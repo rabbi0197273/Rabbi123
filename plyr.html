@@ -102,6 +102,33 @@ const player = new Plyr('#vid1', {
         options: [1080, 720, 576, 480, 360, 240]
     }
 });
+// সাবটাইটেল ইভেন্ট হ্যান্ডলিং
+player.on('captionsenabled', function() {
+    const tracks = document.querySelector('#vid1').textTracks;
+    for (let i = 0; i < tracks.length; i++) {
+        if (tracks[i].language === 'en') {
+            tracks[i].mode = 'showing';
+        } else {
+            tracks[i].mode = 'hidden';
+        }
+    }
+});
+
+player.on('captionsdisabled', function() {
+    const tracks = document.querySelector('#vid1').textTracks;
+    for (let i = 0; i < tracks.length; i++) {
+        tracks[i].mode = 'hidden';
+    }
+});
+
+player.on('ready', function() {
+    setTimeout(function() {
+        const languageBtn = document.querySelector('[data-plyr="language"]');
+        if (languageBtn) {
+            languageBtn.style.display = 'none';
+        }
+    }, 1000);
+});
 
 </script>
 
