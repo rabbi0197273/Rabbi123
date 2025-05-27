@@ -113,21 +113,22 @@
     transform: scale(1.1);
   }
 
-  /* Brightness/Volume Controls */
+  /* Brightness/Volume Controls - Mobile Style */
   .side-control {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     background: rgba(0,0,0,0.8);
-    border-radius: 8px;
-    padding: 15px;
+    border-radius: 12px;
+    padding: 20px 15px;
     color: white;
     text-align: center;
-    min-width: 100px;
+    min-width: 90px;
     opacity: 0;
-    transition: opacity 0.3s ease;
-    backdrop-filter: blur(10px);
-    pointer-events: auto;
+    transition: opacity 0.2s ease;
+    backdrop-filter: blur(15px);
+    pointer-events: none;
+    border: 1px solid rgba(255,255,255,0.1);
   }
 
   .side-control.show {
@@ -135,21 +136,58 @@
   }
 
   .brightness-control {
-    left: 50px;
+    left: 40px;
   }
 
   .volume-control {
-    right: 50px;
+    right: 40px;
   }
 
   .control-icon {
-    font-size: 24px;
-    margin-bottom: 10px;
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
   }
 
   .control-percentage {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
+    color: #fff;
+  }
+
+  /* Progress Bar inside control */
+  .control-progress-bar {
+    width: 60px;
+    height: 4px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+    margin: 8px auto;
+    position: relative;
+  }
+
+  .control-progress-fill {
+    height: 100%;
+    background: #ff6b6b;
+    border-radius: 2px;
+    transition: width 0.1s ease;
+  }
+
+  /* Touch Areas for Swipe */
+  .touch-area {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    pointer-events: auto;
+    z-index: 999;
+  }
+
+  .touch-area-left {
+    left: 0;
+  }
+
+  .touch-area-right {
+    right: 0;
   }
 
   /* Settings Menu */
@@ -307,6 +345,19 @@
       right: 10px;
       min-width: 200px;
     }
+
+    .side-control {
+      min-width: 80px;
+      padding: 15px 10px;
+    }
+
+    .brightness-control {
+      left: 30px;
+    }
+
+    .volume-control {
+      right: 30px;
+    }
   }
 </style>
 
@@ -317,6 +368,10 @@
 
   <!-- BiliBili Custom Controls -->
   <div class="custom-controls" id="customControls">
+    <!-- Touch Areas for Swipe -->
+    <div class="touch-area touch-area-left" id="brightnessArea"></div>
+    <div class="touch-area touch-area-right" id="volumeArea"></div>
+
     <!-- Settings Button -->
     <div class="settings-overlay">
       <button class="settings-btn" id="settingsBtn">⚙️</button>
@@ -331,12 +386,18 @@
     <!-- Brightness Control -->
     <div class="side-control brightness-control" id="brightnessControl">
       <div class="control-icon">☀️</div>
+      <div class="control-progress-bar">
+        <div class="control-progress-fill" id="brightnessProgress"></div>
+      </div>
       <div class="control-percentage" id="brightnessPercentage">96%</div>
     </div>
 
     <!-- Volume Control -->
     <div class="side-control volume-control" id="volumeControl">
       <div class="control-icon">🔊</div>
+      <div class="control-progress-bar">
+        <div class="control-progress-fill" id="volumeProgress"></div>
+      </div>
       <div class="control-percentage" id="volumePercentage">40%</div>
     </div>
 
@@ -448,6 +509,10 @@
   const volumeControl = document.getElementById('volumeControl');
   const brightnessPercentage = document.getElementById('brightnessPercentage');
   const volumePercentage = document.getElementById('volumePercentage');
+  const brightnessProgress = document.getElementById('brightnessProgress');
+  const volumeProgress = document.getElementById('volumeProgress');
+  const brightnessArea = document.getElementById('brightnessArea');
+  const volumeArea = document.getElementById('volumeArea');
 
   // State variables
   let brightness = 96;
@@ -455,51 +520,137 @@
   let playbackSpeed = 1;
   let autoplay = true;
 
-  // Touch handling for brightness and volume
+  // Mobile-style smooth swipe handling
   let touchStartY = 0;
-  let touchStartX = 0;
   let isTouching = false;
+  let controlHideTimeout;
 
-  // Touch events
-  customControls.addEventListener('touchstart', (e) => {
+  // Update progress bars
+  function updateBrightnessDisplay() {
+    brightnessPercentage.textContent = Math.round(brightness) + '%';
+    brightnessProgress.style.width = brightness + '%';
+    document.body.style.filter = `brightness(${brightness}%)`;
+  }
+
+  function updateVolumeDisplay() {
+    volumePercentage.textContent = Math.round(volume) + '%';
+    volumeProgress.style.width = volume + '%';
+    video.volume = volume / 100;
+  }
+
+  // Hide controls after delay
+  function hideControlsAfterDelay() {
+    clearTimeout(controlHideTimeout);
+    controlHideTimeout = setTimeout(() => {
+      brightnessControl.classList.remove('show');
+      volumeControl.classList.remove('show');
+    }, 1500);
+  }
+
+  // Brightness Area Touch Events
+  brightnessArea.addEventListener('touchstart', (e) => {
     touchStartY = e.touches[0].clientY;
-    touchStartX = e.touches[0].clientX;
     isTouching = true;
+    brightnessControl.classList.add('show');
+    e.preventDefault();
   });
 
-  customControls.addEventListener('touchmove', (e) => {
+  brightnessArea.addEventListener('touchmove', (e) => {
     if (!isTouching) return;
     
     const touchY = e.touches[0].clientY;
-    const touchX = e.touches[0].clientX;
     const deltaY = touchStartY - touchY;
-    const screenWidth = window.innerWidth;
     
-    // Left side - Brightness control
-    if (touchStartX < screenWidth / 2) {
-      brightness = Math.max(0, Math.min(100, brightness + deltaY / 3));
-      brightnessPercentage.textContent = Math.round(brightness) + '%';
-      brightnessControl.classList.add('show');
-      document.body.style.filter = `brightness(${brightness}%)`;
-    }
-    // Right side - Volume control
-    else {
-      volume = Math.max(0, Math.min(100, volume + deltaY / 3));
-      volumePercentage.textContent = Math.round(volume) + '%';
-      volumeControl.classList.add('show');
-      video.volume = volume / 100;
-    }
+    // Smooth calculation: 2 pixel movement = 1% change
+    const sensitivity = 0.5;
+    brightness = Math.max(0, Math.min(100, brightness + (deltaY * sensitivity)));
     
+    updateBrightnessDisplay();
     touchStartY = touchY;
     e.preventDefault();
   });
 
-  customControls.addEventListener('touchend', () => {
+  brightnessArea.addEventListener('touchend', () => {
     isTouching = false;
-    setTimeout(() => {
-      brightnessControl.classList.remove('show');
-      volumeControl.classList.remove('show');
-    }, 1000);
+    hideControlsAfterDelay();
+  });
+
+  // Volume Area Touch Events  
+  volumeArea.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+    isTouching = true;
+    volumeControl.classList.add('show');
+    e.preventDefault();
+  });
+
+  volumeArea.addEventListener('touchmove', (e) => {
+    if (!isTouching) return;
+    
+    const touchY = e.touches[0].clientY;
+    const deltaY = touchStartY - touchY;
+    
+    // Smooth calculation: 2 pixel movement = 1% change
+    const sensitivity = 0.5;
+    volume = Math.max(0, Math.min(100, volume + (deltaY * sensitivity)));
+    
+    updateVolumeDisplay();
+    touchStartY = touchY;
+    e.preventDefault();
+  });
+
+  volumeArea.addEventListener('touchend', () => {
+    isTouching = false;
+    hideControlsAfterDelay();
+  });
+
+  // Mouse events for desktop (optional)
+  brightnessArea.addEventListener('mousedown', (e) => {
+    touchStartY = e.clientY;
+    isTouching = true;
+    brightnessControl.classList.add('show');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isTouching) return;
+    
+    const mouseY = e.clientY;
+    const deltaY = touchStartY - mouseY;
+    
+    if (brightnessControl.classList.contains('show')) {
+      const sensitivity = 0.3;
+      brightness = Math.max(0, Math.min(100, brightness + (deltaY * sensitivity)));
+      updateBrightnessDisplay();
+      touchStartY = mouseY;
+    }
+  });
+
+  volumeArea.addEventListener('mousedown', (e) => {
+    touchStartY = e.clientY;
+    isTouching = true;
+    volumeControl.classList.add('show');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isTouching) return;
+    
+    const mouseY = e.clientY;
+    const deltaY = touchStartY - mouseY;
+    
+    if (volumeControl.classList.contains('show')) {
+      const sensitivity = 0.3;
+      volume = Math.max(0, Math.min(100, volume + (deltaY * sensitivity)));
+      updateVolumeDisplay();
+      touchStartY = mouseY;
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isTouching) {
+      isTouching = false;
+      hideControlsAfterDelay();
+    }
   });
 
   // Skip controls
@@ -583,8 +734,8 @@
   });
 
   // Initialize
-  video.volume = volume / 100;
-  document.body.style.filter = `brightness(${brightness}%)`;
+  updateBrightnessDisplay();
+  updateVolumeDisplay();
 
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
@@ -597,4 +748,4 @@
         break;
     }
   });
-</script>
+    </script>
