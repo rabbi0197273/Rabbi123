@@ -29,39 +29,29 @@
   body {
     margin: 0;
     padding: 0;
-    background: #000;
-    font-family: Arial, sans-serif;
   }
-
-  /* Video Container */
-  .video-wrapper {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-  }
-
-  /* BiliBili Custom Controls Overlay */
-  .custom-controls {
-    position: absolute;
+  
+  /* BiliBili Custom Overlay Controls */
+  .bilibili-overlay {
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 1000;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.3) 100%);
+    z-index: 9999;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 15%, transparent 85%, rgba(0,0,0,0.2) 100%);
   }
 
   /* Settings Button */
-  .settings-overlay {
+  .bili-settings {
     position: absolute;
     top: 20px;
     right: 20px;
     pointer-events: auto;
   }
 
-  .settings-btn {
+  .bili-settings-btn {
     background: rgba(0,0,0,0.7);
     border: none;
     border-radius: 50%;
@@ -71,134 +61,117 @@
     font-size: 16px;
     cursor: pointer;
     backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-  }
-
-  .settings-btn:hover {
-    background: rgba(0,0,0,0.9);
-    transform: scale(1.05);
   }
 
   /* Skip Controls */
-  .skip-controls {
+  .bili-skip {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
-    gap: 150px;
+    gap: 120px;
     pointer-events: auto;
   }
 
-  .skip-btn {
+  .bili-skip-btn {
     background: rgba(255,255,255,0.1);
     border: 3px solid rgba(255,255,255,0.8);
     border-radius: 50%;
-    width: 60px;
-    height: 60px;
+    width: 55px;
+    height: 55px;
     color: white;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: bold;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
     backdrop-filter: blur(5px);
   }
 
-  .skip-btn:hover {
-    background: rgba(255,255,255,0.2);
-    transform: scale(1.1);
+  /* Touch Areas */
+  .bili-touch-left, .bili-touch-right {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    pointer-events: auto;
   }
 
-  /* Brightness/Volume Controls - Mobile Style */
-  .side-control {
+  .bili-touch-left {
+    left: 0;
+  }
+
+  .bili-touch-right {
+    right: 0;
+  }
+
+  /* Side Controls */
+  .bili-side-control {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     background: rgba(0,0,0,0.8);
-    border-radius: 12px;
-    padding: 20px 15px;
+    border-radius: 10px;
+    padding: 15px 12px;
     color: white;
     text-align: center;
-    min-width: 90px;
+    min-width: 80px;
     opacity: 0;
     transition: opacity 0.2s ease;
     backdrop-filter: blur(15px);
     pointer-events: none;
-    border: 1px solid rgba(255,255,255,0.1);
   }
 
-  .side-control.show {
+  .bili-side-control.show {
     opacity: 1;
   }
 
-  .brightness-control {
-    left: 40px;
+  .bili-brightness {
+    left: 35px;
   }
 
-  .volume-control {
-    right: 40px;
+  .bili-volume {
+    right: 35px;
   }
 
-  .control-icon {
-    font-size: 28px;
-    margin-bottom: 12px;
-    display: block;
+  .bili-control-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
   }
 
-  .control-percentage {
-    font-size: 16px;
-    font-weight: bold;
-    color: #fff;
-  }
-
-  /* Progress Bar inside control */
-  .control-progress-bar {
-    width: 60px;
-    height: 4px;
+  .bili-control-bar {
+    width: 50px;
+    height: 3px;
     background: rgba(255,255,255,0.3);
     border-radius: 2px;
-    margin: 8px auto;
+    margin: 6px auto;
     position: relative;
   }
 
-  .control-progress-fill {
+  .bili-control-fill {
     height: 100%;
     background: #ff6b6b;
     border-radius: 2px;
     transition: width 0.1s ease;
   }
 
-  /* Touch Areas for Swipe */
-  .touch-area {
-    position: absolute;
-    top: 0;
-    width: 50%;
-    height: 100%;
-    pointer-events: auto;
-    z-index: 999;
-  }
-
-  .touch-area-left {
-    left: 0;
-  }
-
-  .touch-area-right {
-    right: 0;
+  .bili-control-text {
+    font-size: 14px;
+    font-weight: bold;
   }
 
   /* Settings Menu */
-  .settings-menu {
+  .bili-menu {
     position: absolute;
     top: 70px;
     right: 20px;
-    background: rgba(40,40,40,0.95);
-    border-radius: 12px;
-    padding: 15px;
-    min-width: 250px;
+    background: rgba(35,35,35,0.95);
+    border-radius: 10px;
+    padding: 12px;
+    min-width: 220px;
     color: white;
     opacity: 0;
     transform: translateY(-10px);
@@ -207,251 +180,216 @@
     backdrop-filter: blur(20px);
   }
 
-  .settings-menu.show {
+  .bili-menu.show {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
   }
 
-  .settings-item {
+  .bili-menu-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 8px;
+    padding: 10px 8px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
     cursor: pointer;
-    border-radius: 6px;
-    transition: background 0.3s ease;
+    border-radius: 5px;
   }
 
-  .settings-item:last-child {
+  .bili-menu-item:last-child {
     border-bottom: none;
   }
 
-  .settings-item:hover {
+  .bili-menu-item:hover {
     background: rgba(255,255,255,0.1);
   }
 
-  .settings-label {
-    font-size: 16px;
-  }
-
-  .settings-value {
-    font-size: 14px;
-    color: #ccc;
-  }
-
-  /* Sub Menu */
-  .sub-menu {
+  .bili-submenu {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    background: rgba(40,40,40,0.95);
-    border-radius: 12px;
-    padding: 15px;
+    background: rgba(35,35,35,0.95);
+    border-radius: 10px;
+    padding: 12px;
     backdrop-filter: blur(20px);
     transform: translateX(100%);
     transition: transform 0.3s ease;
   }
 
-  .sub-menu.show {
+  .bili-submenu.show {
     transform: translateX(0);
   }
 
-  .sub-menu-header {
+  .bili-submenu-header {
     display: flex;
     align-items: center;
-    padding-bottom: 15px;
+    padding-bottom: 10px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
-    margin-bottom: 15px;
+    margin-bottom: 10px;
   }
 
-  .back-btn {
+  .bili-back {
     background: none;
     border: none;
     color: white;
-    font-size: 18px;
-    cursor: pointer;
-    margin-right: 10px;
-  }
-
-  .sub-menu-title {
     font-size: 16px;
-    font-weight: bold;
+    cursor: pointer;
+    margin-right: 8px;
   }
 
-  .sub-menu-item {
-    padding: 10px 8px;
+  .bili-submenu-item {
+    padding: 8px;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 5px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    transition: background 0.3s ease;
   }
 
-  .sub-menu-item:hover {
+  .bili-submenu-item:hover {
     background: rgba(255,255,255,0.1);
   }
 
-  .sub-menu-item.selected {
+  .bili-submenu-item.selected {
     color: #ff6b6b;
   }
 
-  /* Toggle Switch */
-  .toggle-switch {
+  /* Toggle */
+  .bili-toggle {
     position: relative;
-    width: 50px;
-    height: 25px;
+    width: 45px;
+    height: 22px;
     background: #333;
-    border-radius: 25px;
+    border-radius: 22px;
     cursor: pointer;
     transition: background 0.3s ease;
   }
 
-  .toggle-switch.active {
+  .bili-toggle.active {
     background: #ff6b6b;
   }
 
-  .toggle-slider {
+  .bili-toggle-circle {
     position: absolute;
     top: 2px;
     left: 2px;
-    width: 21px;
-    height: 21px;
+    width: 18px;
+    height: 18px;
     background: white;
     border-radius: 50%;
     transition: transform 0.3s ease;
   }
 
-  .toggle-switch.active .toggle-slider {
-    transform: translateX(25px);
+  .bili-toggle.active .bili-toggle-circle {
+    transform: translateX(23px);
   }
 
-  /* Mobile responsive */
   @media (max-width: 768px) {
-    .skip-controls {
-      gap: 100px;
+    .bili-skip {
+      gap: 80px;
     }
-    
-    .skip-btn {
-      width: 50px;
-      height: 50px;
-      font-size: 10px;
+    .bili-skip-btn {
+      width: 45px;
+      height: 45px;
+      font-size: 9px;
     }
-    
-    .settings-menu {
+    .bili-menu {
+      min-width: 180px;
       right: 10px;
-      min-width: 200px;
-    }
-
-    .side-control {
-      min-width: 80px;
-      padding: 15px 10px;
-    }
-
-    .brightness-control {
-      left: 30px;
-    }
-
-    .volume-control {
-      right: 30px;
     }
   }
 </style>
 
-<div class="video-wrapper">
-  <video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id">
-    <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
-  </video>
+<script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
+<video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id">
+  <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
+</video>
 
-  <!-- BiliBili Custom Controls -->
-  <div class="custom-controls" id="customControls">
-    <!-- Touch Areas for Swipe -->
-    <div class="touch-area touch-area-left" id="brightnessArea"></div>
-    <div class="touch-area touch-area-right" id="volumeArea"></div>
+<!-- BiliBili Overlay -->
+<div class="bilibili-overlay" id="biliOverlay">
+  <!-- Touch Areas -->
+  <div class="bili-touch-left" id="touchLeft"></div>
+  <div class="bili-touch-right" id="touchRight"></div>
 
-    <!-- Settings Button -->
-    <div class="settings-overlay">
-      <button class="settings-btn" id="settingsBtn">⚙️</button>
+  <!-- Settings -->
+  <div class="bili-settings">
+    <button class="bili-settings-btn" id="biliSettings">⚙️</button>
+  </div>
+
+  <!-- Skip Controls -->
+  <div class="bili-skip">
+    <button class="bili-skip-btn" id="biliBack">⏪<br>10</button>
+    <button class="bili-skip-btn" id="biliForward">⏩<br>10</button>
+  </div>
+
+  <!-- Brightness Control -->
+  <div class="bili-side-control bili-brightness" id="biliBrightness">
+    <div class="bili-control-icon">☀️</div>
+    <div class="bili-control-bar">
+      <div class="bili-control-fill" id="brightnessBar"></div>
+    </div>
+    <div class="bili-control-text" id="brightnessText">96%</div>
+  </div>
+
+  <!-- Volume Control -->
+  <div class="bili-side-control bili-volume" id="biliVolume">
+    <div class="bili-control-icon">🔊</div>
+    <div class="bili-control-bar">
+      <div class="bili-control-fill" id="volumeBar"></div>
+    </div>
+    <div class="bili-control-text" id="volumeText">40%</div>
+  </div>
+
+  <!-- Settings Menu -->
+  <div class="bili-menu" id="biliMenu">
+    <div class="bili-menu-item" id="speedMenu">
+      <span>🎯 Speed</span>
+      <span id="speedText">1x ▶</span>
+    </div>
+    <div class="bili-menu-item" id="qualityMenu">
+      <span>⚙️ Quality</span>
+      <span id="qualityText">1080p (Auto) ▶</span>
+    </div>
+    <div class="bili-menu-item" id="autoplayMenu">
+      <span>🔄 Autoplay</span>
+      <div class="bili-toggle active" id="autoplayToggle">
+        <div class="bili-toggle-circle"></div>
+      </div>
     </div>
 
-    <!-- Skip Controls -->
-    <div class="skip-controls">
-      <button class="skip-btn" id="skipBack">⏪<br>10</button>
-      <button class="skip-btn" id="skipForward">⏩<br>10</button>
+    <!-- Speed Submenu -->
+    <div class="bili-submenu" id="speedSubmenu">
+      <div class="bili-submenu-header">
+        <button class="bili-back" id="speedBack">◀</button>
+        <span>Speed</span>
+      </div>
+      <div class="bili-submenu-item" data-speed="0.25">0.25x</div>
+      <div class="bili-submenu-item" data-speed="0.5">0.5x</div>
+      <div class="bili-submenu-item" data-speed="0.75">0.75x</div>
+      <div class="bili-submenu-item selected" data-speed="1">Normal (1x) ✓</div>
+      <div class="bili-submenu-item" data-speed="1.25">1.25x</div>
+      <div class="bili-submenu-item" data-speed="1.5">1.5x</div>
+      <div class="bili-submenu-item" data-speed="1.75">1.75x</div>
+      <div class="bili-submenu-item" data-speed="2">2x</div>
     </div>
 
-    <!-- Brightness Control -->
-    <div class="side-control brightness-control" id="brightnessControl">
-      <div class="control-icon">☀️</div>
-      <div class="control-progress-bar">
-        <div class="control-progress-fill" id="brightnessProgress"></div>
+    <!-- Quality Submenu -->
+    <div class="bili-submenu" id="qualitySubmenu">
+      <div class="bili-submenu-header">
+        <button class="bili-back" id="qualityBack">◀</button>
+        <span>Quality</span>
       </div>
-      <div class="control-percentage" id="brightnessPercentage">96%</div>
-    </div>
-
-    <!-- Volume Control -->
-    <div class="side-control volume-control" id="volumeControl">
-      <div class="control-icon">🔊</div>
-      <div class="control-progress-bar">
-        <div class="control-progress-fill" id="volumeProgress"></div>
-      </div>
-      <div class="control-percentage" id="volumePercentage">40%</div>
-    </div>
-
-    <!-- Settings Menu -->
-    <div class="settings-menu" id="settingsMenu">
-      <div class="settings-item" id="speedSetting">
-        <span class="settings-label">🎯 Speed</span>
-        <span class="settings-value" id="speedValue">1x ▶</span>
-      </div>
-      <div class="settings-item" id="qualitySetting">
-        <span class="settings-label">⚙️ Quality</span>
-        <span class="settings-value" id="qualityValue">1080p (Auto) ▶</span>
-      </div>
-      <div class="settings-item" id="autoplaySetting">
-        <span class="settings-label">🔄 Autoplay</span>
-        <div class="toggle-switch active" id="autoplayToggle">
-          <div class="toggle-slider"></div>
-        </div>
-      </div>
-
-      <!-- Speed Sub Menu -->
-      <div class="sub-menu" id="speedSubMenu">
-        <div class="sub-menu-header">
-          <button class="back-btn" id="speedBackBtn">◀</button>
-          <span class="sub-menu-title">Speed</span>
-        </div>
-        <div class="sub-menu-item" data-speed="0.25">0.25x</div>
-        <div class="sub-menu-item" data-speed="0.5">0.5x</div>
-        <div class="sub-menu-item" data-speed="0.75">0.75x</div>
-        <div class="sub-menu-item selected" data-speed="1">Normal (1x) ✓</div>
-        <div class="sub-menu-item" data-speed="1.25">1.25x</div>
-        <div class="sub-menu-item" data-speed="1.5">1.5x</div>
-        <div class="sub-menu-item" data-speed="1.75">1.75x</div>
-        <div class="sub-menu-item" data-speed="2">2x</div>
-      </div>
-
-      <!-- Quality Sub Menu -->
-      <div class="sub-menu" id="qualitySubMenu">
-        <div class="sub-menu-header">
-          <button class="back-btn" id="qualityBackBtn">◀</button>
-          <span class="sub-menu-title">Quality</span>
-        </div>
-        <div class="sub-menu-item selected" data-quality="auto">Automatically ✓</div>
-        <div class="sub-menu-item" data-quality="1080">1080p HD</div>
-        <div class="sub-menu-item" data-quality="720">720p</div>
-        <div class="sub-menu-item" data-quality="480">480p</div>
-        <div class="sub-menu-item" data-quality="360">360p</div>
-      </div>
+      <div class="bili-submenu-item selected" data-quality="auto">Automatically ✓</div>
+      <div class="bili-submenu-item" data-quality="1080">1080p HD</div>
+      <div class="bili-submenu-item" data-quality="720">720p</div>
+      <div class="bili-submenu-item" data-quality="480">480p</div>
+      <div class="bili-submenu-item" data-quality="360">360p</div>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
 <script>
+  // Original Fluid Player Setup
   var myFP = fluidPlayer(
     'video-id', {
       "layoutControls": {
@@ -482,10 +420,8 @@
       }
     }
   );
-</script>
 
-<script>
-  // Google Drive Integration
+  // Original Google Drive Integration
   var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
   console.log(apikey);
 
@@ -499,196 +435,115 @@
     video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
   }
 
-  // BiliBili Custom Features
-  const customControls = document.getElementById('customControls');
-  const settingsBtn = document.getElementById('settingsBtn');
-  const settingsMenu = document.getElementById('settingsMenu');
-  const skipBack = document.getElementById('skipBack');
-  const skipForward = document.getElementById('skipForward');
-  const brightnessControl = document.getElementById('brightnessControl');
-  const volumeControl = document.getElementById('volumeControl');
-  const brightnessPercentage = document.getElementById('brightnessPercentage');
-  const volumePercentage = document.getElementById('volumePercentage');
-  const brightnessProgress = document.getElementById('brightnessProgress');
-  const volumeProgress = document.getElementById('volumeProgress');
-  const brightnessArea = document.getElementById('brightnessArea');
-  const volumeArea = document.getElementById('volumeArea');
-
-  // State variables
+  // BiliBili Features
   let brightness = 96;
   let volume = 40;
-  let playbackSpeed = 1;
-  let autoplay = true;
+  let touchY = 0;
+  let isTouch = false;
+  let hideTimer;
 
-  // Mobile-style smooth swipe handling
-  let touchStartY = 0;
-  let isTouching = false;
-  let controlHideTimeout;
-
-  // Update progress bars
-  function updateBrightnessDisplay() {
-    brightnessPercentage.textContent = Math.round(brightness) + '%';
-    brightnessProgress.style.width = brightness + '%';
+  // Update displays
+  function updateBrightness() {
+    document.getElementById('brightnessText').textContent = Math.round(brightness) + '%';
+    document.getElementById('brightnessBar').style.width = brightness + '%';
     document.body.style.filter = `brightness(${brightness}%)`;
   }
 
-  function updateVolumeDisplay() {
-    volumePercentage.textContent = Math.round(volume) + '%';
-    volumeProgress.style.width = volume + '%';
+  function updateVolume() {
+    document.getElementById('volumeText').textContent = Math.round(volume) + '%';
+    document.getElementById('volumeBar').style.width = volume + '%';
     video.volume = volume / 100;
   }
 
-  // Hide controls after delay
-  function hideControlsAfterDelay() {
-    clearTimeout(controlHideTimeout);
-    controlHideTimeout = setTimeout(() => {
-      brightnessControl.classList.remove('show');
-      volumeControl.classList.remove('show');
-    }, 1500);
+  function hideControls() {
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      document.getElementById('biliBrightness').classList.remove('show');
+      document.getElementById('biliVolume').classList.remove('show');
+    }, 1200);
   }
 
-  // Brightness Area Touch Events
-  brightnessArea.addEventListener('touchstart', (e) => {
-    touchStartY = e.touches[0].clientY;
-    isTouching = true;
-    brightnessControl.classList.add('show');
+  // Touch Events - Brightness (Left)
+  document.getElementById('touchLeft').addEventListener('touchstart', (e) => {
+    touchY = e.touches[0].clientY;
+    isTouch = true;
+    document.getElementById('biliBrightness').classList.add('show');
     e.preventDefault();
   });
 
-  brightnessArea.addEventListener('touchmove', (e) => {
-    if (!isTouching) return;
-    
-    const touchY = e.touches[0].clientY;
-    const deltaY = touchStartY - touchY;
-    
-    // Smooth calculation: 2 pixel movement = 1% change
-    const sensitivity = 0.5;
-    brightness = Math.max(0, Math.min(100, brightness + (deltaY * sensitivity)));
-    
-    updateBrightnessDisplay();
-    touchStartY = touchY;
+  document.getElementById('touchLeft').addEventListener('touchmove', (e) => {
+    if (!isTouch) return;
+    const currentY = e.touches[0].clientY;
+    const delta = touchY - currentY;
+    brightness = Math.max(0, Math.min(100, brightness + (delta * 0.4)));
+    updateBrightness();
+    touchY = currentY;
     e.preventDefault();
   });
 
-  brightnessArea.addEventListener('touchend', () => {
-    isTouching = false;
-    hideControlsAfterDelay();
+  document.getElementById('touchLeft').addEventListener('touchend', () => {
+    isTouch = false;
+    hideControls();
   });
 
-  // Volume Area Touch Events  
-  volumeArea.addEventListener('touchstart', (e) => {
-    touchStartY = e.touches[0].clientY;
-    isTouching = true;
-    volumeControl.classList.add('show');
+  // Touch Events - Volume (Right)
+  document.getElementById('touchRight').addEventListener('touchstart', (e) => {
+    touchY = e.touches[0].clientY;
+    isTouch = true;
+    document.getElementById('biliVolume').classList.add('show');
     e.preventDefault();
   });
 
-  volumeArea.addEventListener('touchmove', (e) => {
-    if (!isTouching) return;
-    
-    const touchY = e.touches[0].clientY;
-    const deltaY = touchStartY - touchY;
-    
-    // Smooth calculation: 2 pixel movement = 1% change
-    const sensitivity = 0.5;
-    volume = Math.max(0, Math.min(100, volume + (deltaY * sensitivity)));
-    
-    updateVolumeDisplay();
-    touchStartY = touchY;
+  document.getElementById('touchRight').addEventListener('touchmove', (e) => {
+    if (!isTouch) return;
+    const currentY = e.touches[0].clientY;
+    const delta = touchY - currentY;
+    volume = Math.max(0, Math.min(100, volume + (delta * 0.4)));
+    updateVolume();
+    touchY = currentY;
     e.preventDefault();
   });
 
-  volumeArea.addEventListener('touchend', () => {
-    isTouching = false;
-    hideControlsAfterDelay();
+  document.getElementById('touchRight').addEventListener('touchend', () => {
+    isTouch = false;
+    hideControls();
   });
 
-  // Mouse events for desktop (optional)
-  brightnessArea.addEventListener('mousedown', (e) => {
-    touchStartY = e.clientY;
-    isTouching = true;
-    brightnessControl.classList.add('show');
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!isTouching) return;
-    
-    const mouseY = e.clientY;
-    const deltaY = touchStartY - mouseY;
-    
-    if (brightnessControl.classList.contains('show')) {
-      const sensitivity = 0.3;
-      brightness = Math.max(0, Math.min(100, brightness + (deltaY * sensitivity)));
-      updateBrightnessDisplay();
-      touchStartY = mouseY;
-    }
-  });
-
-  volumeArea.addEventListener('mousedown', (e) => {
-    touchStartY = e.clientY;
-    isTouching = true;
-    volumeControl.classList.add('show');
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!isTouching) return;
-    
-    const mouseY = e.clientY;
-    const deltaY = touchStartY - mouseY;
-    
-    if (volumeControl.classList.contains('show')) {
-      const sensitivity = 0.3;
-      volume = Math.max(0, Math.min(100, volume + (deltaY * sensitivity)));
-      updateVolumeDisplay();
-      touchStartY = mouseY;
-    }
-  });
-
-  document.addEventListener('mouseup', () => {
-    if (isTouching) {
-      isTouching = false;
-      hideControlsAfterDelay();
-    }
-  });
-
-  // Skip controls
-  skipBack.addEventListener('click', () => {
+  // Skip buttons
+  document.getElementById('biliBack').addEventListener('click', () => {
     video.currentTime = Math.max(0, video.currentTime - 10);
   });
 
-  skipForward.addEventListener('click', () => {
+  document.getElementById('biliForward').addEventListener('click', () => {
     video.currentTime = Math.min(video.duration, video.currentTime + 10);
   });
 
   // Settings menu
-  settingsBtn.addEventListener('click', (e) => {
+  document.getElementById('biliSettings').addEventListener('click', (e) => {
     e.stopPropagation();
-    settingsMenu.classList.toggle('show');
+    document.getElementById('biliMenu').classList.toggle('show');
   });
 
-  // Settings menu items
-  document.getElementById('speedSetting').addEventListener('click', () => {
-    document.getElementById('speedSubMenu').classList.add('show');
+  // Menu items
+  document.getElementById('speedMenu').addEventListener('click', () => {
+    document.getElementById('speedSubmenu').classList.add('show');
   });
 
-  document.getElementById('qualitySetting').addEventListener('click', () => {
-    document.getElementById('qualitySubMenu').classList.add('show');
+  document.getElementById('qualityMenu').addEventListener('click', () => {
+    document.getElementById('qualitySubmenu').classList.add('show');
   });
 
   document.getElementById('autoplayToggle').addEventListener('click', () => {
-    autoplay = !autoplay;
     document.getElementById('autoplayToggle').classList.toggle('active');
   });
 
-  // Sub menu navigation
-  document.getElementById('speedBackBtn').addEventListener('click', () => {
-    document.getElementById('speedSubMenu').classList.remove('show');
+  // Back buttons
+  document.getElementById('speedBack').addEventListener('click', () => {
+    document.getElementById('speedSubmenu').classList.remove('show');
   });
 
-  document.getElementById('qualityBackBtn').addEventListener('click', () => {
-    document.getElementById('qualitySubMenu').classList.remove('show');
+  document.getElementById('qualityBack').addEventListener('click', () => {
+    document.getElementById('qualitySubmenu').classList.remove('show');
   });
 
   // Speed selection
@@ -696,15 +551,13 @@
     item.addEventListener('click', () => {
       const speed = parseFloat(item.dataset.speed);
       video.playbackRate = speed;
-      playbackSpeed = speed;
       
-      // Update UI
       document.querySelectorAll('[data-speed]').forEach(i => i.classList.remove('selected'));
       item.classList.add('selected');
       item.innerHTML = item.textContent.replace('✓', '') + ' ✓';
       
-      document.getElementById('speedValue').textContent = speed === 1 ? '1x ▶' : speed + 'x ▶';
-      document.getElementById('speedSubMenu').classList.remove('show');
+      document.getElementById('speedText').textContent = speed === 1 ? '1x ▶' : speed + 'x ▶';
+      document.getElementById('speedSubmenu').classList.remove('show');
     });
   });
 
@@ -713,39 +566,34 @@
     item.addEventListener('click', () => {
       const quality = item.dataset.quality;
       
-      // Update UI
       document.querySelectorAll('[data-quality]').forEach(i => i.classList.remove('selected'));
       item.classList.add('selected');
       item.innerHTML = item.textContent.replace('✓', '') + ' ✓';
       
-      let qualityText = quality === 'auto' ? '1080p (Auto) ▶' : quality + 'p ▶';
-      document.getElementById('qualityValue').textContent = qualityText;
-      document.getElementById('qualitySubMenu').classList.remove('show');
+      const qualityText = quality === 'auto' ? '1080p (Auto) ▶' : quality + 'p ▶';
+      document.getElementById('qualityText').textContent = qualityText;
+      document.getElementById('qualitySubmenu').classList.remove('show');
     });
   });
 
-  // Close settings menu when clicking outside
+  // Close menu on outside click
   document.addEventListener('click', (e) => {
-    if (!settingsBtn.contains(e.target) && !settingsMenu.contains(e.target)) {
-      settingsMenu.classList.remove('show');
-      document.getElementById('speedSubMenu').classList.remove('show');
-      document.getElementById('qualitySubMenu').classList.remove('show');
+    const menu = document.getElementById('biliMenu');
+    const settingsBtn = document.getElementById('biliSettings');
+    if (!menu.contains(e.target) && !settingsBtn.contains(e.target)) {
+      menu.classList.remove('show');
+      document.getElementById('speedSubmenu').classList.remove('show');
+      document.getElementById('qualitySubmenu').classList.remove('show');
     }
   });
 
   // Initialize
-  updateBrightnessDisplay();
-  updateVolumeDisplay();
+  updateBrightness();
+  updateVolume();
 
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
-    switch(e.code) {
-      case 'ArrowLeft':
-        video.currentTime -= 10;
-        break;
-      case 'ArrowRight':
-        video.currentTime += 10;
-        break;
-    }
+    if (e.code === 'ArrowLeft') video.currentTime -= 10;
+    if (e.code === 'ArrowRight') video.currentTime += 10;
   });
-    </script>
+            </script>
