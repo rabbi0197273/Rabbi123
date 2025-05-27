@@ -38,12 +38,12 @@ let getbase=()=>{
 
 
 //Player Openers (diff. func. coding intentionally)
-let opensp=()=> { window.open('https://sh20raj.github.io/DrivePlyr/sopplayer.html?id='+base)}
-let openplyr=()=> { window.open('https://sh20raj.github.io/DrivePlyr/plyr.html?id='+base)}
-let openfluid=()=> { window.open('https://sh20raj.github.io/DrivePlyr/fluid.html?id='+base)}
-let openafterglow=()=> { window.open('https://sh20raj.github.io/DrivePlyr/afterglow.html?id='+base)}
-let openmediaelements=()=> { window.open('https://sh20raj.github.io/DrivePlyr/mediaelements.html?id='+base)}
-let openvlitejs=()=> { window.open('https://sh20raj.github.io/DrivePlyr/vlitejs.html?id='+base)}
+let opensp=()=> { window.open(' https://rabbi0197273.github.io/Rabbi123/sopplayer.html?id='+base)}
+let openplyr=()=> { window.open(' https://rabbi0197273.github.io/Rabbi123/plyr.html?id='+base)}
+let openfluid=()=> { window.open(' https://rabbi0197273.github.io/Rabbi123/fluid.html?id='+base)}
+let openafterglow=()=> { window.open(' https://rabbi0197273.github.io/Rabbi123/afterglow.html?id='+base)}
+let openmediaelements=()=> { window.open(' https://rabbi0197273.github.io/Rabbi123/mediaelements.html?id='+base)}
+let openvlitejs=()=> { window.open(' https://rabbi0197273.github.io/Rabbi123/vlitejs.html?id='+base)}
 
 
 let pmsg = 'Copy Embed Code' ;
@@ -51,7 +51,7 @@ let pmsg = 'Copy Embed Code' ;
 let embedsp=()=> {
   prompt(pmsg,`<iframe width="560" height="315" 
 scrolling="no"
-src="https://sh20raj.github.io/DrivePlyr/sopplayer.html?id=${base}" 
+src=" https://rabbi0197273.github.io/Rabbi123/sopplayer.html?id=${base}" 
 frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; 
 gyroscope; picture-in-picture" allowfullscreen>
 </iframe>`)
@@ -59,7 +59,7 @@ gyroscope; picture-in-picture" allowfullscreen>
 let embedplyr=()=> {
   prompt(pmsg,`<iframe width="560" height="315" 
 scrolling="no"
-src="https://sh20raj.github.io/DrivePlyr/plyr.html?id=${base}" 
+src=" https://rabbi0197273.github.io/Rabbi123/plyr.html?id=${base}" 
 frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; 
 gyroscope; picture-in-picture" allowfullscreen>
 </iframe>`)
