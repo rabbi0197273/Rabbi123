@@ -25,15 +25,54 @@
 <meta name="theme-color" content="#ffffff">
 <meta name="robots" content="index, follow">
 
-
 <style>
   body {
     margin : 0;
     padding: 0;
   }
+  
+  /* Quality Selector Style */
+  .quality-selector {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    padding: 5px;
+  }
+  
+  .quality-select {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border: 1px solid #555;
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+  }
+  
+  .quality-select:hover {
+    background: rgba(0, 0, 0, 1);
+  }
 </style>
+
 <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
+
+<!-- Quality Selector -->
+<div class="quality-selector">
+    <select id="qualitySelect" class="quality-select">
+        <option value="auto">Auto</option>
+        <option value="1080">1080p</option>
+        <option value="720">720p</option>
+        <option value="480">480p</option>
+        <option value="360">360p</option>
+    </select>
+</div>
+
 <video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id"><source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
+
 <script>
     var myFP = fluidPlayer(
         'video-id',	{
@@ -66,6 +105,7 @@
 }
     );
 </script>
+
 <script>
   var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
  console.log(apikey);
@@ -73,10 +113,43 @@
   function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
 
   let video = document.getElementById('video-id');
+  let currentDriveId = null;
+  
   if(getparam('id')){
     let json = JSON.parse(atob(getparam('id'))) ;
     let driveid = json.id;
+    currentDriveId = driveid;
     video.src = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
     video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
   }
+  
+  // Quality Selector Functionality
+  document.getElementById('qualitySelect').addEventListener('change', function() {
+    if (!currentDriveId) return;
+    
+    const selectedQuality = this.value;
+    const currentTime = video.currentTime;
+    const isPlaying = !video.paused;
+    const volume = video.volume;
+    
+    // Generate new URL based on quality
+    let newUrl = `https://www.googleapis.com/drive/v3/files/${currentDriveId}?alt=media&key=${apikey}`;
+    
+    if (selectedQuality !== 'auto') {
+      newUrl += `&quality=${selectedQuality}`;
+    }
+    
+    // Update video source
+    video.src = newUrl;
+    
+    // Restore playback state
+    video.addEventListener('loadedmetadata', function restoreState() {
+      video.removeEventListener('loadedmetadata', restoreState);
+      video.currentTime = currentTime;
+      video.volume = volume;
+      if (isPlaying) {
+        video.play().catch(e => console.log('Play error:', e));
+      }
+    });
+  });
 </script>
