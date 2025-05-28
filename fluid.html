@@ -1,158 +1,82 @@
-<!-- Styles -->
+<link rel="icon" href="drive-logo.png">
+<title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
+    
+<!-- Meta Tags for SEO -->
+<meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+<meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
+<meta name="author" content="SH20RAJ">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://rabbi0197273.github.io/Rabbi123/">
+<meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
+<meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+<meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://sh20raj.github.io/DrivePlyr/">
+<meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
+<meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+<meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+
+<!-- Other Meta Tags -->
+<link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
+<meta name="theme-color" content="#ffffff">
+<meta name="robots" content="index, follow">
+
+
 <style>
   body {
-    margin: 0;
+    margin : 0;
     padding: 0;
-    background-color: #000;
-  }
-
-  .player-container {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-  }
-
-  .settings-icon {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    z-index: 1001;
-    background: rgba(0,0,0,0.6);
-    padding: 8px;
-    border-radius: 50%;
-    cursor: pointer;
-  }
-
-  .settings-icon img {
-    width: 24px;
-    height: 24px;
-  }
-
-  .settings-menu {
-    position: absolute;
-    top: 55px;
-    right: 20px;
-    background: #222;
-    color: #fff;
-    border-radius: 8px;
-    padding: 12px;
-    z-index: 1000;
-    display: none;
-    font-family: sans-serif;
-    font-size: 14px;
-  }
-
-  .settings-menu select {
-    width: 100%;
-    margin-top: 8px;
-    margin-bottom: 12px;
-    background: #333;
-    color: white;
-    border: none;
-    padding: 6px;
-    border-radius: 4px;
-  }
-
-  .settings-icon:hover + .settings-menu,
-  .settings-menu:hover {
-    display: block;
   }
 </style>
-
-<!-- Video Player HTML -->
-<div class="player-container">
-  <div class="settings-icon">
-    <img src="https://img.icons8.com/material-outlined/24/ffffff/settings--v1.png" alt="Settings">
-  </div>
-  <div class="settings-menu">
-    <label>Video Quality:</label>
-    <select id="quality-select">
-      <option value="360">360p</option>
-      <option value="720" selected>720p</option>
-      <option value="1080">1080p</option>
-    </select>
-    <label>Speed:</label>
-    <select id="speed-select">
-      <option value="0.5">0.5x</option>
-      <option value="1" selected>1x (Normal)</option>
-      <option value="1.5">1.5x</option>
-      <option value="2">2x</option>
-    </select>
-  </div>
-
-  <video id="video-id" poster="https://bit.ly/bbsampleposter" width="100%" height="100%" controls>
-    <source id="source-id" src="https://bit.ly/bbsamplevideo" type="video/mp4">
-  </video>
-</div>
-
-<!-- FluidPlayer JS -->
 <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
-
-<!-- Script Logic -->
+<video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id"><source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
 <script>
-  var myFP = fluidPlayer('video-id', {
-    layoutControls: {
-      autoPlay: false,
-      mute: false,
-      allowTheatre: true,
-      playbackRateEnabled: true,
-      allowDownload: false,
-      playButtonShowing: true,
-      fillToContainer: true,
-      posterImage: ""
-    },
-    vastOptions: {
-      adList: [],
-    }
-  });
-
-  var apikeys = [
-    'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
-    'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
-    'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM',
-    'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'
-  ];
-  var apikey = apikeys[Math.floor(Math.random() * apikeys.length)];
-
-  function getparam(a, e) {
-    return e || (e = window.location.href), new URL(e).searchParams.get(a);
-  }
+    var myFP = fluidPlayer(
+        'video-id',	{
+	"layoutControls": {
+		"controlBar": {
+			"autoHideTimeout": 3,
+			"animated": true,
+			"autoHide": true
+		},
+		"htmlOnPauseBlock": {
+			"html": null,
+			"height": null,
+			"width": null
+		},
+		"autoPlay": false,
+		"mute": false,
+		"allowTheatre": true,
+		"playPauseAnimation": true,
+		"playbackRateEnabled": true,
+		"allowDownload": false,
+		"playButtonShowing": true,
+		"fillToContainer": false,
+		"posterImage": ""
+	},
+	"vastOptions": {
+		"adList": [],
+		"adCTAText": false,
+		"adCTATextPosition": ""
+	}
+}
+    );
+</script>
+<script>
+  var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
+ console.log(apikey);
+   //apikey = 'AIzaSyD739-eb6NzS_KbVJq1K8ZAxnrMfkIqPyw';
+  function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
 
   let video = document.getElementById('video-id');
-  let source = document.getElementById('source-id');
-
-  const sources = {
-    360: 'https://bit.ly/bbsamplevideo',
-    720: 'https://bit.ly/bbsamplevideo',
-    1080: 'https://bit.ly/bbsamplevideo'
-  };
-
-  if (getparam('id')) {
-    let json = JSON.parse(atob(getparam('id')));
+  if(getparam('id')){
+    let json = JSON.parse(atob(getparam('id'))) ;
     let driveid = json.id;
-
-    sources[360] = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
-    sources[720] = sources[360]; // If you have separate links, replace these
-    sources[1080] = sources[360];
-
-    video.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
-    source.src = sources[720]; // Default quality
-    video.load();
+    video.src = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
+    video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
   }
-
-  // Quality Change
-  document.getElementById('quality-select').addEventListener('change', function () {
-    let selected = this.value;
-    let currentTime = video.currentTime;
-    let isPlaying = !video.paused;
-    source.src = sources[selected];
-    video.load();
-    video.currentTime = currentTime;
-    if (isPlaying) video.play();
-  });
-
-  // Speed Change
-  document.getElementById('speed-select').addEventListener('change', function () {
-    video.playbackRate = parseFloat(this.value);
-  });
 </script>
