@@ -25,58 +25,395 @@
 <meta name="theme-color" content="#ffffff">
 <meta name="robots" content="index, follow">
 
-
 <style>
   body {
-    margin : 0;
+    margin: 0;
     padding: 0;
+    background: #000;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* FluidPlayer HD Quality Source Styling */
+  .fp_hd_source { 
+    color: #00ff88 !important; 
+    font-weight: bold;
+  }
+  
+  /* Custom Quality Selector */
+  .quality-selector {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .quality-select {
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    border: 1px solid #555;
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    min-width: 80px;
+  }
+  
+  .quality-select:hover {
+    background: rgba(0, 0, 0, 1);
+    border-color: #00ff88;
+  }
+  
+  .quality-select option {
+    background: #222;
+    color: white;
+    padding: 5px;
+  }
+  
+  .quality-label {
+    color: white;
+    font-size: 12px;
+    margin-bottom: 5px;
+    display: block;
+    text-align: center;
+  }
+  
+  /* Loading Indicator */
+  .loading-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 5px;
+    font-size: 14px;
+    z-index: 999;
+    display: none;
+  }
+  
+  .spinner {
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #00ff88;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .quality-selector {
+      top: 10px;
+      right: 10px;
+      padding: 5px;
+    }
+    
+    .quality-select {
+      padding: 6px 8px;
+      font-size: 12px;
+      min-width: 70px;
+    }
   }
 </style>
-<script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
-<video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id"><source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
-<script>
-    var myFP = fluidPlayer(
-        'video-id',	{
-	"layoutControls": {
-		"controlBar": {
-			"autoHideTimeout": 3,
-			"animated": true,
-			"autoHide": true
-		},
-		"htmlOnPauseBlock": {
-			"html": null,
-			"height": null,
-			"width": null
-		},
-		"autoPlay": false,
-		"mute": false,
-		"allowTheatre": true,
-		"playPauseAnimation": true,
-		"playbackRateEnabled": true,
-		"allowDownload": false,
-		"playButtonShowing": true,
-		"fillToContainer": false,
-		"posterImage": ""
-	},
-	"vastOptions": {
-		"adList": [],
-		"adCTAText": false,
-		"adCTATextPosition": ""
-	}
-}
-    );
-</script>
-<script>
-  var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
- console.log(apikey);
-   //apikey = 'AIzaSyD739-eb6NzS_KbVJq1K8ZAxnrMfkIqPyw';
-  function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
 
-  let video = document.getElementById('video-id');
-  if(getparam('id')){
-    let json = JSON.parse(atob(getparam('id'))) ;
-    let driveid = json.id;
-    video.src = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
-    video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
-  }
+<script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
+
+<!-- Loading Indicator -->
+<div class="loading-indicator" id="loadingIndicator">
+    <div class="spinner"></div>
+    <span>Loading quality...</span>
+</div>
+
+<!-- Quality Selector -->
+<div class="quality-selector">
+    <span class="quality-label">Quality</span>
+    <select id="qualitySelect" class="quality-select">
+        <option value="auto">Auto</option>
+        <option value="1080">1080p</option>
+        <option value="720">720p</option>
+        <option value="480">480p</option>
+        <option value="360">360p</option>
+    </select>
+</div>
+
+<!-- Video Element with Multiple Quality Sources -->
+<video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id" controls>
+    <source id="source-1080" data-fluid-hd src="" title="1080p HD" type="video/mp4" />
+    <source id="source-720" data-fluid-hd src="" title="720p HD" type="video/mp4" />
+    <source id="source-480" src="" title="480p" type="video/mp4" />
+    <source id="source-360" src="" title="360p" type="video/mp4" />
+    <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
+</video>
+
+<script>
+    // Initialize FluidPlayer with enhanced options
+    var myFP = fluidPlayer('video-id', {
+        "layoutControls": {
+            "controlBar": {
+                "autoHideTimeout": 3,
+                "animated": true,
+                "autoHide": true
+            },
+            "htmlOnPauseBlock": {
+                "html": null,
+                "height": null,
+                "width": null
+            },
+            "autoPlay": false,
+            "mute": false,
+            "allowTheatre": true,
+            "playPauseAnimation": true,
+            "playbackRateEnabled": true,
+            "allowDownload": false,
+            "playButtonShowing": true,
+            "fillToContainer": false,
+            "posterImage": "",
+            "playerInitCallback": function() {
+                console.log('FluidPlayer initialized successfully');
+            }
+        },
+        "vastOptions": {
+            "adList": [],
+            "adCTAText": false,
+            "adCTATextPosition": ""
+        },
+        // Enable HD Quality Switcher
+        "hlsjs": {
+            "startLevel": -1, // Auto start level
+            "capLevelToPlayerSize": true
+        }
+    });
 </script>
+
+<script>
+  // API Keys Array
+  var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
+  console.log('Using API Key:', apikey);
+  
+  // Utility Functions
+  function getparam(a, e) {
+    return e || (e = window.location.href), new URL(e).searchParams.get(a);
+  }
+  
+  function showLoading() {
+    document.getElementById('loadingIndicator').style.display = 'block';
+  }
+  
+  function hideLoading() {
+    document.getElementById('loadingIndicator').style.display = 'none';
+  }
+  
+  // Global Variables
+  let video = document.getElementById('video-id');
+  let qualitySelect = document.getElementById('qualitySelect');
+  let currentDriveId = null;
+  let currentPlayer = null;
+  
+  // Generate Video URLs for Different Qualities
+  function generateVideoUrls(driveId) {
+    const baseUrl = `https://www.googleapis.com/drive/v3/files/${driveId}?alt=media&key=${apikey}`;
+    return {
+      '1080': baseUrl + '&quality=hd1080',
+      '720': baseUrl + '&quality=hd720', 
+      '480': baseUrl + '&quality=medium',
+      '360': baseUrl + '&quality=small',
+      'auto': baseUrl
+    };
+  }
+  
+  // Initialize Video Sources
+  function initializeVideoSources(driveId) {
+    const urls = generateVideoUrls(driveId);
+    const posterUrl = 'https://lh3.googleusercontent.com/d/' + driveId;
+    
+    // Set poster
+    video.poster = posterUrl;
+    
+    // Set all quality sources
+    document.getElementById('source-1080').src = urls['1080'];
+    document.getElementById('source-720').src = urls['720'];
+    document.getElementById('source-480').src = urls['480'];
+    document.getElementById('source-360').src = urls['360'];
+    
+    // Set default auto quality as main source
+    video.src = urls['auto'];
+    
+    console.log('Video sources initialized for Drive ID:', driveId);
+  }
+  
+  // Quality Change Handler
+  function changeQuality(selectedQuality) {
+    if (!currentDriveId) {
+      console.error('No Drive ID available');
+      return;
+    }
+    
+    showLoading();
+    
+    const currentTime = video.currentTime;
+    const isPlaying = !video.paused;
+    const volume = video.volume;
+    
+    try {
+      const urls = generateVideoUrls(currentDriveId);
+      const newUrl = urls[selectedQuality] || urls['auto'];
+      
+      console.log('Switching to quality:', selectedQuality, 'URL:', newUrl);
+      
+      // Update video source
+      video.src = newUrl;
+      
+      // Restore playback state after loading
+      video.addEventListener('loadedmetadata', function restoreState() {
+        video.removeEventListener('loadedmetadata', restoreState);
+        
+        video.currentTime = currentTime;
+        video.volume = volume;
+        
+        if (isPlaying) {
+          video.play().catch(e => {
+            console.log('Play error after quality change:', e);
+            hideLoading();
+          });
+        } else {
+          hideLoading();
+        }
+      });
+      
+      // Handle loading completion
+      video.addEventListener('canplay', function onCanPlay() {
+        video.removeEventListener('canplay', onCanPlay);
+        hideLoading();
+      });
+      
+      // Handle errors
+      video.addEventListener('error', function onError(e) {
+        video.removeEventListener('error', onError);
+        console.error('Video loading error:', e);
+        hideLoading();
+        
+        // Fallback to auto quality
+        if (selectedQuality !== 'auto') {
+          console.log('Falling back to auto quality');
+          qualitySelect.value = 'auto';
+          changeQuality('auto');
+        }
+      });
+      
+    } catch (error) {
+      console.error('Quality change error:', error);
+      hideLoading();
+    }
+  }
+  
+  // Event Listeners
+  qualitySelect.addEventListener('change', function() {
+    const selectedQuality = this.value;
+    console.log('Quality selected:', selectedQuality);
+    changeQuality(selectedQuality);
+  });
+  
+  // Video Event Handlers
+  video.addEventListener('loadstart', showLoading);
+  video.addEventListener('waiting', showLoading);
+  video.addEventListener('playing', hideLoading);
+  video.addEventListener('pause', hideLoading);
+  
+  // Initialize from URL Parameter
+  if (getparam('id')) {
+    try {
+      let json = JSON.parse(atob(getparam('id')));
+      currentDriveId = json.id;
+      
+      console.log('Initializing with Drive ID:', currentDriveId);
+      initializeVideoSources(currentDriveId);
+      
+    } catch (error) {
+      console.error('Error parsing video ID:', error);
+      alert('ভিডিও ID পার্স করতে সমস্যা হচ্ছে।');
+    }
+  }
+  
+  // Keyboard Shortcuts
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName.toLowerCase() === 'input') return;
+    
+    switch(e.key) {
+      case ' ':
+        e.preventDefault();
+        if (video.paused) {
+          video.play();
+        } else {
+          video.pause();
+        }
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        video.volume = Math.min(1, video.volume + 0.1);
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        video.volume = Math.max(0, video.volume - 0.1);
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        video.currentTime = Math.max(0, video.currentTime - 10);
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        video.currentTime = Math.min(video.duration, video.currentTime + 10);
+        break;
+      case 'f':
+      case 'F':
+        e.preventDefault();
+        if (video.requestFullscreen) {
+          video.requestFullscreen();
+        }
+        break;
+      case '1':
+        qualitySelect.value = '360';
+        changeQuality('360');
+        break;
+      case '2':
+        qualitySelect.value = '480';
+        changeQuality('480');
+        break;
+      case '3':
+        qualitySelect.value = '720';
+        changeQuality('720');
+        break;
+      case '4':
+        qualitySelect.value = '1080';
+        changeQuality('1080');
+        break;
+      case '0':
+        qualitySelect.value = 'auto';
+        changeQuality('auto');
+        break;
+    }
+  });
+  
+  // Handle page visibility changes
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden && !video.paused) {
+      video.pause();
+    }
+  });
+  
+  console.log('Enhanced FluidPlayer with Quality Selector initialized');
+  console.log('Keyboard shortcuts: Space (play/pause), ↑↓ (volume), ←→ (seek), F (fullscreen), 1-4 (quality), 0 (auto)');
+		</script>
