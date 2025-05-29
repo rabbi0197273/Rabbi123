@@ -1,6 +1,6 @@
 <link rel="icon" href="drive-logo.png">
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
-    
+
 <!-- Meta Tags for SEO -->
 <meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
 <meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
@@ -22,85 +22,105 @@
 
 <!-- Other Meta Tags -->
 <link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#000000">
 <meta name="robots" content="index, follow">
 
 <style>
-  body {
-    margin : 0;
-    padding: 0;
-  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: black;
+  }
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 📌 Video fills entire screen without blank */
+    display: block;
+    background-color: black;
+  }
 </style>
 
 <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
 
-<video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id">
-    <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
+<video poster="https://bit.ly/bbsampleposter" id="video-id" playsinline controls>
+  <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
 </video>
 
 <script>
-    var myFP = fluidPlayer('video-id', {
-        "layoutControls": {
-            "controlBar": {
-                "autoHideTimeout": 3,
-                "animated": true,
-                "autoHide": true
-            },
-            "htmlOnPauseBlock": {
-                "html": null,
-                "height": null,
-                "width": null
-            },
-            "autoPlay": false,
-            "mute": false,
-            "allowTheatre": true,
-            "playPauseAnimation": true,
-            "playbackRateEnabled": true,
-            "allowDownload": false,
-            "playButtonShowing": true,
-            "fillToContainer": false,
-            "posterImage": ""
-        },
-        "vastOptions": {
-            "adList": [],
-            "adCTAText": false,
-            "adCTATextPosition": ""
-        }
-    });
+  var myFP = fluidPlayer('video-id', {
+    "layoutControls": {
+      "controlBar": {
+        "autoHideTimeout": 3,
+        "animated": true,
+        "autoHide": true
+      },
+      "htmlOnPauseBlock": {
+        "html": null,
+        "height": null,
+        "width": null
+      },
+      "autoPlay": false,
+      "mute": false,
+      "allowTheatre": true,
+      "playPauseAnimation": true,
+      "playbackRateEnabled": true,
+      "allowDownload": false,
+      "playButtonShowing": true,
+      "fillToContainer": true, // ✅ Important
+      "posterImage": ""
+    },
+    "vastOptions": {
+      "adList": [],
+      "adCTAText": false,
+      "adCTATextPosition": ""
+    }
+  });
 </script>
 
 <script>
-  var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
-  console.log(apikey);
+  var apikey = [
+    'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
+    'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
+    'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM',
+    'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'
+  ][Math.floor(Math.random() * 4)];
+  console.log(apikey);
 
-  function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
+  function getparam(a, e) {
+    return e || (e = window.location.href), new URL(e).searchParams.get(a)
+  }
 
-  let video = document.getElementById('video-id');
-  if(getparam('id')){
-    let json = JSON.parse(atob(getparam('id'))) ;
-    let driveid = json.id;
-    video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
-    video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
-  }
+  let video = document.getElementById('video-id');
+  if (getparam('id')) {
+    let json = JSON.parse(atob(getparam('id')));
+    let driveid = json.id;
+    video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
+    video.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
+  }
 
-  // ✅ Auto-Rotation Function
-  function forceRotation() {
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock("landscape-primary").catch(function(error) {
-        console.log("Orientation lock failed:", error);
-      });
-    }
-  }
+  function forceRotation() {
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock("landscape-primary").catch(function (error) {
+        console.log("Orientation lock failed:", error);
+      });
+    }
+  }
 
-  // ✅ Fullscreen Event Listeners for All Browsers
-  function onFullscreenChange() {
-    if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
-      forceRotation();
-    }
-  }
+  function onFullscreenChange() {
+    if (
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement
+    ) {
+      forceRotation();
+    }
+  }
 
-  document.addEventListener("fullscreenchange", onFullscreenChange);
-  document.addEventListener("webkitfullscreenchange", onFullscreenChange);
-  document.addEventListener("mozfullscreenchange", onFullscreenChange);
-  document.addEventListener("MSFullscreenChange", onFullscreenChange);
+  document.addEventListener("fullscreenchange", onFullscreenChange);
+  document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+  document.addEventListener("mozfullscreenchange", onFullscreenChange);
+  document.addEventListener("MSFullscreenChange", onFullscreenChange);
 </script>
