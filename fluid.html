@@ -1,6 +1,6 @@
 <link rel="icon" href="drive-logo.png">
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
-    
+
 <!-- Meta Tags for SEO -->
 <meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
 <meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
@@ -25,72 +25,78 @@
 <meta name="theme-color" content="#ffffff">
 <meta name="robots" content="index, follow">
 
-
 <style>
-  body {
-    margin: 0;
-    padding: 0;
-  }
+  body {
+    margin : 0;
+    padding: 0;
+  }
+
+  /* ✅ Rotate effect when fullscreen */
+  .rotate-video {
+    transform: rotate(10deg); /* ইচ্ছামত পরিবর্তন করতে পারো */
+    transition: transform 0.5s ease;
+  }
 </style>
+
 <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
-<video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id"><source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
+
+<video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id">
+  <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
+</video>
+
 <script>
-  var myFP = fluidPlayer(
-    'video-id', {
-      "layoutControls": {
-        "controlBar": {
-          "autoHideTimeout": 3,
-          "animated": true,
-          "autoHide": true
-        },
-        "htmlOnPauseBlock": {
-          "html": null,
-          "height": null,
-          "width": null
-        },
-        "autoPlay": false,
-        "mute": false,
-        "allowTheatre": true,
-        "playPauseAnimation": true,
-        "playbackRateEnabled": true,
-        "allowDownload": false,
-        "playButtonShowing": true,
-        "fillToContainer": false,
-        "posterImage": ""
-      },
-      "vastOptions": {
-        "adList": [],
-        "adCTAText": false,
-        "adCTATextPosition": ""
-      }
-    }
-  );
+    var myFP = fluidPlayer(
+        'video-id', {
+  "layoutControls": {
+      "controlBar": {
+        "autoHideTimeout": 3,
+        "animated": true,
+        "autoHide": true
+      },
+      "htmlOnPauseBlock": {
+        "html": null,
+        "height": null,
+        "width": null
+      },
+      "autoPlay": false,
+      "mute": false,
+      "allowTheatre": true,
+      "playPauseAnimation": true,
+      "playbackRateEnabled": true,
+      "allowDownload": false,
+      "playButtonShowing": true,
+      "fillToContainer": false,
+      "posterImage": ""
+    },
+    "vastOptions": {
+      "adList": [],
+      "adCTAText": false,
+      "adCTATextPosition": ""
+    }
+  }
+    );
+</script>
 
-  var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
-  console.log(apikey);
+<script>
+  var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
+  console.log(apikey);
+  //apikey = 'AIzaSyD739-eb6NzS_KbVJq1K8ZAxnrMfkIqPyw';
+  function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
 
-  function getparam(a, e) { return e || (e = window.location.href), new URL(e).searchParams.get(a) }
+  let video = document.getElementById('video-id');
+  if(getparam('id')){
+    let json = JSON.parse(atob(getparam('id'))) ;
+    let driveid = json.id;
+    video.src = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
+    video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
+  }
 
-  let video = document.getElementById('video-id');
-  if (getparam('id')) {
-    let json = JSON.parse(atob(getparam('id')));
-    let driveid = json.id;
-    video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
-    video.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
-  }
-
-  // Listen for fullscreen changes
-  video.addEventListener('fullscreenchange', function () {
-    if (document.fullscreenElement) {
-      // When fullscreen mode is activated, trigger auto-rotate for mobile devices
-      if (window.matchMedia("(max-width: 768px)").matches) { // Check if the device is mobile
-        screen.orientation.lock('landscape').catch(function (e) {
-          console.error("Auto-rotate failed:", e);
-        });
-      }
-    } else {
-      // Exit fullscreen mode or handle landscape orientation
-      screen.orientation.unlock();
-    }
-  });
+  // ✅ Fullscreen এ গেলে ভিডিও বাঁকা হবে
+  document.addEventListener('fullscreenchange', function () {
+    if (document.fullscreenElement) {
+      video.classList.add('rotate-video');
+    } else {
+      video.classList.remove('rotate-video');
+    }
+  });
 </script>
