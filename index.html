@@ -2,101 +2,151 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DrivePlyr</title>
-  <link rel="stylesheet" href="style.css">
+  <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
+    
+  <!-- Meta Tags for SEO -->
+  <meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+  <meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
+  <meta name="author" content="Rabbi123">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sh20raj.github.io/DrivePlyr/">
+  <meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
+  <meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+  <meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://rabbi0197273.github.io/Rabbi123/">
+  <meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
+  <meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+  <meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+
+  <!-- Other Meta Tags -->
+  <link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="robots" content="index, follow">
+
+
+  <!-- Link to Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
+  <meta name="description" content="Google Drive Proxy Video Player with Many Powerful HTML5 Players Hidden ID and Many Features ðŸš€">
   <style>
-    body {
-      background-color: #121212;
-      color: white;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 500px;
-      margin: auto;
-      padding: 20px;
-    }
-    .logo {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .logo img {
-      width: 80px;
-    }
-    h1 {
-      text-align: center;
-      font-size: 28px;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 5px;
-      border: none;
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      background-color: #0057ff;
-      border: none;
-      color: white;
-      font-size: 18px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    a.history-link {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      color: white;
-      font-weight: bold;
-      text-decoration: none;
-      font-size: 16px;
+    /* Glass effect */
+    .glass {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
     }
   </style>
 </head>
-<body>
-  <a href="history.html" class="history-link">History</a>
-  <div class="container">
-    <div class="logo">
-      <img src="drive-logo.png" alt="DrivePlyr Logo">
+<body class="bg-gray-100">
+
+<!-- Subscribe Box -->
+<div class="container mx-auto py-8">
+  <div class="max-w-md mx-auto bg-white p-6 rounded-md shadow-md glass">
+    <div class="text-center">
+      <img src="https://cdn.jsdelivr.net/gh/SH20RAJ/DrivePlyr@main/drive-logo.png" alt="DrivePlyr Logo" class="mx-auto h-16 mb-4">
+      <h2 class="text-xl font-semibold text-gray-800">DrivePlyr</h2>
     </div>
-    <h1>DrivePlyr</h1>
-    <input type="text" id="driveLink" placeholder="Enter Your Drive Video Link*">
-    <input type="text" id="posterUrl" placeholder="Poster URL (optional)">
-    <input type="text" id="videoTitle" placeholder="Video Title (optional)">
-    <button onclick="generateLink()">GET</button>
+    <div class="mt-6">
+      <input type="text" placeholder="Enter Your Drive Video Link*" autocomplete="on" id="videourl" required="required" class="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400 mb-3">
+      <input type="text" placeholder="Poster URL (optional)" autocomplete="on" id="posterurl" class="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400 mb-3">
+      <input type="text" placeholder="Video Title (optional)" autocomplete="on" id="videotitle" class="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-400 mb-3">
+      <button onclick="get()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full transition duration-300">GET</button>
+    </div>
   </div>
+</div>
 
-  <script>
-    function generateLink() {
-      const driveLink = document.getElementById('driveLink').value;
-      const posterUrl = document.getElementById('posterUrl').value;
-      const videoTitle = document.getElementById('videoTitle').value;
+<!-- Cards Section -->
+<div class="container mx-auto px-4 ">
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <!-- Card 1: SopPlayer -->
+    <div class="bg-white rounded-md shadow-md glass">
+      <h4 class="text-lg font-semibold text-gray-800 p-4">SopPlayer</h4>
+      <div class="aspect-w-16 aspect-h-9">
+        <iframe id="sopplayer" src="sopplayer.html" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full"></iframe>
+      </div>
+      <div class="p-4 flex justify-between items-center">
+        <a href="#" onclick="embedsp()" class="text-blue-500 hover:text-blue-700">Embed Code</a>
+        <a href="#" onclick="opensp()" class="text-blue-500 hover:text-blue-700">Open</a>
+      </div>
+    </div>
 
-      if (!driveLink) {
-        alert("Please enter your Google Drive video link.");
-        return;
-      }
+    <!-- Card 2: Plyr -->
+    <div class="bg-white rounded-md shadow-md glass">
+      <h4 class="text-lg font-semibold text-gray-800 p-4">Plyr</h4>
+      <div class="aspect-w-16 aspect-h-9">
+        <iframe id="plyr" src="plyr.html" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full"></iframe>
+      </div>
+      <div class="p-4 flex justify-between items-center">
+        <a href="#" onclick="embedplyr()" class="text-blue-500 hover:text-blue-700">Embed Code</a>
+        <a href="#" onclick="openplyr()" class="text-blue-500 hover:text-blue-700">Open</a>
+      </div>
+    </div>
 
-      saveToHistory(driveLink, videoTitle, posterUrl);
+    <!-- Card 3: vLiteJS -->
+    <div class="bg-white rounded-md shadow-md glass">
+      <h4 class="text-lg font-semibold text-gray-800 p-4">vLiteJS</h4>
+      <div class="aspect-w-16 aspect-h-9">
+        <iframe id="vlitejs" src="vlitejs.html" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full"></iframe>
+      </div>
+      <div class="p-4 flex justify-between items-center">
+        <a href="#" onclick="embedvlitejs()" class="text-blue-500 hover:text-blue-700">Embed Code</a>
+        <a href="#" onclick="openvlitejs()" class="text-blue-500 hover:text-blue-700">Open</a>
+      </div>
+    </div>
 
-      const finalUrl = `sopplayer.html?link=${encodeURIComponent(driveLink)}&poster=${encodeURIComponent(posterUrl)}&title=${encodeURIComponent(videoTitle)}`;
-      window.open(finalUrl, '_blank');
-    }
+    <!-- Card 4: Fluid Player -->
+    <div class="bg-white rounded-md shadow-md glass">
+      <h4 class="text-lg font-semibold text-gray-800 p-4">Fluid Player</h4>
+      <div class="aspect-w-16 aspect-h-9">
+        <iframe id="fluid" src="fluid.html" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full"></iframe>
+      </div>
+      <div class="p-4 flex justify-between items-center">
+        <a href="#" onclick="embedfluid()" class="text-blue-500 hover:text-blue-700">Embed Code</a>
+        <a href="#" onclick="openfluid()" class="text-blue-500 hover:text-blue-700">Open</a>
+      </div>
+    </div>
 
-    function saveToHistory(driveLink, title, poster) {
-      let history = JSON.parse(localStorage.getItem("driveHistory")) || [];
-      history.unshift({
-        link: driveLink,
-        title: title || "Untitled",
-        poster: poster || "",
-        date: new Date().toLocaleString()
-      });
-      localStorage.setItem("driveHistory", JSON.stringify(history.slice(0, 20)));
-    }
-  </script>
+    <!-- Card 5: Afterglow -->
+    <div class="bg-white rounded-md shadow-md glass">
+      <h4 class="text-lg font-semibold text-gray-800 p-4">Afterglow</h4>
+      <div class="aspect-w-16 aspect-h-9">
+        <iframe id="afterglow" src="afterglow.html" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full"></iframe>
+      </div>
+      <div class="p-4 flex justify-between items-center">
+        <a href="#" onclick="embedafterglow()" class="
+        text-blue-500 hover:text-blue-700">Embed Code</a>
+        <a href="#" onclick="openafterglow()" class="text-blue-500 hover:text-blue-700">Open</a>
+      </div>
+    </div>
+
+    <!-- Card 6: Mediaelements -->
+    <div class="bg-white rounded-md shadow-md glass">
+      <h4 class="text-lg font-semibold text-gray-800 p-4">Mediaelements</h4>
+      <div class="aspect-w-16 aspect-h-9">
+        <iframe id="mediaelements" src="mediaelements.html" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full"></iframe>
+      </div>
+      <div class="p-4 flex justify-between items-center">
+        <a href="#" onclick="embedmediaelements()" class="text-blue-500 btn hover:text-blue-700">Embed Code</a>
+        <a href="#" onclick="openmediaelements()" class="text-blue-500 hover:text-blue-700">Open</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="mt-5 py-8 bg-gray-900 text-white text-center">
+  <h3><a href="https://linktr.ee/cxdiin">CXDI - Serve Technology</a></h3>
+  <h5>Currently working on <a target="_blank" href="https://driveplyr.appspages.online/" rel="dofollow">DrivePlyr 2.0</a></h5>
+</footer>
+
+<!-- Scripts -->
+<script src="script.js"></script>
+
 </body>
 </html>
