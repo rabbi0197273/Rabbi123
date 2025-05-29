@@ -31,11 +31,6 @@
     margin : 0;
     padding: 0;
   }
-  
-  /* শুধু time display এর জন্য spacing */
-  .fluid_controls_container div[style*="color"] {
-    margin-right: 15px !important;
-  }
 </style>
 <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
 <video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id"><source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
@@ -71,19 +66,18 @@
 }
     );
 
-// সবচেয়ে সহজ পদ্ধতি - শুধু time text এর জন্য
+// Time text এর শেষে invisible spacing যোগ করি
 setTimeout(function() {
     const controlsContainer = document.querySelector('.fluid_controls_container');
     if (controlsContainer) {
-        // সব div elements খুঁজি
         const divs = controlsContainer.querySelectorAll('div');
         divs.forEach(div => {
-            // যে div এ time format আছে (যেমন: 1:13 / 25:28)
+            // যে div এ time format আছে
             if (div.textContent && div.textContent.match(/\d+:\d+\s*\/\s*\d+:\d+/)) {
-                div.style.marginRight = '20px';
-                div.style.position = 'relative';
-                div.style.right = '-10px';
-                console.log('Time section found and spaced:', div.textContent);
+                // Time text এর সাথে extra spacing যোগ করি
+                const originalText = div.textContent;
+                div.innerHTML = originalText + '<span style="margin-left: 30px; display: inline-block; width: 30px;"></span>';
+                console.log('Time section spacing added:', originalText);
             }
         });
     }
