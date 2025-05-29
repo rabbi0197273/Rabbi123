@@ -31,49 +31,6 @@
     margin : 0;
     padding: 0;
   }
-  
-  /* FluidPlayer control bar এর সব possible selectors */
-  .fp_controls_time,
-  .fluid_controls_time,
-  .fp-time,
-  .fp-current-time,
-  .fp-duration,
-  [class*="time"],
-  [class*="duration"] {
-    margin-right: 20px !important;
-  }
-  
-  .fp_control_volume,
-  .fluid_control_volume,
-  .fp-volume,
-  .fp-mute,
-  [class*="volume"],
-  [class*="mute"] {
-    margin-left: 20px !important;
-  }
-  
-  /* More specific targeting */
-  .fluid_video_wrapper .fluid_controls_container > div:contains(":")  {
-    margin-right: 25px !important;
-  }
-  
-  /* Universal approach - target any element that has time format */
-  .fluid_controls_container span[class*="time"]:after {
-    content: "";
-    margin-right: 25px;
-    display: inline-block;
-  }
-  
-  /* Alternative - use nth-child to target specific positions */
-  .fluid_controls_container > *:nth-child(3),
-  .fluid_controls_container > *:nth-child(4) {
-    margin-right: 20px !important;
-  }
-  
-  .fluid_controls_container > *:nth-child(5),
-  .fluid_controls_container > *:nth-child(6) {
-    margin-left: 20px !important;
-  }
 </style>
 <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
 <video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id"><source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
@@ -109,20 +66,46 @@
 }
     );
 
-// JavaScript দিয়ে DOM manipulation
+// FluidPlayer load হওয়ার পর specific spacing add করি
 setTimeout(function() {
-    // FluidPlayer load হওয়ার পর DOM elements খুঁজে বের করি
-    const timeElements = document.querySelectorAll('[class*="time"], [class*="duration"]');
-    const volumeElements = document.querySelectorAll('[class*="volume"], [class*="mute"]');
+    // DOM inspect করে exact elements খুঁজে বের করি
+    const controlsContainer = document.querySelector('.fluid_controls_container');
+    if (controlsContainer) {
+        const allControls = controlsContainer.children;
+        
+        // Time display element খুঁজি (যেখানে 1:13 / 25:28 আছে)
+        for (let i = 0; i < allControls.length; i++) {
+            const element = allControls[i];
+            if (element.textContent && element.textContent.includes(':')) {
+                element.style.marginRight = '30px';
+                element.style.paddingRight = '15px';
+                console.log('Time element found and styled:', element);
+                break;
+            }
+        }
+        
+        // Volume/Sound control খুঁজি
+        const volumeIcon = document.querySelector('[class*="volume"], [class*="mute"], .fluid_control_volume');
+        if (volumeIcon) {
+            volumeIcon.style.marginLeft = '25px';
+            volumeIcon.style.paddingLeft = '10px';
+            console.log('Volume element found and styled:', volumeIcon);
+        }
+    }
     
-    timeElements.forEach(el => {
-        el.style.marginRight = '20px';
-    });
+    // Alternative approach - CSS injection
+    const style = document.createElement('style');
+    style.textContent = `
+        .fluid_controls_container > div:nth-child(2) {
+            margin-right: 25px !important;
+        }
+        .fluid_controls_container > div:nth-child(3) {
+            margin-left: 20px !important;
+        }
+    `;
+    document.head.appendChild(style);
     
-    volumeElements.forEach(el => {
-        el.style.marginLeft = '20px';
-    });
-}, 2000);
+}, 3000);
 </script>
 <script>
   var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
