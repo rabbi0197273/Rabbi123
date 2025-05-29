@@ -31,6 +31,11 @@
     margin : 0;
     padding: 0;
   }
+  
+  /* শুধু time display এর জন্য spacing */
+  .fluid_controls_container div[style*="color"] {
+    margin-right: 15px !important;
+  }
 </style>
 <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
 <video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id"><source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
@@ -66,24 +71,23 @@
 }
     );
 
-// শুধু time section কে ডানদিকে সরানোর জন্য
+// সবচেয়ে সহজ পদ্ধতি - শুধু time text এর জন্য
 setTimeout(function() {
     const controlsContainer = document.querySelector('.fluid_controls_container');
     if (controlsContainer) {
-        const allControls = controlsContainer.children;
-        
-        // শুধু time display element খুঁজে সেটাকে ডানদিকে সরাই
-        for (let i = 0; i < allControls.length; i++) {
-            const element = allControls[i];
-            if (element.textContent && element.textContent.includes(':') && element.textContent.includes('/')) {
-                element.style.marginLeft = '20px';
-                element.style.paddingLeft = '10px';
-                console.log('শুধু time element কে ডানদিকে সরানো হয়েছে:', element);
-                break;
+        // সব div elements খুঁজি
+        const divs = controlsContainer.querySelectorAll('div');
+        divs.forEach(div => {
+            // যে div এ time format আছে (যেমন: 1:13 / 25:28)
+            if (div.textContent && div.textContent.match(/\d+:\d+\s*\/\s*\d+:\d+/)) {
+                div.style.marginRight = '20px';
+                div.style.position = 'relative';
+                div.style.right = '-10px';
+                console.log('Time section found and spaced:', div.textContent);
             }
-        }
+        });
     }
-}, 2000);
+}, 1500);
 </script>
 <script>
   var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
