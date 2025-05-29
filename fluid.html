@@ -32,16 +32,46 @@
     padding: 0;
   }
   
-  /* টাইম এবং ভলিউম কন্ট্রোলের মধ্যে ফাঁকা জায়গার জন্য */
-  .fluid_controls_time {
-    margin-right: 15px !important;
+  /* FluidPlayer control bar এর সব possible selectors */
+  .fp_controls_time,
+  .fluid_controls_time,
+  .fp-time,
+  .fp-current-time,
+  .fp-duration,
+  [class*="time"],
+  [class*="duration"] {
+    margin-right: 20px !important;
   }
   
-  .fluid_control_volume_container {
-    margin-left: 10px !important;
+  .fp_control_volume,
+  .fluid_control_volume,
+  .fp-volume,
+  .fp-mute,
+  [class*="volume"],
+  [class*="mute"] {
+    margin-left: 20px !important;
   }
   
-  .fluid_controls_container .fluid_controls_time ~ .fluid_control_volume_container {
+  /* More specific targeting */
+  .fluid_video_wrapper .fluid_controls_container > div:contains(":")  {
+    margin-right: 25px !important;
+  }
+  
+  /* Universal approach - target any element that has time format */
+  .fluid_controls_container span[class*="time"]:after {
+    content: "";
+    margin-right: 25px;
+    display: inline-block;
+  }
+  
+  /* Alternative - use nth-child to target specific positions */
+  .fluid_controls_container > *:nth-child(3),
+  .fluid_controls_container > *:nth-child(4) {
+    margin-right: 20px !important;
+  }
+  
+  .fluid_controls_container > *:nth-child(5),
+  .fluid_controls_container > *:nth-child(6) {
     margin-left: 20px !important;
   }
 </style>
@@ -78,6 +108,21 @@
 	}
 }
     );
+
+// JavaScript দিয়ে DOM manipulation
+setTimeout(function() {
+    // FluidPlayer load হওয়ার পর DOM elements খুঁজে বের করি
+    const timeElements = document.querySelectorAll('[class*="time"], [class*="duration"]');
+    const volumeElements = document.querySelectorAll('[class*="volume"], [class*="mute"]');
+    
+    timeElements.forEach(el => {
+        el.style.marginRight = '20px';
+    });
+    
+    volumeElements.forEach(el => {
+        el.style.marginLeft = '20px';
+    });
+}, 2000);
 </script>
 <script>
   var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
