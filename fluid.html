@@ -30,74 +30,75 @@
     margin : 0;
     padding: 0;
   }
-
-  /* ✅ Rotate effect style */
-  .rotate-video {
-    transform: rotate(10deg);
-    transition: transform 0.5s ease;
-  }
 </style>
 
 <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
-
-<video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id">
-  <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
-</video>
+<video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id"><source src="https://bit.ly/bbsamplevideo" type="video/mp4" /></video>
 
 <script>
     var myFP = fluidPlayer(
-        'video-id',	{
-  "layoutControls": {
-  "controlBar": {
-   "autoHideTimeout": 3,
-   "animated": true,
-   "autoHide": true
-  },
-  "htmlOnPauseBlock": {
-   "html": null,
-   "height": null,
-   "width": null
-  },
-  "autoPlay": false,
-  "mute": false,
-  "allowTheatre": true,
-  "playPauseAnimation": true,
-  "playbackRateEnabled": true,
-  "allowDownload": false,
-  "playButtonShowing": true,
-  "fillToContainer": false,
-  "posterImage": ""
- },
- "vastOptions": {
-  "adList": [],
-  "adCTAText": false,
-  "adCTATextPosition": ""
- }
-}
+        'video-id', {
+            "layoutControls": {
+                "controlBar": {
+                    "autoHideTimeout": 3,
+                    "animated": true,
+                    "autoHide": true
+                },
+                "htmlOnPauseBlock": {
+                    "html": null,
+                    "height": null,
+                    "width": null
+                },
+                "autoPlay": false,
+                "mute": false,
+                "allowTheatre": true,
+                "playPauseAnimation": true,
+                "playbackRateEnabled": true,
+                "allowDownload": false,
+                "playButtonShowing": true,
+                "fillToContainer": false,
+                "posterImage": ""
+            },
+            "vastOptions": {
+                "adList": [],
+                "adCTAText": false,
+                "adCTATextPosition": ""
+            }
+        }
     );
 </script>
 
 <script>
   var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
- console.log(apikey);
-   //apikey = 'AIzaSyD739-eb6NzS_KbVJq1K8ZAxnrMfkIqPyw';
+  console.log(apikey);
   function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
 
   let video = document.getElementById('video-id');
   if(getparam('id')){
     let json = JSON.parse(atob(getparam('id'))) ;
     let driveid = json.id;
-    video.src = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
+    video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
     video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
   }
 
-  // ✅ Fullscreen হলে বাঁকা করে দাও
+  // ✅ Auto-Rotate function (Only this part added)
+  function forceRotation() {
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape-primary').then(() => {
+        console.log('Orientation locked to landscape');
+      }).catch(err => {
+        console.warn('Primary landscape lock failed, trying landscape...');
+        screen.orientation.lock('landscape').catch(e => {
+          console.warn('All orientation locks failed');
+        });
+      });
+    }
+  }
+
+  // ✅ Detect fullscreen change and call rotation
   document.addEventListener('fullscreenchange', function () {
-    const wrapper = document.querySelector('.fluid_video_wrapper');
     if (document.fullscreenElement) {
-      wrapper?.classList.add('rotate-video');
-    } else {
-      wrapper?.classList.remove('rotate-video');
+      forceRotation();
     }
   });
 </script>
