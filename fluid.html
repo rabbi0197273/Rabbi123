@@ -36,8 +36,24 @@
   video {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* 📌 Video fills entire screen without blank */
+    object-fit: contain !important; /* ✅ মূল জিনিস */
     display: block;
+    background-color: black;
+  }
+
+  /* Fullscreen অবস্থায়ও apply হবে */
+  video:-webkit-full-screen {
+    object-fit: contain !important;
+    background-color: black;
+  }
+
+  video:-moz-full-screen {
+    object-fit: contain !important;
+    background-color: black;
+  }
+
+  video:fullscreen {
+    object-fit: contain !important;
     background-color: black;
   }
 </style>
