@@ -65,23 +65,6 @@
 	}
 }
     );
-
-// Time text এর শেষে invisible spacing যোগ করি
-setTimeout(function() {
-    const controlsContainer = document.querySelector('.fluid_controls_container');
-    if (controlsContainer) {
-        const divs = controlsContainer.querySelectorAll('div');
-        divs.forEach(div => {
-            // যে div এ time format আছে
-            if (div.textContent && div.textContent.match(/\d+:\d+\s*\/\s*\d+:\d+/)) {
-                // Time text এর সাথে extra spacing যোগ করি
-                const originalText = div.textContent;
-                div.innerHTML = originalText + '<span style="margin-left: 30px; display: inline-block; width: 30px;"></span>';
-                console.log('Time section spacing added:', originalText);
-            }
-        });
-    }
-}, 1500);
 </script>
 <script>
   var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
