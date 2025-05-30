@@ -1,7 +1,29 @@
 <link rel="icon" href="drive-logo.png">
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
 
-<!-- Meta & SEO Tags skipped for brevity (same as before) -->
+<!-- Meta Tags for SEO -->
+<meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+<meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
+<meta name="author" content="SH20RAJ">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://rabbi0197273.github.io/Rabbi123/">
+<meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
+<meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+<meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://rabbi0197273.github.io/Rabbi123/">
+<meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
+<meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+<meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+
+<!-- Other Meta Tags -->
+<link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
+<meta name="theme-color" content="#000000">
+<meta name="robots" content="index, follow">
 
 <style>
   html, body {
@@ -10,6 +32,7 @@
     height: 100%;
     background: black;
   }
+
   video {
     width: 100%;
     height: 100%;
@@ -17,8 +40,17 @@
     display: block;
     background-color: black;
   }
-  video:-webkit-full-screen,
-  video:-moz-full-screen,
+
+  video:-webkit-full-screen {
+    object-fit: contain !important;
+    background-color: black;
+  }
+
+  video:-moz-full-screen {
+    object-fit: contain !important;
+    background-color: black;
+  }
+
   video:fullscreen {
     object-fit: contain !important;
     background-color: black;
@@ -32,25 +64,6 @@
 </video>
 
 <script>
-  var apikey = [
-    'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
-    'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
-    'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM',
-    'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'
-  ][Math.floor(Math.random() * 4)];
-
-  function getparam(a, e) {
-    return e || (e = window.location.href), new URL(e).searchParams.get(a)
-  }
-
-  let video = document.getElementById('video-id');
-  if (getparam('id')) {
-    let json = JSON.parse(atob(getparam('id')));
-    let driveid = json.id;
-    video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
-    video.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
-  }
-
   var myFP = fluidPlayer('video-id', {
     "layoutControls": {
       "controlBar": {
@@ -71,8 +84,7 @@
       "allowDownload": true,
       "playButtonShowing": true,
       "fillToContainer": true,
-      "posterImage": "",
-      "pictureInPictureEnabled": true
+      "posterImage": ""
     },
     "vastOptions": {
       "adList": [],
@@ -81,7 +93,43 @@
     }
   });
 
-  // ✅ Force screen landscape orientation on fullscreen
+  // PIP button function
+  const pipBtn = document.querySelector('.fluid_pip_button');
+  const video = document.getElementById('video-id');
+
+  pipBtn?.addEventListener('click', async () => {
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      } else {
+        await video.requestPictureInPicture();
+      }
+    } catch (error) {
+      console.error('PIP Error:', error);
+    }
+  });
+</script>
+
+<script>
+  var apikey = [
+    'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
+    'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
+    'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM',
+    'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'
+  ][Math.floor(Math.random() * 4)];
+  console.log(apikey);
+
+  function getparam(a, e) {
+    return e || (e = window.location.href), new URL(e).searchParams.get(a)
+  }
+
+  if (getparam('id')) {
+    let json = JSON.parse(atob(getparam('id')));
+    let driveid = json.id;
+    video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
+    video.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
+  }
+
   function forceRotation() {
     if (screen.orientation && screen.orientation.lock) {
       screen.orientation.lock("landscape-primary").catch(function (error) {
@@ -105,24 +153,4 @@
   document.addEventListener("webkitfullscreenchange", onFullscreenChange);
   document.addEventListener("mozfullscreenchange", onFullscreenChange);
   document.addEventListener("MSFullscreenChange", onFullscreenChange);
-
-  // ✅ Fix PiP button to always trigger native PiP manually
-  setInterval(() => {
-    let pipBtn = document.querySelector('.fp-pip-toggle'); // Fluid Player PiP button class
-    if (pipBtn && !pipBtn.hasAttribute('data-pip-added')) {
-      pipBtn.setAttribute('data-pip-added', 'true');
-      pipBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        try {
-          if (document.pictureInPictureElement) {
-            await document.exitPictureInPicture();
-          } else {
-            await video.requestPictureInPicture();
-          }
-        } catch (err) {
-          console.error('PiP error:', err);
-        }
-      });
-    }
-  }, 500);
 </script>
