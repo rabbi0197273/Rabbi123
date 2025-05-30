@@ -93,6 +93,35 @@
     }
   });
 
+  var video = document.getElementById('video-id');
+
+  // Auto-add PiP support to native button
+  video.addEventListener('enterpictureinpicture', () => {
+    console.log('Entered PiP mode');
+  });
+
+  video.addEventListener('leavepictureinpicture', () => {
+    console.log('Left PiP mode');
+  });
+
+  // Optional: Handle error gracefully if browser doesn't support PiP
+  document.addEventListener('DOMContentLoaded', () => {
+    if ('pictureInPictureEnabled' in document) {
+      // Listen to native PiP button click
+      video.addEventListener('click', async (e) => {
+        // only allow PiP on video element if not already in PiP
+        if (document.pictureInPictureElement) return;
+        try {
+          await video.requestPictureInPicture();
+        } catch (err) {
+          console.log('PiP error:', err);
+        }
+      });
+    }
+  });
+</script>
+
+<script>
   var apikey = [
     'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
     'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
@@ -105,7 +134,6 @@
     return e || (e = window.location.href), new URL(e).searchParams.get(a)
   }
 
-  let video = document.getElementById('video-id');
   if (getparam('id')) {
     let json = JSON.parse(atob(getparam('id')));
     let driveid = json.id;
@@ -136,26 +164,4 @@
   document.addEventListener("webkitfullscreenchange", onFullscreenChange);
   document.addEventListener("mozfullscreenchange", onFullscreenChange);
   document.addEventListener("MSFullscreenChange", onFullscreenChange);
-
-  // Enable PiP when available
-  const enablePiP = () => {
-    if ('pictureInPictureEnabled' in document) {
-      const pipButton = document.querySelector('.fluid_control_pip');
-      if (pipButton) {
-        pipButton.addEventListener('click', function (e) {
-          e.preventDefault();
-          if (document.pictureInPictureElement) {
-            document.exitPictureInPicture();
-          } else {
-            video.requestPictureInPicture().catch(err => {
-              console.error("PiP Error: ", err);
-            });
-          }
-        });
-      }
-    }
-  };
-
-  // Wait for the player to initialize
-  setTimeout(enablePiP, 1500);
 </script>
