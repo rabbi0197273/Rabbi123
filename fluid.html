@@ -65,60 +65,34 @@
 
 <script>
   var myFP = fluidPlayer('video-id', {
-    "layoutControls": {
-      "controlBar": {
-        "autoHideTimeout": 3,
-        "animated": true,
-        "autoHide": true
+    layoutControls: {
+      controlBar: {
+        autoHideTimeout: 3,
+        animated: true,
+        autoHide: true
       },
-      "htmlOnPauseBlock": {
-        "html": null,
-        "height": null,
-        "width": null
+      htmlOnPauseBlock: {
+        html: null,
+        height: null,
+        width: null
       },
-      "autoPlay": false,
-      "mute": false,
-      "allowTheatre": true,
-      "playPauseAnimation": true,
-      "playbackRateEnabled": true,
-      "allowDownload": true,
-      "playButtonShowing": true,
-      "fillToContainer": true,
-      "posterImage": ""
+      autoPlay: false,
+      mute: false,
+      allowTheatre: true,
+      playPauseAnimation: true,
+      playbackRateEnabled: true,
+      allowDownload: true,
+      playButtonShowing: true,
+      fillToContainer: true,
+      posterImage: ""
     },
-    "vastOptions": {
-      "adList": [],
-      "adCTAText": false,
-      "adCTATextPosition": ""
+    vastOptions: {
+      adList: [],
+      adCTAText: false,
+      adCTATextPosition: ""
     }
   });
 
-  // PiP Button কাজ করার ফাংশন
-  document.addEventListener('DOMContentLoaded', function () {
-    const pipBtnInterval = setInterval(() => {
-      const pipBtn = document.querySelector('.fluid_control_pip');
-
-      if (pipBtn) {
-        clearInterval(pipBtnInterval); // একবার পেলে বারবার না খোঁজে
-        pipBtn.addEventListener('click', async function (e) {
-          e.stopPropagation(); // ভিডিওতে ক্লিক করে PiP চালু না হয়
-          const video = document.getElementById('video-id');
-          if (document.pictureInPictureElement) {
-            document.exitPictureInPicture();
-          } else {
-            try {
-              await video.requestPictureInPicture();
-            } catch (err) {
-              console.log('PiP Error:', err);
-            }
-          }
-        });
-      }
-    }, 500);
-  });
-</script>
-
-<script>
   var apikey = [
     'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
     'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
@@ -162,4 +136,24 @@
   document.addEventListener("webkitfullscreenchange", onFullscreenChange);
   document.addEventListener("mozfullscreenchange", onFullscreenChange);
   document.addEventListener("MSFullscreenChange", onFullscreenChange);
+
+  // Pip Fix: Remove video click PIP, force button-based only
+  video.removeEventListener('click', video.requestPictureInPicture);
+
+  // Wait until player UI is ready and attach proper PiP handler to the button
+  document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(() => {
+      const pipButton = document.querySelector('.fp-pip');
+      if (pipButton && document.pictureInPictureEnabled) {
+        pipButton.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (!document.pictureInPictureElement) {
+            video.requestPictureInPicture();
+          } else {
+            document.exitPictureInPicture();
+          }
+        });
+      }
+    }, 1000);
+  });
 </script>
