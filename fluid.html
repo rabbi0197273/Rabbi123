@@ -65,58 +65,32 @@
 
 <script>
   var myFP = fluidPlayer('video-id', {
-    "layoutControls": {
-      "controlBar": {
-        "autoHideTimeout": 3,
-        "animated": true,
-        "autoHide": true
+    layoutControls: {
+      controlBar: {
+        autoHideTimeout: 3,
+        animated: true,
+        autoHide: true
       },
-      "htmlOnPauseBlock": {
-        "html": null,
-        "height": null,
-        "width": null
+      htmlOnPauseBlock: {
+        html: null,
+        height: null,
+        width: null
       },
-      "autoPlay": false,
-      "mute": false,
-      "allowTheatre": true,
-      "playPauseAnimation": true,
-      "playbackRateEnabled": true,
-      "allowDownload": true,
-      "playButtonShowing": true,
-      "fillToContainer": true,
-      "posterImage": ""
+      autoPlay: false,
+      mute: false,
+      allowTheatre: true,
+      playPauseAnimation: true,
+      playbackRateEnabled: true,
+      allowDownload: true,
+      playButtonShowing: true,
+      fillToContainer: true,
+      posterImage: "",
+      pictureInPictureEnabled: true  // Enable PiP feature
     },
-    "vastOptions": {
-      "adList": [],
-      "adCTAText": false,
-      "adCTATextPosition": ""
-    }
-  });
-
-  var video = document.getElementById('video-id');
-
-  // Auto-add PiP support to native button
-  video.addEventListener('enterpictureinpicture', () => {
-    console.log('Entered PiP mode');
-  });
-
-  video.addEventListener('leavepictureinpicture', () => {
-    console.log('Left PiP mode');
-  });
-
-  // Optional: Handle error gracefully if browser doesn't support PiP
-  document.addEventListener('DOMContentLoaded', () => {
-    if ('pictureInPictureEnabled' in document) {
-      // Listen to native PiP button click
-      video.addEventListener('click', async (e) => {
-        // only allow PiP on video element if not already in PiP
-        if (document.pictureInPictureElement) return;
-        try {
-          await video.requestPictureInPicture();
-        } catch (err) {
-          console.log('PiP error:', err);
-        }
-      });
+    vastOptions: {
+      adList: [],
+      adCTAText: false,
+      adCTATextPosition: ""
     }
   });
 </script>
@@ -134,6 +108,7 @@
     return e || (e = window.location.href), new URL(e).searchParams.get(a)
   }
 
+  let video = document.getElementById('video-id');
   if (getparam('id')) {
     let json = JSON.parse(atob(getparam('id')));
     let driveid = json.id;
