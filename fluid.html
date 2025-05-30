@@ -93,6 +93,28 @@
     }
   });
 
+  // Enable PiP from FluidPlayer PiP button
+  document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(function () {
+      const pipBtn = document.querySelector('.fp-pip');
+
+      if (pipBtn) {
+        pipBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          const video = document.querySelector('#video-id');
+
+          if (document.pictureInPictureElement) {
+            document.exitPictureInPicture();
+          } else if (document.pictureInPictureEnabled) {
+            video.requestPictureInPicture().catch(err => console.log(err));
+          }
+        });
+      }
+    }, 500); // wait for FluidPlayer to render the PiP button
+  });
+</script>
+
+<script>
   var apikey = [
     'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
     'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
@@ -136,24 +158,4 @@
   document.addEventListener("webkitfullscreenchange", onFullscreenChange);
   document.addEventListener("mozfullscreenchange", onFullscreenChange);
   document.addEventListener("MSFullscreenChange", onFullscreenChange);
-
-  // Pip Fix: Remove video click PIP, force button-based only
-  video.removeEventListener('click', video.requestPictureInPicture);
-
-  // Wait until player UI is ready and attach proper PiP handler to the button
-  document.addEventListener("DOMContentLoaded", function () {
-    setTimeout(() => {
-      const pipButton = document.querySelector('.fp-pip');
-      if (pipButton && document.pictureInPictureEnabled) {
-        pipButton.addEventListener('click', function (e) {
-          e.preventDefault();
-          if (!document.pictureInPictureElement) {
-            video.requestPictureInPicture();
-          } else {
-            document.exitPictureInPicture();
-          }
-        });
-      }
-    }, 1000);
-  });
 </script>
