@@ -41,6 +41,7 @@
     background-color: black;
   }
 
+  
   video:-webkit-full-screen {
     object-fit: contain !important;
     background-color: black;
@@ -57,7 +58,6 @@
   }
 </style>
 
-<!-- Fluid Player -->
 <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
 
 <video poster="https://bit.ly/bbsampleposter" id="video-id" playsinline controls>
@@ -95,7 +95,6 @@
   });
 </script>
 
-<!-- Google Drive ID Handling -->
 <script>
   var apikey = [
     'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
@@ -116,10 +115,7 @@
     video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
     video.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
   }
-</script>
 
-<!-- Fullscreen Rotate -->
-<script>
   function forceRotation() {
     if (screen.orientation && screen.orientation.lock) {
       screen.orientation.lock("landscape-primary").catch(function (error) {
@@ -143,32 +139,4 @@
   document.addEventListener("webkitfullscreenchange", onFullscreenChange);
   document.addEventListener("mozfullscreenchange", onFullscreenChange);
   document.addEventListener("MSFullscreenChange", onFullscreenChange);
-</script>
-
-<!-- PiP Button Activate -->
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const video = document.getElementById('video-id');
-
-    const observer = new MutationObserver(() => {
-      const pipBtn = document.querySelector('.fp-pip');
-      if (pipBtn) {
-        observer.disconnect();
-        pipBtn.addEventListener('click', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-
-          if (document.pictureInPictureElement) {
-            document.exitPictureInPicture();
-          } else if (document.pictureInPictureEnabled) {
-            video.requestPictureInPicture().catch(err => {
-              console.error('PiP Error:', err);
-            });
-          }
-        });
-      }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-  });
 </script>
