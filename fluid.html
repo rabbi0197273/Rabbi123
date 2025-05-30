@@ -41,6 +41,7 @@
     background-color: black;
   }
 
+  
   video:-webkit-full-screen {
     object-fit: contain !important;
     background-color: black;
@@ -63,51 +64,38 @@
   <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
 </video>
 
+<script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
+<video id="video-id"><source src="video.mp4" type="video/mp4" />
 <script>
-  var myFP = fluidPlayer('video-id', {
-    "layoutControls": {
-      "controlBar": {
-        "autoHideTimeout": 3,
-        "animated": true,
-        "autoHide": true
-      },
-      "htmlOnPauseBlock": {
-        "html": null,
-        "height": null,
-        "width": null
-      },
-      "autoPlay": false,
-      "mute": false,
-      "allowTheatre": true,
-      "playPauseAnimation": true,
-      "playbackRateEnabled": true,
-      "allowDownload": true,
-      "playButtonShowing": true,
-      "fillToContainer": true,
-      "posterImage": ""
-    },
-    "vastOptions": {
-      "adList": [],
-      "adCTAText": false,
-      "adCTATextPosition": ""
-    }
-  });
-
-  // PIP button function
-  const pipBtn = document.querySelector('.fluid_pip_button');
-  const video = document.getElementById('video-id');
-
-  pipBtn?.addEventListener('click', async () => {
-    try {
-      if (document.pictureInPictureElement) {
-        await document.exitPictureInPicture();
-      } else {
-        await video.requestPictureInPicture();
-      }
-    } catch (error) {
-      console.error('PIP Error:', error);
-    }
-  });
+    var myFP = fluidPlayer(
+        'video-id',	{
+	"layoutControls": {
+		"controlBar": {
+			"autoHideTimeout": 3,
+			"animated": true,
+			"autoHide": false
+		},
+		"htmlOnPauseBlock": {
+			"html": null,
+			"height": null,
+			"width": null
+		},
+		"autoPlay": true,
+		"mute": true,
+		"allowTheatre": false,
+		"playPauseAnimation": true,
+		"playbackRateEnabled": true,
+		"allowDownload": false,
+		"playButtonShowing": true,
+		"fillToContainer": false,
+		"posterImage": ""
+	},
+	"vastOptions": {
+		"adList": [],
+		"adCTAText": false,
+		"adCTATextPosition": ""
+	}
+});
 </script>
 
 <script>
@@ -123,6 +111,7 @@
     return e || (e = window.location.href), new URL(e).searchParams.get(a)
   }
 
+  let video = document.getElementById('video-id');
   if (getparam('id')) {
     let json = JSON.parse(atob(getparam('id')));
     let driveid = json.id;
