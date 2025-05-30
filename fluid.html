@@ -41,8 +41,16 @@
     background-color: black;
   }
 
-  video:-webkit-full-screen,
-  video:-moz-full-screen,
+  video:-webkit-full-screen {
+    object-fit: contain !important;
+    background-color: black;
+  }
+
+  video:-moz-full-screen {
+    object-fit: contain !important;
+    background-color: black;
+  }
+
   video:fullscreen {
     object-fit: contain !important;
     background-color: black;
@@ -56,46 +64,12 @@
 </video>
 
 <script>
-  var myFP = fluidPlayer('video-id', {
-    layoutControls: {
-      controlBar: {
-        autoHideTimeout: 3,
-        animated: true,
-        autoHide: true
-      },
-      htmlOnPauseBlock: {
-        html: null,
-        height: null,
-        width: null
-      },
-      autoPlay: false,
-      mute: false,
-      allowTheatre: true,
-      playPauseAnimation: true,
-      playbackRateEnabled: true,
-      allowDownload: true,
-      playButtonShowing: true,
-      fillToContainer: true,
-      posterImage: "",
-      pictureInPictureEnabled: true // <-- এটি PiP এনাবল করে
-    },
-    vastOptions: {
-      adList: [],
-      adCTAText: false,
-      adCTATextPosition: ""
-    }
-  });
-</script>
-
-<script>
-  // Google Drive API Key randomizer
   var apikey = [
     'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
     'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
     'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM',
     'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'
   ][Math.floor(Math.random() * 4)];
-  console.log(apikey);
 
   function getparam(a, e) {
     return e || (e = window.location.href), new URL(e).searchParams.get(a)
@@ -108,6 +82,36 @@
     video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
     video.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
   }
+
+  var myFP = fluidPlayer('video-id', {
+    "layoutControls": {
+      "controlBar": {
+        "autoHideTimeout": 3,
+        "animated": true,
+        "autoHide": true
+      },
+      "htmlOnPauseBlock": {
+        "html": null,
+        "height": null,
+        "width": null
+      },
+      "autoPlay": false,
+      "mute": false,
+      "allowTheatre": true,
+      "playPauseAnimation": true,
+      "playbackRateEnabled": true,
+      "allowDownload": true,
+      "playButtonShowing": true,
+      "fillToContainer": true,
+      "posterImage": "",
+      "pictureInPictureEnabled": true  // ✅ PIP ENABLED HERE
+    },
+    "vastOptions": {
+      "adList": [],
+      "adCTAText": false,
+      "adCTATextPosition": ""
+    }
+  });
 
   function forceRotation() {
     if (screen.orientation && screen.orientation.lock) {
@@ -132,19 +136,4 @@
   document.addEventListener("webkitfullscreenchange", onFullscreenChange);
   document.addEventListener("mozfullscreenchange", onFullscreenChange);
   document.addEventListener("MSFullscreenChange", onFullscreenChange);
-</script>
-
-<script>
-  // PiP Functionality Binding (Required for some browsers)
-  const videoElem = document.getElementById("video-id");
-  document.addEventListener("DOMContentLoaded", () => {
-    if ('pictureInPictureEnabled' in document) {
-      videoElem.addEventListener("enterpictureinpicture", () => {
-        console.log("Entered PiP");
-      });
-      videoElem.addEventListener("leavepictureinpicture", () => {
-        console.log("Left PiP");
-      });
-    }
-  });
 </script>
