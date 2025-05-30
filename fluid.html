@@ -41,7 +41,6 @@
     background-color: black;
   }
 
-  
   video:-webkit-full-screen {
     object-fit: contain !important;
     background-color: black;
@@ -64,41 +63,36 @@
   <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
 </video>
 
-<script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
-<video id="video-id"><source src="video.mp4" type="video/mp4" />
 <script>
-    var myFP = fluidPlayer(
-        'video-id',	{
-	"layoutControls": {
-		"controlBar": {
-			"autoHideTimeout": 3,
-			"animated": true,
-			"autoHide": false
-		},
-		"htmlOnPauseBlock": {
-			"html": null,
-			"height": null,
-			"width": null
-		},
-		"autoPlay": true,
-		"mute": true,
-		"allowTheatre": false,
-		"playPauseAnimation": true,
-		"playbackRateEnabled": true,
-		"allowDownload": false,
-		"playButtonShowing": true,
-		"fillToContainer": false,
-		"posterImage": ""
-	},
-	"vastOptions": {
-		"adList": [],
-		"adCTAText": false,
-		"adCTATextPosition": ""
-	}
-});
-</script>
+  var myFP = fluidPlayer('video-id', {
+    "layoutControls": {
+      "controlBar": {
+        "autoHideTimeout": 3,
+        "animated": true,
+        "autoHide": true
+      },
+      "htmlOnPauseBlock": {
+        "html": null,
+        "height": null,
+        "width": null
+      },
+      "autoPlay": false,
+      "mute": false,
+      "allowTheatre": true,
+      "playPauseAnimation": true,
+      "playbackRateEnabled": true,
+      "allowDownload": true,
+      "playButtonShowing": true,
+      "fillToContainer": true,
+      "posterImage": ""
+    },
+    "vastOptions": {
+      "adList": [],
+      "adCTAText": false,
+      "adCTATextPosition": ""
+    }
+  });
 
-<script>
   var apikey = [
     'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
     'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
@@ -142,4 +136,26 @@
   document.addEventListener("webkitfullscreenchange", onFullscreenChange);
   document.addEventListener("mozfullscreenchange", onFullscreenChange);
   document.addEventListener("MSFullscreenChange", onFullscreenChange);
+
+  // Enable PiP when available
+  const enablePiP = () => {
+    if ('pictureInPictureEnabled' in document) {
+      const pipButton = document.querySelector('.fluid_control_pip');
+      if (pipButton) {
+        pipButton.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (document.pictureInPictureElement) {
+            document.exitPictureInPicture();
+          } else {
+            video.requestPictureInPicture().catch(err => {
+              console.error("PiP Error: ", err);
+            });
+          }
+        });
+      }
+    }
+  };
+
+  // Wait for the player to initialize
+  setTimeout(enablePiP, 1500);
 </script>
