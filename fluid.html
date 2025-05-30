@@ -41,26 +41,19 @@
     background-color: black;
   }
 
-  video:-webkit-full-screen,
-  video:-moz-full-screen,
-  video:fullscreen {
+  video:-webkit-full-screen {
     object-fit: contain !important;
     background-color: black;
   }
 
-  /* Optional PiP button styling */
-  #pip-button {
-    position: absolute;
-    bottom: 70px;
-    right: 20px;
-    z-index: 9999;
-    padding: 10px 14px;
-    font-size: 16px;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+  video:-moz-full-screen {
+    object-fit: contain !important;
+    background-color: black;
+  }
+
+  video:fullscreen {
+    object-fit: contain !important;
+    background-color: black;
   }
 </style>
 
@@ -70,11 +63,7 @@
   <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
 </video>
 
-<!-- Picture-in-Picture Button -->
-<button id="pip-button" style="display: none;">📺 PiP</button>
-
 <script>
-  // Initialize FluidPlayer
   var myFP = fluidPlayer('video-id', {
     "layoutControls": {
       "controlBar": {
@@ -92,7 +81,7 @@
       "allowTheatre": true,
       "playPauseAnimation": true,
       "playbackRateEnabled": true,
-      "allowDownload": false,
+      "allowDownload": true,
       "playButtonShowing": true,
       "fillToContainer": true,
       "posterImage": ""
@@ -104,7 +93,30 @@
     }
   });
 
-  // Random API key selection
+  // ✅ Inject VIP (Picture-in-Picture) support
+  const video = document.getElementById('video-id');
+
+  video.addEventListener('loadedmetadata', () => {
+    if ('pictureInPictureEnabled' in document) {
+      const pipBtn = document.querySelector('.fluid_control_fullscreen');
+      if (pipBtn) {
+        pipBtn.addEventListener('click', async () => {
+          try {
+            if (document.pictureInPictureElement) {
+              await document.exitPictureInPicture();
+            } else {
+              await video.requestPictureInPicture();
+            }
+          } catch (err) {
+            console.log('PiP error:', err);
+          }
+        });
+      }
+    }
+  });
+</script>
+
+<script>
   var apikey = [
     'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
     'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
@@ -113,21 +125,18 @@
   ][Math.floor(Math.random() * 4)];
   console.log(apikey);
 
-  // Get URL param
   function getparam(a, e) {
     return e || (e = window.location.href), new URL(e).searchParams.get(a)
   }
 
-  // Set dynamic video source from Google Drive
-  let video = document.getElementById('video-id');
+  let videoEl = document.getElementById('video-id');
   if (getparam('id')) {
     let json = JSON.parse(atob(getparam('id')));
     let driveid = json.id;
-    video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
-    video.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
+    videoEl.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
+    videoEl.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
   }
 
-  // Force landscape on fullscreen
   function forceRotation() {
     if (screen.orientation && screen.orientation.lock) {
       screen.orientation.lock("landscape-primary").catch(function (error) {
@@ -151,25 +160,4 @@
   document.addEventListener("webkitfullscreenchange", onFullscreenChange);
   document.addEventListener("mozfullscreenchange", onFullscreenChange);
   document.addEventListener("MSFullscreenChange", onFullscreenChange);
-
-  // PiP Support
-  const pipBtn = document.getElementById('pip-button');
-
-  if ('pictureInPictureEnabled' in document) {
-    pipBtn.style.display = 'block';
-
-    pipBtn.addEventListener('click', async () => {
-      try {
-        if (video !== document.pictureInPictureElement) {
-          await video.requestPictureInPicture();
-        } else {
-          await document.exitPictureInPicture();
-        }
-      } catch (error) {
-        console.error('PiP failed:', error);
-      }
-    });
-  } else {
-    console.log('Picture-in-Picture not supported');
-  }
 </script>
