@@ -26,136 +26,94 @@
 <meta name="robots" content="index, follow">
 
 <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background: black;
-  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: black;
+  }
 
-  video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain !important;
-    display: block;
-    background-color: black;
-  }
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain !important;
+    display: block;
+    background-color: black;
+  }
 
-  video:-webkit-full-screen {
-    object-fit: contain !important;
-    background-color: black;
-  }
+  video:-webkit-full-screen {
+    object-fit: contain !important;
+    background-color: black;
+  }
 
-  video:-moz-full-screen {
-    object-fit: contain !important;
-    background-color: black;
-  }
+  video:-moz-full-screen {
+    object-fit: contain !important;
+    background-color: black;
+  }
 
-  video:fullscreen {
-    object-fit: contain !important;
-    background-color: black;
-  }
+  video:fullscreen {
+    object-fit: contain !important;
+    background-color: black;
+  }
 </style>
 
 <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
 
 <video poster="https://bit.ly/bbsampleposter" id="video-id" playsinline controls>
-  <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
+  <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
 </video>
 
 <script>
-  var myFP = fluidPlayer('video-id', {
-    layoutControls: {
-      controlBar: {
-        autoHideTimeout: 3,
-        animated: true,
-        autoHide: true
-      },
-      htmlOnPauseBlock: {
-        html: null,
-        height: null,
-        width: null
-      },
-      autoPlay: false,
-      mute: false,
-      allowTheatre: true,
-      playPauseAnimation: true,
-      playbackRateEnabled: true,
-      allowDownload: true,
-      playButtonShowing: true,
-      fillToContainer: true,
-      posterImage: ""
-    },
-    vastOptions: {
-      adList: [],
-      adCTAText: false,
-      adCTATextPosition: ""
-    }
-  });
-
-  // Enable PiP from FluidPlayer PiP button
-  document.addEventListener('DOMContentLoaded', function () {
-    setTimeout(function () {
-      const pipBtn = document.querySelector('.fp-pip');
-
-      if (pipBtn) {
-        pipBtn.addEventListener('click', function (e) {
-          e.preventDefault();
-          const video = document.querySelector('#video-id');
-
-          if (document.pictureInPictureElement) {
-            document.exitPictureInPicture();
-          } else if (document.pictureInPictureEnabled) {
-            video.requestPictureInPicture().catch(err => console.log(err));
-          }
-        });
-      }
-    }, 500); // wait for FluidPlayer to render the PiP button
-  });
+  var myFP = fluidPlayer('video-id', {
+    "layoutControls": {
+      "controlBar": {
+        "autoHideTimeout": 3,
+        "animated": true,
+        "autoHide": true
+      },
+      "htmlOnPauseBlock": {
+        "html": null,
+        "height": null,
+        "width": null
+      },
+      "autoPlay": false,
+      "mute": false,
+      "allowTheatre": true,
+      "playPauseAnimation": true,
+      "playbackRateEnabled": true,
+      "allowDownload": true,
+      "playButtonShowing": true,
+      "fillToContainer": true,
+      "posterImage": ""
+    },
+    "vastOptions": {
+      "adList": [],
+      "adCTAText": false,
+      "adCTATextPosition": ""
+    }
+  });
 </script>
 
+<!-- PiP Function bind only to the UI button -->
 <script>
-  var apikey = [
-    'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
-    'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
-    'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM',
-    'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'
-  ][Math.floor(Math.random() * 4)];
-  console.log(apikey);
+  document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(function () {
+      const pipBtn = document.querySelector('.fp-pip');
+      const video = document.getElementById('video-id');
 
-  function getparam(a, e) {
-    return e || (e = window.location.href), new URL(e).searchParams.get(a)
-  }
-
-  let video = document.getElementById('video-id');
-  if (getparam('id')) {
-    let json = JSON.parse(atob(getparam('id')));
-    let driveid = json.id;
-    video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
-    video.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
-  }
-
-  function forceRotation() {
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock("landscape-primary").catch(function (error) {
-        console.log("Orientation lock failed:", error);
-      });
-    }
-  }
-
-  function onFullscreenChange() {
-    if (
-      document.fullscreenElement ||
-      document.webkitFullscreenElement ||
-      document.mozFullScreenElement ||
-      document.msFullscreenElement
-    ) {
-      forceRotation();
-    }
-  }
-
-  document.addEventListener("fullscreenchange", onFullscreenChange);
-  document.addEventListener("webkitfullscreenchange", onFullscreenChange);
-  document.addEventListener("mozfullscreenchange", onFullscreenChange);
-  document.addEventListener("MSFullscreenChange", onFullscreenChange);
+      if (pipBtn && video) {
+        pipBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (document.pictureInPictureElement) {
+            document.exitPictureInPicture();
+          } else if (document.pictureInPictureEnabled) {
+            video.requestPictureInPicture().catch(err => {
+              console.error('PiP error:', err);
+            });
+          }
+        });
+      }
+    }, 1000); // Wait for UI to load
+  });
 </script>
