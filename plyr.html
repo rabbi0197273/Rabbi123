@@ -15,7 +15,7 @@ html, body {
 }
 </style>
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
-
+    
 <!-- Meta Tags for SEO -->
 <meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
 <meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
@@ -57,8 +57,8 @@ html, body {
   var controls =
 [
     'play-large', // The large play button in the center
-  // 'restart', // Restart playback
-  // 'rewind', // Rewind by the seek time (default 10 seconds)
+   // 'restart', // Restart playback
+   // 'rewind', // Rewind by the seek time (default 10 seconds)
     'play', // Play/pause playback
     'fast-forward', // Fast forward by the seek time (default 10 seconds)
     'progress', // The progress bar and scrubber for playback and buffering
@@ -101,7 +101,7 @@ html, body {
 
 <script>
   var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
-  console.log(apikey);
+ console.log(apikey);
    //apikey = 'AIzaSyD739-eb6NzS_KbVJq1K8ZAxnrMfkIqPyw';
   function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
 
@@ -112,26 +112,4 @@ html, body {
     video.src = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
     video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
   }
-</script>
-
-<!-- ✅ নিচে ফাংশন যোগ করা হলো শুধু play-large ক্লিক করলে ভিডিও চালু/বন্ধ হবে -->
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const player = Plyr.setup('#vid1')[0];
-
-    const waitForPlayButton = setInterval(() => {
-      const playLarge = document.querySelector('.plyr__control--overlaid');
-      if (playLarge) {
-        clearInterval(waitForPlayButton);
-        playLarge.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (player.playing) {
-            player.pause();
-          } else {
-            player.play();
-          }
-        });
-      }
-    }, 100);
-  });
 </script>
