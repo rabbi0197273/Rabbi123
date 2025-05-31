@@ -15,7 +15,7 @@ html, body {
 }
 </style>
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
-    
+
 <!-- Meta Tags for SEO -->
 <meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
 <meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
@@ -55,24 +55,24 @@ html, body {
 
 <script>
   var controls =
-[
+  [
     'play-large', // The large play button in the center
-   // 'restart', // Restart playback
-   // 'rewind', // Rewind by the seek time (default 10 seconds)
-    'play', // Play/pause playback
-    'fast-forward', // Fast forward by the seek time (default 10 seconds)
-    'progress', // The progress bar and scrubber for playback and buffering
-    'current-time', // The current time of playback
-    'duration', // The full duration of the media
-    'mute', // Toggle mute
-    'volume', // Volume control
-    'captions', // Toggle captions
-    'settings', // Settings menu
-    'pip', // Picture-in-picture (currently Safari only)
-    'airplay', // Airplay (currently Safari only)
-    //'download', // Show a download button with a link to either the current source or a custom URL you specify in your options
-    'fullscreen' // Toggle fullscreen
-];
+    //'restart',
+    //'rewind',
+    'play',
+    'fast-forward',
+    'progress',
+    'current-time',
+    'duration',
+    'mute',
+    'volume',
+    'captions',
+    'settings',
+    'pip',
+    'airplay',
+    //'download',
+    'fullscreen'
+  ];
 
   const player = new Plyr('#vid1',{controls});
 
@@ -94,15 +94,15 @@ html, body {
 
 <style>
   :root {
-  --plyr-color-main: #e657ff;
+    --plyr-color-main: #e657ff;
     --plyr-video-control-color  :#e8ffba;
-}
+  }
 </style>
 
 <script>
   var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
- console.log(apikey);
-   //apikey = 'AIzaSyD739-eb6NzS_KbVJq1K8ZAxnrMfkIqPyw';
+  console.log(apikey);
+
   function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
 
   let video = document.getElementById('vid1');
@@ -112,4 +112,28 @@ html, body {
     video.src = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
     video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
   }
+
+  // ✅ Double Click to Seek ±10s (YouTube Style)
+  let lastClickTime = 0;
+  let lastClickX = 0;
+  const doubleClickThreshold = 300; // milliseconds
+  const skipTime = 10; // seconds
+
+  video.addEventListener('click', function(e) {
+    const currentTime = new Date().getTime();
+    const timeDiff = currentTime - lastClickTime;
+    const isDoubleClick = timeDiff < doubleClickThreshold && Math.abs(e.clientX - lastClickX) < 100;
+
+    if (isDoubleClick) {
+      const midpoint = window.innerWidth / 2;
+      if (e.clientX < midpoint) {
+        player.rewind(skipTime);
+      } else {
+        player.forward(skipTime);
+      }
+    }
+
+    lastClickTime = currentTime;
+    lastClickX = e.clientX;
+  });
 </script>
