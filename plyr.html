@@ -5,7 +5,6 @@ html, body {
   margin: 0;
   padding: 0;
 }
-
 .plyr  {
   position: absolute;
   top: 0;
@@ -46,7 +45,6 @@ html, body {
 <!--Add a Simple HTML5 Video tag-->
 <div id="container">
   <video controls poster="https://bit.ly/bbsampleposter" id="vid1">
-    <!-- Video files -->
     <source src="https://rebrand.ly/sample-video" type="video/mp4" size="576" />
   </video>
 </div>
@@ -54,86 +52,85 @@ html, body {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.6.7/plyr.min.js"></script>
 
 <script>
-  var controls =
-  [
-    'play-large', // The large play button in the center
-    //'restart',
-    //'rewind',
-    'play',
-    'fast-forward',
-    'progress',
-    'current-time',
-    'duration',
-    'mute',
-    'volume',
-    'captions',
-    'settings',
-    'pip',
-    'airplay',
-    //'download',
-    'fullscreen'
-  ];
+var controls = [
+  'play-large',
+  'play',
+  'fast-forward',
+  'progress',
+  'current-time',
+  'duration',
+  'mute',
+  'volume',
+  'captions',
+  'settings',
+  'pip',
+  'airplay',
+  'fullscreen'
+];
 
-  const player = new Plyr('#vid1',{controls});
+const player = new Plyr('#vid1', {
+  controls,
+  fullscreen: { enabled: true, fallback: true }
+});
 
-  // ✅ Auto-Rotate on Fullscreen
-  player.on('enterfullscreen', function () {
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(function (error) {
-        console.warn('Orientation lock failed:', error);
-      });
-    }
-  });
+// ✅ Auto-Rotate on Fullscreen
+player.on('enterfullscreen', function () {
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('landscape').catch(function (error) {
+      console.warn('Orientation lock failed:', error);
+    });
+  }
+});
+player.on('exitfullscreen', function () {
+  if (screen.orientation && screen.orientation.unlock) {
+    screen.orientation.unlock();
+  }
+});
 
-  player.on('exitfullscreen', function () {
-    if (screen.orientation && screen.orientation.unlock) {
-      screen.orientation.unlock();
-    }
-  });
+// ✅ ভিডিওতে ডাবল ক্লিক করলে fullscreen হবে না
+player.elements.container.querySelector('video').addEventListener('dblclick', function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+}, true);
+
+// ✅ ভিডিওতে ডাবল ক্লিক করলে 10s ফরোয়ার্ড বা রিওয়াইন্ড
+player.elements.container.querySelector('video').addEventListener('dblclick', function (e) {
+  var rect = e.target.getBoundingClientRect();
+  var x = e.clientX - rect.left;
+
+  if (x < rect.width / 2) {
+    player.rewind(10);
+  } else {
+    player.forward(10);
+  }
+});
 </script>
 
 <style>
   :root {
     --plyr-color-main: #e657ff;
-    --plyr-video-control-color  :#e8ffba;
+    --plyr-video-control-color: #e8ffba;
   }
 </style>
 
 <script>
-  var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
-  console.log(apikey);
+var apikey = [
+  'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
+  'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
+  'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM',
+  'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'
+][Math.floor(Math.random() * 4)];
+console.log(apikey);
 
-  function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
+function getparam(a, e) {
+  return e || (e = window.location.href), new URL(e).searchParams.get(a);
+}
 
-  let video = document.getElementById('vid1');
-  if(getparam('id')){
-    let json = JSON.parse(atob(getparam('id'))) ;
-    let driveid = json.id;
-    video.src = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
-    video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
-  }
-
-  // ✅ Double Click to Seek ±10s (YouTube Style)
-  let lastClickTime = 0;
-  let lastClickX = 0;
-  const doubleClickThreshold = 300; // milliseconds
-  const skipTime = 10; // seconds
-
-  video.addEventListener('click', function(e) {
-    const currentTime = new Date().getTime();
-    const timeDiff = currentTime - lastClickTime;
-    const isDoubleClick = timeDiff < doubleClickThreshold && Math.abs(e.clientX - lastClickX) < 100;
-
-    if (isDoubleClick) {
-      const midpoint = window.innerWidth / 2;
-      if (e.clientX < midpoint) {
-        player.rewind(skipTime);
-      } else {
-        player.forward(skipTime);
-      }
-    }
-
-    lastClickTime = currentTime;
-    lastClickX = e.clientX;
-  });
+let video = document.getElementById('vid1');
+if (getparam('id')) {
+  let json = JSON.parse(atob(getparam('id')));
+  let driveid = json.id;
+  video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
+  video.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
+}
 </script>
