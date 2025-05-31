@@ -6,7 +6,7 @@ html, body {
   padding: 0;
 }
 
-.plyr {
+.plyr  {
   position: absolute;
   top: 0;
   left: 0;
@@ -57,6 +57,8 @@ html, body {
   var controls =
 [
     'play-large', // The large play button in the center
+   // 'restart', // Restart playback
+   // 'rewind', // Rewind by the seek time (default 10 seconds)
     'play', // Play/pause playback
     'fast-forward', // Fast forward by the seek time (default 10 seconds)
     'progress', // The progress bar and scrubber for playback and buffering
@@ -68,6 +70,7 @@ html, body {
     'settings', // Settings menu
     'pip', // Picture-in-picture (currently Safari only)
     'airplay', // Airplay (currently Safari only)
+    //'download', // Show a download button with a link to either the current source or a custom URL you specify in your options
     'fullscreen' // Toggle fullscreen
 ];
 
@@ -88,43 +91,40 @@ html, body {
     }
   });
 
-  // ✅ Disable double-click fullscreen + Add 10s rewind/forward
+  // ✅ Disable double-click fullscreen & enable 10s rewind/forward
   var video = document.getElementById('vid1');
-
   video.addEventListener('dblclick', function(e) {
-    e.stopPropagation();
     e.preventDefault();
-
+    e.stopPropagation();
     var rect = video.getBoundingClientRect();
     var x = e.clientX - rect.left;
-    var mid = rect.width / 2;
-
-    if (x < mid) {
-      player.rewind(10); // Left side = rewind
+    var width = rect.width;
+    if (x < width / 2) {
+      player.rewind(10); // Left side - rewind
     } else {
-      player.forward(10); // Right side = forward
+      player.forward(10); // Right side - forward
     }
   });
 </script>
 
 <style>
   :root {
-    --plyr-color-main: #e657ff;
-    --plyr-video-control-color: #e8ffba;
-  }
+  --plyr-color-main: #e657ff;
+    --plyr-video-control-color  :#e8ffba;
+}
 </style>
 
 <script>
   var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
-  console.log(apikey);
-
+ console.log(apikey);
+   //apikey = 'AIzaSyD739-eb6NzS_KbVJq1K8ZAxnrMfkIqPyw';
   function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
 
+  let videoTag = document.getElementById('vid1');
   if(getparam('id')){
     let json = JSON.parse(atob(getparam('id'))) ;
     let driveid = json.id;
-    let video = document.getElementById('vid1');
-    video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
-    video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
+    videoTag.src = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
+    videoTag.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
   }
 </script>
