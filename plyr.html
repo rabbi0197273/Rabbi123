@@ -15,57 +15,48 @@ html, body {
 </style>
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
 
-<!-- Meta Tags for SEO -->
+<!-- Meta Tags -->
 <meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
 <meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
 <meta name="author" content="Rabbi123">
 
-<!-- Open Graph / Facebook -->
+<!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://rabbi0197273.github.io/Rabbi123/">
 <meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+<meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features.">
 <meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:url" content="https://rabbi0197273.github.io/Rabbi123/">
-<meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+<meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player">
+<meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Powerful HTML5 Players.">
 <meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
 
-<!-- Other Meta Tags -->
+<!-- Icon and Theme -->
 <link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
 <meta name="theme-color" content="#ffffff">
 <meta name="robots" content="index, follow">
 
-<!-- Docs styles -->
+<!-- Plyr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/CDNSFree2/Plyr/plyr.css" />
 
-<!--Add a Simple HTML5 Video tag-->
+<!-- Video Tag -->
 <div id="container">
   <video controls poster="https://bit.ly/bbsampleposter" id="vid1">
     <source src="https://rebrand.ly/sample-video" type="video/mp4" size="576" />
   </video>
 </div>
 
+<!-- Plyr JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.6.7/plyr.min.js"></script>
 
 <script>
-var controls = [
-  'play-large',
-  'play',
-  'fast-forward',
-  'progress',
-  'current-time',
-  'duration',
-  'mute',
-  'volume',
-  'captions',
-  'settings',
-  'pip',
-  'airplay',
-  'fullscreen'
+const controls = [
+  'play-large', 'play', 'fast-forward', 'progress', 'current-time',
+  'duration', 'mute', 'volume', 'captions', 'settings', 'pip',
+  'airplay', 'fullscreen'
 ];
 
 const player = new Plyr('#vid1', {
@@ -73,64 +64,68 @@ const player = new Plyr('#vid1', {
   fullscreen: { enabled: true, fallback: true }
 });
 
-// ✅ Auto-Rotate on Fullscreen
-player.on('enterfullscreen', function () {
+// ✅ Fullscreen Orientation Lock
+player.on('enterfullscreen', () => {
   if (screen.orientation && screen.orientation.lock) {
-    screen.orientation.lock('landscape').catch(function (error) {
-      console.warn('Orientation lock failed:', error);
-    });
+    screen.orientation.lock('landscape').catch(err => console.warn('Lock error', err));
   }
 });
-player.on('exitfullscreen', function () {
+player.on('exitfullscreen', () => {
   if (screen.orientation && screen.orientation.unlock) {
     screen.orientation.unlock();
   }
 });
 
-// ✅ ভিডিওতে ডাবল ক্লিক করলে fullscreen হবে না
-player.elements.container.querySelector('video').addEventListener('dblclick', function (e) {
+// ✅ ডাবল ক্লিক করলে fullscreen DISABLED
+const video = document.querySelector('video');
+video.addEventListener('dblclick', function(e) {
   e.preventDefault();
   e.stopPropagation();
 }, true);
 
-// ✅ ভিডিওতে ডাবল ক্লিক করলে 10s ফরোয়ার্ড বা রিওয়াইন্ড
-player.elements.container.querySelector('video').addEventListener('dblclick', function (e) {
-  var rect = e.target.getBoundingClientRect();
-  var x = e.clientX - rect.left;
+// ✅ ডাবল ক্লিক করলে rewind/forward
+video.addEventListener('dblclick', function(e) {
+  const rect = this.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const half = rect.width / 2;
 
-  if (x < rect.width / 2) {
-    player.rewind(10);
+  if (x < half) {
+    player.rewind(10); // Left half = rewind
   } else {
-    player.forward(10);
+    player.forward(10); // Right half = forward
   }
 });
 </script>
 
+<!-- Plyr Theme Color -->
 <style>
-  :root {
-    --plyr-color-main: #e657ff;
-    --plyr-video-control-color: #e8ffba;
-  }
+:root {
+  --plyr-color-main: #e657ff;
+  --plyr-video-control-color: #e8ffba;
+}
 </style>
 
+<!-- Drive ID Fetch & Load -->
 <script>
-var apikey = [
+const apikeys = [
   'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
   'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
   'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM',
   'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'
-][Math.floor(Math.random() * 4)];
-console.log(apikey);
+];
+const apikey = apikeys[Math.floor(Math.random() * apikeys.length)];
 
-function getparam(a, e) {
-  return e || (e = window.location.href), new URL(e).searchParams.get(a);
+function getParam(name, url) {
+  if (!url) url = window.location.href;
+  return new URL(url).searchParams.get(name);
 }
 
-let video = document.getElementById('vid1');
-if (getparam('id')) {
-  let json = JSON.parse(atob(getparam('id')));
-  let driveid = json.id;
-  video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
-  video.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
+const vid = document.getElementById('vid1');
+const param = getParam('id');
+if (param) {
+  const json = JSON.parse(atob(param));
+  const driveid = json.id;
+  vid.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
+  vid.poster = `https://lh3.googleusercontent.com/d/${driveid}`;
 }
 </script>
