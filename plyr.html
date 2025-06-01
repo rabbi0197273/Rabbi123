@@ -36,35 +36,29 @@ html, body {
   opacity: 1;
 }
 
-/* Force progress bar to show at top */
-.plyr__controls .plyr__progress {
-  position: absolute !important;
-  top: -40px !important;
-  left: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
+/* Progress bar positioned at bottom like YouTube */
+.plyr__controls {
+  padding-top: 6px !important;
+}
+
+.plyr__progress {
+  margin-top: 6px !important;
   height: 4px !important;
   background: rgba(255, 255, 255, 0.3) !important;
-  z-index: 20 !important;
-  margin: 0 !important;
-  border-radius: 0 !important;
-  display: block !important;
-  visibility: visible !important;
+  border-radius: 2px !important;
 }
 
-.plyr__controls .plyr__progress:hover {
-  height: 6px !important;
+.plyr__progress input[type=range] {
+  height: 4px !important;
 }
 
-/* Progress bar elements */
-.plyr__controls .plyr__progress .plyr__progress__buffer {
+/* Buffer and played */
+.plyr__progress .plyr__progress__buffer {
   background: rgba(255, 255, 255, 0.4) !important;
-  height: 100% !important;
 }
 
-.plyr__controls .plyr__progress .plyr__progress__played {
+.plyr__progress .plyr__progress__played {
   background: var(--plyr-color-main) !important;
-  height: 100% !important;
 }
 
 /* Custom large pause button */
@@ -114,7 +108,7 @@ html, body {
 }
 </style>
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
-    
+
 <!-- Meta Tags for SEO -->
 <meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
 <meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
@@ -145,231 +139,160 @@ html, body {
 <!--Add a Simple HTML5 Video tag-->
 <div id="container">
   <video controls poster="https://bit.ly/bbsampleposter" id="vid1">
-    <!-- Video files -->
     <source src="https://rebrand.ly/sample-video" type="video/mp4" size="576" />
   </video>
-  <!-- Custom large pause button -->
   <div id="custom-large-button" class="custom-large-button">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
     </svg>
   </div>
-  <!-- Skip feedback overlay -->
   <div id="skip-feedback" class="skip-feedback"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.6.7/plyr.min.js"></script>
-
 <script>
-  var controls =
-[
-    'play-large', // The large play button in the center
-    // 'restart', // Removed restart button as requested
-    'rewind', // Rewind by the seek time (default 10 seconds)
-    'play', // Play/pause playback
-    'fast-forward', // Fast forward by the seek time (default 10 seconds)
-    'progress', // The progress bar and scrubber for playback and buffering
-    'current-time', // The current time of playback
-    'duration', // The full duration of the media
-    'mute', // Toggle mute
-    'volume', // Volume control
-    'captions', // Toggle captions
-    'settings', // Settings menu
-    'pip', // Picture-in-picture (currently Safari only)
-    'airplay', // Airplay (currently Safari only)
-    'fullscreen' // Keep fullscreen button
+var controls = [
+  'play-large',
+  'rewind',
+  'play',
+  'fast-forward',
+  'progress',
+  'current-time',
+  'duration',
+  'mute',
+  'volume',
+  'captions',
+  'settings',
+  'pip',
+  'airplay',
+  'fullscreen'
 ];
 
-  const player = new Plyr('#vid1',{
-    controls,
-    seekTime: 10
-  });
+const player = new Plyr('#vid1', {
+  controls,
+  seekTime: 10
+});
 
-  // Custom pause button functionality
-  const customButton = document.getElementById('custom-large-button');
-  let hideTimeout;
+const customButton = document.getElementById('custom-large-button');
+let hideTimeout;
 
-  // Disable only double-click for play/pause, keep fullscreen button working
-  document.addEventListener('DOMContentLoaded', function() {
-    // Disable double-click play/pause but allow fullscreen button clicks
-    document.addEventListener('dblclick', function(e) {
-      // Allow fullscreen button double-clicks
-      if (e.target.closest('[data-plyr="fullscreen"]') || 
-          e.target.closest('.plyr__control--fullscreen')) {
-        return true;
-      }
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      return false;
-    }, true);
-  });
-
-  player.on('ready', function() {
-    const video = document.querySelector('#vid1');
-    const container = document.querySelector('#container');
-    const wrapper = document.querySelector('.plyr');
-    
-    // Disable double-click on video area only
-    [video, container, wrapper].forEach(element => {
-      if (element) {
-        element.addEventListener('dblclick', function(e) {
-          // Allow fullscreen button functionality
-          if (e.target.closest('[data-plyr="fullscreen"]') || 
-              e.target.closest('.plyr__control--fullscreen')) {
-            return true;
-          }
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          e.stopPropagation();
-          return false;
-        }, { capture: true, passive: false });
-      }
-    });
-
-    // Single click handler for showing pause button
-    video.addEventListener('click', function(e) {
-      if (player.playing) {
-        console.log('Video clicked while playing');
-        showCustomButton();
-      }
-    });
-    
-    container.addEventListener('click', function(e) {
-      // Ignore clicks on controls or progress bar
-      if (e.target.closest('.plyr__controls') || 
-          e.target.closest('.plyr__progress') ||
-          e.target === customButton) {
-        return;
-      }
-      
-      if (player.playing) {
-        console.log('Container clicked while playing');
-        showCustomButton();
-      }
-    });
-  });
-
-  // Custom button click handler
-  customButton.addEventListener('click', function(e) {
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('dblclick', function(e) {
+    if (e.target.closest('[data-plyr="fullscreen"]') || e.target.closest('.plyr__control--fullscreen')) return true;
     e.preventDefault();
-    e.stopPropagation();
-    console.log('Custom pause button clicked');
-    player.pause();
-    hideCustomButton();
+    e.stopImmediatePropagation();
+    return false;
+  }, true);
+});
+
+player.on('ready', function() {
+  const video = document.querySelector('#vid1');
+  const container = document.querySelector('#container');
+  const wrapper = document.querySelector('.plyr');
+
+  [video, container, wrapper].forEach(element => {
+    if (element) {
+      element.addEventListener('dblclick', function(e) {
+        if (e.target.closest('[data-plyr="fullscreen"]') || e.target.closest('.plyr__control--fullscreen')) return true;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return false;
+      }, { capture: true, passive: false });
+    }
   });
 
-  function showCustomButton() {
-    console.log('Showing custom button');
-    customButton.classList.add('show');
-    
-    // Clear existing timeout
-    if (hideTimeout) {
-      clearTimeout(hideTimeout);
-    }
-    
-    // Hide after 2 seconds
-    hideTimeout = setTimeout(() => {
-      hideCustomButton();
-    }, 2000);
+  video.addEventListener('click', function() {
+    if (player.playing) showCustomButton();
+  });
+
+  container.addEventListener('click', function(e) {
+    if (e.target.closest('.plyr__controls') || e.target.closest('.plyr__progress') || e.target === customButton) return;
+    if (player.playing) showCustomButton();
+  });
+});
+
+customButton.addEventListener('click', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  player.pause();
+  hideCustomButton();
+});
+
+function showCustomButton() {
+  customButton.classList.add('show');
+  if (hideTimeout) clearTimeout(hideTimeout);
+  hideTimeout = setTimeout(hideCustomButton, 2000);
+}
+
+function hideCustomButton() {
+  customButton.classList.remove('show');
+  if (hideTimeout) clearTimeout(hideTimeout);
+}
+
+player.on('pause', hideCustomButton);
+player.on('ended', hideCustomButton);
+
+function showSkipFeedback(seconds) {
+  const feedback = document.getElementById('skip-feedback');
+  feedback.textContent = seconds > 0 ? `+${seconds}s` : `${seconds}s`;
+  feedback.classList.add('show');
+  setTimeout(() => feedback.classList.remove('show'), 1000);
+}
+
+document.addEventListener('keydown', function(event) {
+  if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+  switch(event.key) {
+    case 'ArrowLeft':
+      event.preventDefault();
+      player.rewind(10);
+      showSkipFeedback(-10);
+      break;
+    case 'ArrowRight':
+      event.preventDefault();
+      player.forward(10);
+      showSkipFeedback(10);
+      break;
+    case ' ':
+      event.preventDefault();
+      player.playing ? player.pause() : player.play();
+      break;
   }
+});
 
-  function hideCustomButton() {
-    console.log('Hiding custom button');
-    customButton.classList.remove('show');
-    if (hideTimeout) {
-      clearTimeout(hideTimeout);
-    }
+player.on('rewind', () => showSkipFeedback(-10));
+player.on('fastforward', () => showSkipFeedback(10));
+
+player.on('enterfullscreen', function () {
+  if (screen.orientation?.lock) {
+    screen.orientation.lock('landscape').catch(error => console.warn('Orientation lock failed:', error));
   }
+});
 
-  // Hide when paused or ended
-  player.on('pause', function() {
-    hideCustomButton();
-  });
-
-  player.on('ended', function() {
-    hideCustomButton();
-  });
-
-  // Skip feedback function
-  function showSkipFeedback(seconds) {
-    const feedback = document.getElementById('skip-feedback');
-    feedback.textContent = seconds > 0 ? `+${seconds}s` : `${seconds}s`;
-    feedback.classList.add('show');
-    setTimeout(() => {
-      feedback.classList.remove('show');
-    }, 1000);
-  }
-
-  // Keyboard shortcuts for skip functionality
-  document.addEventListener('keydown', function(event) {
-    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
-      return;
-    }
-    
-    switch(event.key) {
-      case 'ArrowLeft':
-        event.preventDefault();
-        player.rewind(10);
-        showSkipFeedback(-10);
-        break;
-      case 'ArrowRight':
-        event.preventDefault();
-        player.forward(10);
-        showSkipFeedback(10);
-        break;
-      case ' ':
-        event.preventDefault();
-        if (player.playing) {
-          player.pause();
-        } else {
-          player.play();
-        }
-        break;
-    }
-  });
-
-  // Add event listeners for button clicks
-  player.on('rewind', function() {
-    showSkipFeedback(-10);
-  });
-
-  player.on('fastforward', function() {
-    showSkipFeedback(10);
-  });
-
-  // Auto-Rotate on Fullscreen
-  player.on('enterfullscreen', function () {
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(function (error) {
-        console.warn('Orientation lock failed:', error);
-      });
-    }
-  });
-
-  player.on('exitfullscreen', function () {
-    if (screen.orientation && screen.orientation.unlock) {
-      screen.orientation.unlock();
-    }
-  });
+player.on('exitfullscreen', function () {
+  if (screen.orientation?.unlock) screen.orientation.unlock();
+});
 </script>
 
 <style>
-  :root {
+:root {
   --plyr-color-main: #e657ff;
-    --plyr-video-control-color  :#e8ffba;
+  --plyr-video-control-color: #e8ffba;
 }
 </style>
 
 <script>
-  var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
- console.log(apikey);
-  function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
+var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
+console.log(apikey);
+function getparam(a, e) {
+  return e || (e = window.location.href), new URL(e).searchParams.get(a);
+}
 
-  let video = document.getElementById('vid1');
-  if(getparam('id')){
-    let json = JSON.parse(atob(getparam('id'))) ;
-    let driveid = json.id;
-    video.src = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
-    video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
-  }
+let video = document.getElementById('vid1');
+if (getparam('id')) {
+  let json = JSON.parse(atob(getparam('id')));
+  let driveid = json.id;
+  video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
+  video.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
+}
 </script>
