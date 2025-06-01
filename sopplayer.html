@@ -1,79 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<link href="https://cdn.jsdelivr.net/gh/SH20RAJ/Sopplayer/sopplayer.min.css" rel="stylesheet" />
-  <!--Here is the Css Library-->
-<link rel="icon" href="drive-logo.png">
-<title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
-    
-<!-- Meta Tags for SEO -->
-<meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
-<meta name="author" content="Rabbi">
+  <link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
+  <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
 
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://rabbi0197273.github.io/Rabbi123/">
-<meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+  <!-- Meta Tags for SEO -->
+  <meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+  <meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
+  <meta name="author" content="Rabbi">
 
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://rabbi0197273.github.io/Rabbi123/">
-<meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rabbi0197273.github.io/Rabbi123/">
+  <meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
+  <meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+  <meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
 
-<!-- Other Meta Tags -->
-<link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
-<meta name="theme-color" content="#ffffff">
-<meta name="robots" content="index, follow">
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://rabbi0197273.github.io/Rabbi123/">
+  <meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
+  <meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+  <meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
 
+  <!-- Other Meta Tags -->
+  <meta name="theme-color" content="#ffffff">
+  <meta name="robots" content="index, follow">
 
+  <!-- CSS Library -->
+  <link href="https://cdn.jsdelivr.net/gh/SH20RAJ/Sopplayer/sopplayer.min.css" rel="stylesheet" />
 
-<style>
-  html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
+  <!-- Custom Style -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #0f0f0f;
+      font-family: 'Segoe UI', sans-serif;
+    }
 
-#my-video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
+    .wrapper {
+      max-width: 960px;
+      margin: 30px auto;
+      padding: 10px;
+    }
 
-</style>
+    h1 {
+      text-align: center;
+      color: #00ffc3;
+      font-size: 2rem;
+    }
 
-    <video id="my-video" class="sopplayer" controls preload="auto" data-setup="{}" width= "100%" poster="https://bit.ly/bbsampleposter">
-      <!--Use class="sopplayer" and data-setup="{}" -->
+    #my-video {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(0, 255, 200, 0.3);
+    }
+
+    .footer {
+      text-align: center;
+      color: #aaa;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <h1>DrivePlyr - GDrive Proxy Player</h1>
+
+    <video id="my-video" class="sopplayer" controls preload="auto" data-setup="{}" poster="https://bit.ly/bbsampleposter">
       <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
+      <track kind="subtitles" src="test.vtt" srclang="en" label="English" default>
     </video>
 
-   <script src="https://rebrand.ly/SopPlayerJS"></script>
-    <!--Here is the JavaScript Library-->
+    <div class="footer">
+      &copy; 2025 DrivePlyr by Rabbi & S-Tech04.
+    </div>
+  </div>
 
-<script>
- // let apikey = 'AIzaSyD739-eb6NzS_KbVJq1K8ZAxnrMfkIqPyw';
-    var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
- console.log(apikey);
-  
-  let videolink, video, json ;
-  function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
+  <!-- JavaScript Library -->
+  <script src="https://rebrand.ly/SopPlayerJS"></script>
 
-   video = videojs('my-video');
-  if(getparam('id')){
-     json = JSON.parse(atob(getparam('id'))) ;
-    console.log(json)
-    let driveid = json.id;
-    videolink = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
-    //video.src(videolink);
-    video.src([
-			{type: "video/mp4", src: videolink},
-			{type: "rtmp/mp4", src: videolink}
-		]);
-    video.poster_ = 'https://lh3.googleusercontent.com/d/'+driveid;
-  }
-</script>
+  <script>
+    const apikeys = [
+      'AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU',
+      'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY',
+      'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM',
+      'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'
+    ];
+    const apikey = apikeys[Math.floor(Math.random() * apikeys.length)];
+    console.log("API Key:", apikey);
+
+    function getParam(param, url = window.location.href) {
+      return new URL(url).searchParams.get(param);
+    }
+
+    const video = videojs('my-video');
+    const idEncoded = getParam('id');
+
+    if (idEncoded) {
+      const json = JSON.parse(atob(idEncoded));
+      const driveId = json.id;
+      const videolink = `https://www.googleapis.com/drive/v3/files/${driveId}?alt=media&key=${apikey}`;
+
+      video.src([
+        { type: "video/mp4", src: videolink },
+        { type: "rtmp/mp4", src: videolink }
+      ]);
+
+      video.poster(`https://lh3.googleusercontent.com/d/${driveId}`);
+    }
+  </script>
+</body>
+</html>
