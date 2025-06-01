@@ -65,10 +65,9 @@ html, body {
   height: 100% !important;
 }
 
-/* Hide duplicate progress bar from controls completely */
+/* Hide the duplicate progress bar from controls */
 .plyr__controls .plyr__progress {
   display: none !important;
-  visibility: hidden !important;
 }
 
 /* Move controls down to make space for top progress bar */
@@ -112,13 +111,6 @@ html, body {
   width: 32px;
   height: 32px;
   fill: white;
-}
-
-/* Disable double-click fullscreen completely */
-.plyr__video-wrapper,
-.plyr video,
-#container {
-  user-select: none !important;
 }
 </style>
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
@@ -190,33 +182,43 @@ html, body {
 
   const player = new Plyr('#vid1',{
     controls,
-    seekTime: 10,
-    clickToPlay: false, // Disable click to play/pause
-    keyboard: { focused: true, global: false }
+    seekTime: 10
   });
 
   // Custom pause button functionality
   const customButton = document.getElementById('custom-large-button');
   let hideTimeout;
 
-  // Show custom button when video area is clicked during playback
+  // Disable double-click fullscreen completely
   player.on('ready', function() {
     const video = document.querySelector('#vid1');
     const container = document.querySelector('#container');
-    const wrapper = document.querySelector('.plyr__video-wrapper');
-    const playerElement = document.querySelector('.plyr');
+    const wrapper = document.querySelector('.plyr');
     
-    // Completely disable double-click events on all elements
-    [video, container, wrapper, playerElement].forEach(element => {
-      if (element) {
-        element.addEventListener('dblclick', function(e) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          e.stopPropagation();
-          return false;
-        }, true);
-      }
-    });
+    // Override Plyr's double-click functionality
+    if (wrapper) {
+      wrapper.ondblclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      };
+    }
+    
+    if (video) {
+      video.ondblclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      };
+    }
+    
+    if (container) {
+      container.ondblclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      };
+    }
 
     // Single click handler for showing pause button
     video.addEventListener('click', function(e) {
@@ -329,7 +331,7 @@ html, body {
     showSkipFeedback(10);
   });
 
-  // Auto-Rotate on Fullscreen
+  // ✅ Auto-Rotate on Fullscreen
   player.on('enterfullscreen', function () {
     if (screen.orientation && screen.orientation.lock) {
       screen.orientation.lock('landscape').catch(function (error) {
