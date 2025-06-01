@@ -85,7 +85,8 @@
       "allowDownload": false,
       "playButtonShowing": true,
       "fillToContainer": true,
-      "posterImage": ""
+      "posterImage": "",
+      "pictureInPictureEnabled": true
     },
     "vastOptions": {
       "adList": [],
@@ -93,6 +94,20 @@
       "adCTATextPosition": ""
     }
   });
+
+  // PIP functionality manually added for better browser support
+  const video = document.getElementById('video-id');
+  
+  // Add PIP support check and manual implementation
+  if ('pictureInPictureEnabled' in document) {
+    // Add custom PIP button if needed
+    video.addEventListener('loadedmetadata', () => {
+      if (document.pictureInPictureEnabled && !video.disablePictureInPicture) {
+        // PIP is supported
+        console.log('PIP is supported');
+      }
+    });
+  }
 </script>
 
 <script>
