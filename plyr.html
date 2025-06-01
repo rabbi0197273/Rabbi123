@@ -13,6 +13,28 @@ html, body {
   width: 100%;
   height: 100%;
 }
+
+/* Skip feedback animation */
+.skip-feedback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 18px;
+  font-weight: bold;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.skip-feedback.show {
+  opacity: 1;
+}
 </style>
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
     
@@ -49,6 +71,8 @@ html, body {
     <!-- Video files -->
     <source src="https://rebrand.ly/sample-video" type="video/mp4" size="576" />
   </video>
+  <!-- Skip feedback overlay -->
+  <div id="skip-feedback" class="skip-feedback"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.6.7/plyr.min.js"></script>
@@ -57,10 +81,10 @@ html, body {
   var controls =
 [
     'play-large', // The large play button in the center
-   // 'restart', // Restart playback
-   // 'rewind', // Rewind by the seek time (default 10 seconds)
+    'restart', // Restart playback
+    'rewind', // Rewind by the seek time (default 10 seconds) - বাম সাইডে পিছনে
     'play', // Play/pause playback
-    'fast-forward', // Fast forward by the seek time (default 10 seconds)
+    'fast-forward', // Fast forward by the seek time (default 10 seconds) - ডান সাইডে সামনে
     'progress', // The progress bar and scrubber for playback and buffering
     'current-time', // The current time of playback
     'duration', // The full duration of the media
@@ -74,7 +98,50 @@ html, body {
     'fullscreen' // Toggle fullscreen
 ];
 
-  const player = new Plyr('#vid1',{controls});
+  const player = new Plyr('#vid1',{
+    controls,
+    seekTime: 10 // Set seek time to 10 seconds
+  });
+
+  // Skip feedback function
+  function showSkipFeedback(seconds) {
+    const feedback = document.getElementById('skip-feedback');
+    feedback.textContent = seconds > 0 ? `+${seconds}s` : `${seconds}s`;
+    feedback.classList.add('show');
+    setTimeout(() => {
+      feedback.classList.remove('show');
+    }, 1000);
+  }
+
+  // Keyboard shortcuts for skip functionality
+  document.addEventListener('keydown', function(event) {
+    // Only work when video is focused or no input is focused
+    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+      return;
+    }
+    
+    switch(event.key) {
+      case 'ArrowLeft':
+        event.preventDefault();
+        player.rewind(10);
+        showSkipFeedback(-10);
+        break;
+      case 'ArrowRight':
+        event.preventDefault();
+        player.forward(10);
+        showSkipFeedback(10);
+        break;
+    }
+  });
+
+  // Add event listeners for button clicks
+  player.on('rewind', function() {
+    showSkipFeedback(-10);
+  });
+
+  player.on('fastforward', function() {
+    showSkipFeedback(10);
+  });
 
   // ✅ Auto-Rotate on Fullscreen
   player.on('enterfullscreen', function () {
@@ -100,7 +167,7 @@ html, body {
 </style>
 
 <script>
-  var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
+  var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
  console.log(apikey);
    //apikey = 'AIzaSyD739-eb6NzS_KbVJq1K8ZAxnrMfkIqPyw';
   function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
