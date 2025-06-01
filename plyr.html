@@ -36,35 +36,46 @@ html, body {
   opacity: 1;
 }
 
-/* Force progress bar to show at top */
+/* Hide original progress bar */
 .plyr__controls .plyr__progress {
-  position: absolute !important;
-  top: -40px !important;
-  left: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
-  height: 4px !important;
-  background: rgba(255, 255, 255, 0.3) !important;
-  z-index: 20 !important;
-  margin: 0 !important;
-  border-radius: 0 !important;
-  display: block !important;
-  visibility: visible !important;
+  display: none !important;
 }
 
-.plyr__controls .plyr__progress:hover {
-  height: 6px !important;
+/* YouTube-style progress bar above controls */
+.custom-progress-bar {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  z-index: 10;
+  margin-bottom: 8px;
+  cursor: pointer;
 }
 
-/* Progress bar elements */
-.plyr__controls .plyr__progress .plyr__progress__buffer {
-  background: rgba(255, 255, 255, 0.4) !important;
-  height: 100% !important;
+.custom-progress-bar:hover {
+  height: 6px;
 }
 
-.plyr__controls .plyr__progress .plyr__progress__played {
-  background: var(--plyr-color-main) !important;
-  height: 100% !important;
+.custom-progress-buffer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.4);
+  width: 0%;
+  transition: width 0.1s ease;
+}
+
+.custom-progress-played {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--plyr-color-main);
+  width: 0%;
+  transition: width 0.1s ease;
 }
 
 /* Custom large pause button */
@@ -105,7 +116,7 @@ html, body {
   fill: white;
 }
 
-/* Completely disable double click */
+/* Disable double click selection */
 * {
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -189,6 +200,9 @@ html, body {
   const customButton = document.getElementById('custom-large-button');
   let hideTimeout;
 
+  // Custom progress bar functionality
+  let customProgressBar, customProgressPlayed, customProgressBuffer;
+
   // Disable only double-click for play/pause, keep fullscreen button working
   document.addEventListener('DOMContentLoaded', function() {
     // Disable double-click play/pause but allow fullscreen button clicks
@@ -208,6 +222,29 @@ html, body {
     const video = document.querySelector('#vid1');
     const container = document.querySelector('#container');
     const wrapper = document.querySelector('.plyr');
+    const controls = document.querySelector('.plyr__controls');
+    
+    // Create custom progress bar
+    customProgressBar = document.createElement('div');
+    customProgressBar.className = 'custom-progress-bar';
+    
+    customProgressBuffer = document.createElement('div');
+    customProgressBuffer.className = 'custom-progress-buffer';
+    
+    customProgressPlayed = document.createElement('div');
+    customProgressPlayed.className = 'custom-progress-played';
+    
+    customProgressBar.appendChild(customProgressBuffer);
+    customProgressBar.appendChild(customProgressPlayed);
+    controls.appendChild(customProgressBar);
+
+    // Custom progress bar click handler
+    customProgressBar.addEventListener('click', function(e) {
+      const rect = customProgressBar.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      const newTime = percent * player.duration;
+      player.currentTime = newTime;
+    });
     
     // Disable double-click on video area only
     [video, container, wrapper].forEach(element => {
@@ -237,7 +274,7 @@ html, body {
     container.addEventListener('click', function(e) {
       // Ignore clicks on controls or progress bar
       if (e.target.closest('.plyr__controls') || 
-          e.target.closest('.plyr__progress') ||
+          e.target.closest('.custom-progress-bar') ||
           e.target === customButton) {
         return;
       }
@@ -247,6 +284,21 @@ html, body {
         showCustomButton();
       }
     });
+  });
+
+  // Update custom progress bar
+  player.on('timeupdate', function() {
+    if (customProgressPlayed && player.duration) {
+      const percent = (player.currentTime / player.duration) * 100;
+      customProgressPlayed.style.width = percent + '%';
+    }
+  });
+
+  player.on('progress', function() {
+    if (customProgressBuffer && player.duration && player.buffered.length > 0) {
+      const percent = (player.buffered.end(0) / player.duration) * 100;
+      customProgressBuffer.style.width = percent + '%';
+    }
   });
 
   // Custom button click handler
