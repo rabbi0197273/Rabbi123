@@ -36,7 +36,7 @@ html, body {
   opacity: 1;
 }
 
-/* Move progress bar to very top like YouTube */
+/* Move progress bar to very top like YouTube - above all buttons */
 .plyr__progress {
   position: absolute !important;
   top: 0 !important;
@@ -45,9 +45,10 @@ html, body {
   width: 100% !important;
   height: 4px !important;
   background: rgba(255, 255, 255, 0.3) !important;
-  z-index: 10 !important;
+  z-index: 15 !important;
   margin: 0 !important;
   border-radius: 0 !important;
+  order: -1 !important;
 }
 
 .plyr__progress:hover {
@@ -65,14 +66,14 @@ html, body {
   height: 100% !important;
 }
 
-/* Hide the duplicate progress bar from controls */
-.plyr__controls .plyr__progress {
-  display: none !important;
-}
-
-/* Move controls down to make space for top progress bar */
+/* Move controls down and hide duplicate progress */
 .plyr__controls {
   padding-top: 8px !important;
+}
+
+.plyr__controls .plyr__progress {
+  display: none !important;
+  visibility: hidden !important;
 }
 
 /* Custom large pause button */
@@ -182,43 +183,38 @@ html, body {
 
   const player = new Plyr('#vid1',{
     controls,
-    seekTime: 10
+    seekTime: 10,
+    fullscreen: { enabled: false } // Disable fullscreen completely
   });
 
   // Custom pause button functionality
   const customButton = document.getElementById('custom-large-button');
   let hideTimeout;
 
-  // Disable double-click fullscreen completely
+  // Completely disable double-click fullscreen
   player.on('ready', function() {
     const video = document.querySelector('#vid1');
     const container = document.querySelector('#container');
     const wrapper = document.querySelector('.plyr');
+    const videoWrapper = document.querySelector('.plyr__video-wrapper');
     
-    // Override Plyr's double-click functionality
-    if (wrapper) {
-      wrapper.ondblclick = function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      };
-    }
-    
-    if (video) {
-      video.ondblclick = function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      };
-    }
-    
-    if (container) {
-      container.ondblclick = function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-      };
-    }
+    // Disable all double-click events
+    [video, container, wrapper, videoWrapper].forEach(element => {
+      if (element) {
+        element.addEventListener('dblclick', function(e) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+          return false;
+        }, { capture: true });
+        
+        element.ondblclick = function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        };
+      }
+    });
 
     // Single click handler for showing pause button
     video.addEventListener('click', function(e) {
@@ -331,7 +327,7 @@ html, body {
     showSkipFeedback(10);
   });
 
-  // ✅ Auto-Rotate on Fullscreen
+  // ✅ Auto-Rotate on Fullscreen (but fullscreen is disabled)
   player.on('enterfullscreen', function () {
     if (screen.orientation && screen.orientation.lock) {
       screen.orientation.lock('landscape').catch(function (error) {
