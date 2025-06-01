@@ -36,7 +36,41 @@ html, body {
   opacity: 1;
 }
 
-/* Custom large play/pause button - YouTube style */
+/* Move progress bar to very top like YouTube */
+.plyr__progress {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  height: 4px !important;
+  background: rgba(255, 255, 255, 0.3) !important;
+  z-index: 10 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+.plyr__progress:hover {
+  height: 6px !important;
+}
+
+/* Progress bar elements */
+.plyr__progress__buffer {
+  background: rgba(255, 255, 255, 0.4) !important;
+  height: 100% !important;
+}
+
+.plyr__progress__played {
+  background: var(--plyr-color-main) !important;
+  height: 100% !important;
+}
+
+/* Move controls down to make space for top progress bar */
+.plyr__controls {
+  padding-top: 8px !important;
+}
+
+/* Custom large pause button */
 .custom-large-button {
   position: absolute;
   top: 50%;
@@ -44,7 +78,7 @@ html, body {
   transform: translate(-50%, -50%);
   width: 80px;
   height: 80px;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -53,11 +87,13 @@ html, body {
   z-index: 999;
   transition: all 0.3s ease;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
 }
 
 .custom-large-button.show {
   opacity: 1;
+  visibility: visible;
   pointer-events: all;
 }
 
@@ -70,11 +106,6 @@ html, body {
   width: 32px;
   height: 32px;
   fill: white;
-}
-
-/* Hide default large play button when playing */
-.plyr--playing .plyr__control--overlaid {
-  display: none !important;
 }
 </style>
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
@@ -112,9 +143,9 @@ html, body {
     <!-- Video files -->
     <source src="https://rebrand.ly/sample-video" type="video/mp4" size="576" />
   </video>
-  <!-- Custom large play/pause button -->
+  <!-- Custom large pause button -->
   <div id="custom-large-button" class="custom-large-button">
-    <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
     </svg>
   </div>
@@ -149,17 +180,34 @@ html, body {
     seekTime: 10
   });
 
-  // Get custom button element
+  // Custom pause button functionality
   const customButton = document.getElementById('custom-large-button');
-  let buttonTimeout;
+  let hideTimeout;
 
-  // Show custom pause button when video is playing and clicked
+  // Show custom button when video area is clicked during playback
   player.on('ready', function() {
-    const videoElement = document.querySelector('#vid1');
+    const video = document.querySelector('#vid1');
     
-    // Show pause button on video click when playing
-    videoElement.addEventListener('click', function(e) {
+    // Click on video area (but not on controls)
+    video.addEventListener('click', function(e) {
       if (player.playing) {
+        console.log('Video clicked while playing');
+        showCustomButton();
+      }
+    });
+    
+    // Also handle container clicks
+    const container = document.querySelector('#container');
+    container.addEventListener('click', function(e) {
+      // Ignore clicks on controls or progress bar
+      if (e.target.closest('.plyr__controls') || 
+          e.target.closest('.plyr__progress') ||
+          e.target === customButton) {
+        return;
+      }
+      
+      if (player.playing) {
+        console.log('Container clicked while playing');
         showCustomButton();
       }
     });
@@ -167,42 +215,42 @@ html, body {
 
   // Custom button click handler
   customButton.addEventListener('click', function(e) {
+    e.preventDefault();
     e.stopPropagation();
-    if (player.playing) {
-      player.pause();
-    } else {
-      player.play();
-    }
+    console.log('Custom pause button clicked');
+    player.pause();
     hideCustomButton();
   });
 
-  // Show custom button function
   function showCustomButton() {
-    if (player.playing) {
-      customButton.classList.add('show');
-      
-      // Clear existing timeout
-      if (buttonTimeout) {
-        clearTimeout(buttonTimeout);
-      }
-      
-      // Hide after 2 seconds
-      buttonTimeout = setTimeout(() => {
-        hideCustomButton();
-      }, 2000);
+    console.log('Showing custom button');
+    customButton.classList.add('show');
+    
+    // Clear existing timeout
+    if (hideTimeout) {
+      clearTimeout(hideTimeout);
     }
+    
+    // Hide after 2 seconds
+    hideTimeout = setTimeout(() => {
+      hideCustomButton();
+    }, 2000);
   }
 
-  // Hide custom button function
   function hideCustomButton() {
+    console.log('Hiding custom button');
     customButton.classList.remove('show');
-    if (buttonTimeout) {
-      clearTimeout(buttonTimeout);
+    if (hideTimeout) {
+      clearTimeout(hideTimeout);
     }
   }
 
-  // Hide button when video is paused
+  // Hide when paused or ended
   player.on('pause', function() {
+    hideCustomButton();
+  });
+
+  player.on('ended', function() {
     hideCustomButton();
   });
 
