@@ -1,427 +1,603 @@
-<link rel="icon" href="drive-logo.png">
+<link rel="icon" href="drive-logo.png" />
 <style>
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #000;
+  }
 
-.plyr  {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
+  .plyr {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none !important;
+    outline: none !important;
+  }
 
-/* Skip feedback animation */
-.skip-feedback {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 25px;
-  font-size: 18px;
-  font-weight: bold;
-  z-index: 1000;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
+  /* ভিডিও বর্ডার রিমুভ */
+  video {
+    border: none !important;
+    outline: none !important;
+    background: #000 !important;
+  }
 
-.skip-feedback.show {
-  opacity: 1;
-}
+  /* Container border remove */
+  #container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    border: none !important;
+    outline: none !important;
+    background: #000;
+    overflow: hidden;
+  }
 
-/* Hide original progress bar */
-.plyr__controls .plyr__progress {
-  display: none !important;
-}
+  /* Skip feedback animation */
+  .skip-feedback {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
 
-/* YouTube-style progress bar above controls */
-.custom-progress-bar {
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
-  z-index: 10;
-  margin-bottom: 8px;
-  cursor: pointer;
-}
+  .skip-feedback.show {
+    opacity: 1;
+  }
 
-.custom-progress-bar:hover {
-  height: 6px;
-}
+  /* Hide original progress bar */
+  .plyr__controls .plyr__progress {
+    display: none !important;
+  }
 
-.custom-progress-buffer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.4);
-  width: 0%;
-  transition: width 0.1s ease;
-}
+  /* Hide original large play button */
+  .plyr__control--overlaid {
+    display: none !important;
+  }
 
-.custom-progress-played {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background: var(--plyr-color-main);
-  width: 0%;
-  transition: width 0.1s ease;
-}
+  /* YouTube-style progress bar কন্ট্রোল বাটনের উপরে */
+  .custom-progress-bar {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.3);
+    z-index: 9999;
+    cursor: pointer;
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
 
-/* Custom large pause button */
-.custom-large-button {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80px;
-  height: 80px;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 999;
-  transition: all 0.3s ease;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
+  /* Buffer bar */
+  .custom-progress-buffer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.15);
+    width: 0%;
+    transition: width 0.1s ease;
+    border-radius: 3px;
+  }
 
-.custom-large-button.show {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: all;
-}
+  /* Played bar */
+  .custom-progress-played {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: #FF0000;
+    width: 0%;
+    border-radius: 3px;
+  }
 
-.custom-large-button:hover {
-  background: rgba(0, 0, 0, 0.9);
-  transform: translate(-50%, -50%) scale(1.1);
-}
+  /* Scrubber circle */
+  .custom-progress-scrubber {
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    width: 14px;
+    height: 14px;
+    background: white;
+    border: 2px solid #FF0000;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.7);
+    cursor: pointer;
+    z-index: 15;
+  }
 
-.custom-large-button svg {
-  width: 32px;
-  height: 32px;
-  fill: white;
-}
+  .custom-progress-bar:hover .custom-progress-scrubber {
+    box-shadow: 0 0 12px rgba(255, 0, 0, 1);
+  }
 
-/* Disable double click selection */
-* {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
+  /* Tooltip for time on hover */
+  .progress-tooltip {
+    position: absolute;
+    padding: 3px 6px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 12px;
+    border-radius: 3px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -150%);
+    white-space: nowrap;
+    z-index: 20;
+  }
+
+  .custom-progress-bar:hover .progress-tooltip {
+    opacity: 1;
+  }
+
+  /* Custom large pause/play button */
+  .custom-large-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 999;
+    transition: all 0.3s ease;
+    opacity: 0;
+    pointer-events: all;
+  }
+
+  .custom-large-button:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  .custom-large-button svg {
+    width: 32px;
+    height: 32px;
+    fill: white;
+  }
+
+  /* Disable text selection */
+  * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
 </style>
+
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
-    
-<!-- Meta Tags for SEO -->
-<meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
-<meta name="author" content="Rabbi123">
+
+<meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease." />
+<meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features" />
+<meta name="author" content="Rabbi123" />
 
 <!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://rabbi0197273.github.io/Rabbi123/">
-<meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://rabbi0197273.github.io/Rabbi123/" />
+<meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players" />
+<meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease." />
+<meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png" />
 
 <!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://rabbi0197273.github.io/Rabbi123/">
-<meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content="https://rabbi0197273.github.io/Rabbi123/" />
+<meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players" />
+<meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease." />
+<meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png" />
 
-<!-- Other Meta Tags -->
-<link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
-<meta name="theme-color" content="#ffffff">
-<meta name="robots" content="index, follow">
+<link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png" />
+<meta name="theme-color" content="#ffffff" />
+<meta name="robots" content="index, follow" />
 
-<!-- Docs styles -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/CDNSFree2/Plyr/plyr.css" />
 
-<!--Add a Simple HTML5 Video tag-->
 <div id="container">
   <video controls poster="https://bit.ly/bbsampleposter" id="vid1">
-    <!-- Video files -->
     <source src="https://rebrand.ly/sample-video" type="video/mp4" size="576" />
   </video>
-  <!-- Custom large pause button -->
-  <div id="custom-large-button" class="custom-large-button">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+
+  <div id="custom-large-button" class="custom-large-button" title="Play/Pause">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="large-btn-icon">
+      <path d="M8 5v14l11-7z" />
     </svg>
   </div>
-  <!-- Skip feedback overlay -->
+
   <div id="skip-feedback" class="skip-feedback"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.6.7/plyr.min.js"></script>
 
 <script>
-  var controls =
-[
-    'play-large', // The large play button in the center
-    // 'restart', // Removed restart button as requested
-    'rewind', // Rewind by the seek time (default 10 seconds)
-    'play', // Play/pause playback
-    'fast-forward', // Fast forward by the seek time (default 10 seconds)
-    'progress', // The progress bar and scrubber for playback and buffering
-    'current-time', // The current time of playback
-    'duration', // The full duration of the media
-    'mute', // Toggle mute
-    'volume', // Volume control
-    'captions', // Toggle captions
-    'settings', // Settings menu
-    'pip', // Picture-in-picture (currently Safari only)
-    'airplay', // Airplay (currently Safari only)
-    'fullscreen' // Keep fullscreen button
-];
+  var controls = [
+    'rewind',
+    'play',
+    'fast-forward',
+    'progress',
+    'current-time',
+    'duration',
+    'mute',
+    'volume',
+    'captions',
+    'settings',
+    'pip',
+    'airplay',
+    'fullscreen'
+  ];
 
-  const player = new Plyr('#vid1',{
+  const player = new Plyr('#vid1', {
     controls,
-    seekTime: 10
+    seekTime: 10,
+    hideControls: true,
+    autoHide: true,
+    clickToPlay: false // ডাবল ক্লিক বন্ধ করার জন্য
   });
 
-  // Custom pause button functionality
   const customButton = document.getElementById('custom-large-button');
+  const largeBtnIcon = document.getElementById('large-btn-icon');
   let hideTimeout;
+  let customProgressBar, customProgressPlayed, customProgressBuffer, customProgressScrubber, progressTooltip;
+  let isDragging = false;
+  let isFullscreen = false;
 
-  // Custom progress bar functionality
-  let customProgressBar, customProgressPlayed, customProgressBuffer;
-
-  // Disable only double-click for play/pause, keep fullscreen button working
-  document.addEventListener('DOMContentLoaded', function() {
-    // Disable double-click play/pause but allow fullscreen button clicks
-    document.addEventListener('dblclick', function(e) {
-      // Allow fullscreen button double-clicks
-      if (e.target.closest('[data-plyr="fullscreen"]') || 
-          e.target.closest('.plyr__control--fullscreen')) {
-        return true;
+  // Auto rotate on fullscreen
+  function autoRotate() {
+    if (!document.fullscreenElement) {
+      if (screen.orientation && screen.orientation.unlock) {
+        screen.orientation.unlock();
       }
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      return false;
-    }, true);
-  });
-
-  player.on('ready', function() {
-    const video = document.querySelector('#vid1');
-    const container = document.querySelector('#container');
-    const wrapper = document.querySelector('.plyr');
-    const controls = document.querySelector('.plyr__controls');
-    
-    // Create custom progress bar
-    customProgressBar = document.createElement('div');
-    customProgressBar.className = 'custom-progress-bar';
-    
-    customProgressBuffer = document.createElement('div');
-    customProgressBuffer.className = 'custom-progress-buffer';
-    
-    customProgressPlayed = document.createElement('div');
-    customProgressPlayed.className = 'custom-progress-played';
-    
-    customProgressBar.appendChild(customProgressBuffer);
-    customProgressBar.appendChild(customProgressPlayed);
-    controls.appendChild(customProgressBar);
-
-    // Custom progress bar click handler
-    customProgressBar.addEventListener('click', function(e) {
-      const rect = customProgressBar.getBoundingClientRect();
-      const percent = (e.clientX - rect.left) / rect.width;
-      const newTime = percent * player.duration;
-      player.currentTime = newTime;
-    });
-    
-    // Disable double-click on video area only
-    [video, container, wrapper].forEach(element => {
-      if (element) {
-        element.addEventListener('dblclick', function(e) {
-          // Allow fullscreen button functionality
-          if (e.target.closest('[data-plyr="fullscreen"]') || 
-              e.target.closest('.plyr__control--fullscreen')) {
-            return true;
-          }
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          e.stopPropagation();
-          return false;
-        }, { capture: true, passive: false });
-      }
-    });
-
-    // Single click handler for showing pause button
-    video.addEventListener('click', function(e) {
-      if (player.playing) {
-        console.log('Video clicked while playing');
-        showCustomButton();
-      }
-    });
-    
-    container.addEventListener('click', function(e) {
-      // Ignore clicks on controls or progress bar
-      if (e.target.closest('.plyr__controls') || 
-          e.target.closest('.custom-progress-bar') ||
-          e.target === customButton) {
-        return;
-      }
-      
-      if (player.playing) {
-        console.log('Container clicked while playing');
-        showCustomButton();
-      }
-    });
-  });
-
-  // Update custom progress bar
-  player.on('timeupdate', function() {
-    if (customProgressPlayed && player.duration) {
-      const percent = (player.currentTime / player.duration) * 100;
-      customProgressPlayed.style.width = percent + '%';
+      return;
     }
-  });
-
-  player.on('progress', function() {
-    if (customProgressBuffer && player.duration && player.buffered.length > 0) {
-      const percent = (player.buffered.end(0) / player.duration) * 100;
-      customProgressBuffer.style.width = percent + '%';
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(() => {});
     }
-  });
+  }
+  document.addEventListener('fullscreenchange', autoRotate);
+  document.addEventListener('webkitfullscreenchange', autoRotate);
+  document.addEventListener('mozfullscreenchange', autoRotate);
+  document.addEventListener('MSFullscreenChange', autoRotate);
 
-  // Custom button click handler
-  customButton.addEventListener('click', function(e) {
+  // সব ধরনের ডাবল ক্লিক সম্পূর্ণ বন্ধ করা
+  document.addEventListener('dblclick', function(e) {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Custom pause button clicked');
-    player.pause();
+    e.stopImmediatePropagation();
+    return false;
+  }, true);
+
+  // ভিডিও এলিমেন্টে ডাবল ক্লিক বন্ধ
+  const videoElement = document.getElementById('vid1');
+  videoElement.addEventListener('dblclick', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    return false;
+  }, true);
+
+  // কন্টেইনারে ডাবল ক্লিক বন্ধ
+  const container = document.getElementById('container');
+  container.addEventListener('dblclick', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    return false;
+  }, true);
+
+  // Toggle play/pause by custom big button
+  customButton.addEventListener('click', () => {
+    if (player.playing) {
+      player.pause();
+    } else {
+      player.play();
+    }
+  });
+
+  // Update big button icon based on play/pause
+  player.on('play', () => {
+    largeBtnIcon.innerHTML = '<path d="M6 19h4.5V5H6v14zm7.5-14v14H18V5h-4.5z"/>'; // pause icon
     hideCustomButton();
   });
 
+  player.on('pause', () => {
+    largeBtnIcon.innerHTML = '<path d="M8 5v14l11-7z"/>'; // play icon
+    showCustomButton();
+  });
+
+  // কাস্টম বাটন দেখানো/লুকানো
   function showCustomButton() {
-    console.log('Showing custom button');
-    customButton.classList.add('show');
-    
-    // Clear existing timeout
-    if (hideTimeout) {
-      clearTimeout(hideTimeout);
-    }
-    
-    // Hide after 2 seconds
-    hideTimeout = setTimeout(() => {
-      hideCustomButton();
-    }, 2000);
+    customButton.style.opacity = '1';
   }
 
   function hideCustomButton() {
-    console.log('Hiding custom button');
-    customButton.classList.remove('show');
-    if (hideTimeout) {
-      clearTimeout(hideTimeout);
+    customButton.style.opacity = '0';
+  }
+
+  // Create custom progress bar under controls
+  function createCustomProgressBar() {
+    customProgressBar = document.createElement('div');
+    customProgressBar.className = 'custom-progress-bar';
+    customProgressBar.id = 'custom-progress-bar';
+
+    customProgressBuffer = document.createElement('div');
+    customProgressBuffer.className = 'custom-progress-buffer';
+    customProgressBar.appendChild(customProgressBuffer);
+
+    customProgressPlayed = document.createElement('div');
+    customProgressPlayed.className = 'custom-progress-played';
+    customProgressBar.appendChild(customProgressPlayed);
+
+    customProgressScrubber = document.createElement('div');
+    customProgressScrubber.className = 'custom-progress-scrubber';
+    customProgressBar.appendChild(customProgressScrubber);
+
+    progressTooltip = document.createElement('div');
+    progressTooltip.className = 'progress-tooltip';
+    customProgressBar.appendChild(progressTooltip);
+
+    document.getElementById('container').appendChild(customProgressBar);
+
+    // Scrubber drag support
+    let wasPlayingBeforeDrag = false;
+
+    function updateProgressByX(clientX) {
+      const rect = customProgressBar.getBoundingClientRect();
+      let percent = (clientX - rect.left) / rect.width;
+      percent = Math.min(Math.max(percent, 0), 1);
+      player.currentTime = percent * player.duration;
+      
+      // তাৎক্ষণিক আপডেট
+      const playedPercent = (player.currentTime / player.duration) * 100;
+      customProgressPlayed.style.width = playedPercent + '%';
+      customProgressScrubber.style.left = playedPercent + '%';
+    }
+
+    function onPointerDown(e) {
+      isDragging = true;
+      wasPlayingBeforeDrag = player.playing;
+      player.pause();
+      updateProgressByX(e.clientX);
+      e.preventDefault();
+      showControls();
+    }
+
+    function onPointerMove(e) {
+      if (!isDragging) return;
+      updateProgressByX(e.clientX);
+      e.preventDefault();
+      showControls();
+    }
+
+    function onPointerUp(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      updateProgressByX(e.clientX);
+      if (wasPlayingBeforeDrag) player.play();
+      e.preventDefault();
+      startHideTimeout();
+    }
+
+    // Mouse events
+    customProgressBar.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('mousemove', onPointerMove);
+    document.addEventListener('mouseup', onPointerUp);
+
+    // Touch events
+    customProgressBar.addEventListener('touchstart', (e) => {
+      onPointerDown(e.touches[0]);
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', (e) => {
+      if (isDragging) {
+        onPointerMove(e.touches[0]);
+      }
+    }, { passive: false });
+    
+    document.addEventListener('touchend', (e) => {
+      if (isDragging) {
+        onPointerUp(e.changedTouches[0]);
+      }
+    }, { passive: false });
+
+    // Tooltip update on hover
+    customProgressBar.addEventListener('mousemove', (e) => {
+      if (isDragging) return;
+      const rect = customProgressBar.getBoundingClientRect();
+      let percent = (e.clientX - rect.left) / rect.width;
+      percent = Math.min(Math.max(percent, 0), 1);
+      let time = percent * player.duration;
+      progressTooltip.textContent = formatTime(time);
+      progressTooltip.style.left = e.clientX - rect.left + 'px';
+    });
+
+    customProgressBar.addEventListener('mouseleave', () => {
+      if (!isDragging) {
+        progressTooltip.textContent = '';
+      }
+    });
+  }
+
+  // Format time (seconds) to mm:ss or hh:mm:ss
+  function formatTime(seconds) {
+    if (isNaN(seconds)) return '00:00';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    if (h > 0) {
+      return `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    } else {
+      return `${m}:${s.toString().padStart(2,'0')}`;
     }
   }
 
-  // Hide when paused or ended
-  player.on('pause', function() {
-    hideCustomButton();
+  createCustomProgressBar();
+
+  // Update custom progress continuously
+  player.on('timeupdate', () => {
+    if (isDragging) return; // ড্র্যাগিং এর সময় আপডেট বন্ধ
+    
+    const buffered = player.buffered;
+    const duration = player.duration;
+
+    if (buffered.length) {
+      const bufferedEnd = buffered.end(buffered.length - 1);
+      const bufferPercent = (bufferedEnd / duration) * 100;
+      customProgressBuffer.style.width = bufferPercent + '%';
+    }
+
+    const playedPercent = (player.currentTime / duration) * 100;
+    customProgressPlayed.style.width = playedPercent + '%';
+    customProgressScrubber.style.left = playedPercent + '%';
   });
 
-  player.on('ended', function() {
-    hideCustomButton();
-  });
+  // Skip feedback
+  const skipFeedback = document.getElementById('skip-feedback');
 
-  // Skip feedback function
-  function showSkipFeedback(seconds) {
-    const feedback = document.getElementById('skip-feedback');
-    feedback.textContent = seconds > 0 ? `+${seconds}s` : `${seconds}s`;
-    feedback.classList.add('show');
-    setTimeout(() => {
-      feedback.classList.remove('show');
+  let skipTimeout;
+  function showSkipFeedback(text) {
+    skipFeedback.textContent = text;
+    skipFeedback.classList.add('show');
+    clearTimeout(skipTimeout);
+    skipTimeout = setTimeout(() => {
+      skipFeedback.classList.remove('show');
     }, 1000);
   }
 
-  // Keyboard shortcuts for skip functionality
-  document.addEventListener('keydown', function(event) {
-    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
-      return;
+  // Custom rewind/forward with skip feedback
+  const rewindSeconds = 10;
+  const fastForwardSeconds = 10;
+
+  // Plyr already has rewind/fast-forward buttons, so you can listen to them:
+  player.on('rewind', () => {
+    player.currentTime = Math.max(player.currentTime - rewindSeconds, 0);
+    showSkipFeedback(`<< ${rewindSeconds}s`);
+  });
+
+  player.on('fastForward', () => {
+    player.currentTime = Math.min(player.currentTime + fastForwardSeconds, player.duration);
+    showSkipFeedback(`${fastForwardSeconds}s >>`);
+  });
+
+  // কন্ট্রোল দেখানো/লুকানো ফাংশন
+  function showControls() {
+    // প্রগ্রেস বার দেখানো
+    customProgressBar.style.opacity = '1';
+    
+    // যদি ভিডিও পজ হয় তাহলে কাস্টম বাটন দেখানো
+    if (!player.playing) {
+      showCustomButton();
     }
     
-    switch(event.key) {
-      case 'ArrowLeft':
-        event.preventDefault();
-        player.rewind(10);
-        showSkipFeedback(-10);
-        break;
-      case 'ArrowRight':
-        event.preventDefault();
-        player.forward(10);
-        showSkipFeedback(10);
-        break;
-      case ' ':
-        event.preventDefault();
-        if (player.playing) {
-          player.pause();
-        } else {
-          player.play();
-        }
-        break;
-    }
-  });
-
-  // Add event listeners for button clicks
-  player.on('rewind', function() {
-    showSkipFeedback(-10);
-  });
-
-  player.on('fastforward', function() {
-    showSkipFeedback(10);
-  });
-
-  // Auto-Rotate on Fullscreen
-  player.on('enterfullscreen', function () {
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(function (error) {
-        console.warn('Orientation lock failed:', error);
-      });
-    }
-  });
-
-  player.on('exitfullscreen', function () {
-    if (screen.orientation && screen.orientation.unlock) {
-      screen.orientation.unlock();
-    }
-  });
-</script>
-
-<style>
-  :root {
-  --plyr-color-main: #e657ff;
-    --plyr-video-control-color  :#e8ffba;
-}
-</style>
-
-<script>
-  var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
- console.log(apikey);
-  function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
-
-  let video = document.getElementById('vid1');
-  if(getparam('id')){
-    let json = JSON.parse(atob(getparam('id'))) ;
-    let driveid = json.id;
-    video.src = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
-    video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
+    // অটো হাইড টাইমআউট রিসেট
+    clearTimeout(hideTimeout);
+    startHideTimeout();
   }
-</script>
+
+  function hideControls() {
+    if (!isDragging) {
+      // প্রগ্রেস বার লুকানো
+      customProgressBar.style.opacity = '0';
+      
+      // যদি ভিডিও চলছে তাহলে কাস্টম বাটন লুকানো
+      if (player.playing) {
+        hideCustomButton();
+      }
+    }
+  }
+
+  function startHideTimeout() {
+    hideTimeout = setTimeout(hideControls, 3000);
+  }
+
+  // মাউস মুভ করলে কন্ট্রোল দেখানো
+  container.addEventListener('mousemove', () => {
+    showControls();
+  });
+
+  // টাচ করলে কন্ট্রোল দেখানো
+  container.addEventListener('touchstart', () => {
+    showControls();
+  });
+
+  // ক্লিক করলে কন্ট্রোল দেখানো
+  container.addEventListener('click', (e) => {
+    // যদি কাস্টম বাটনে ক্লিক না হয় তাহলে কন্ট্রোল দেখানো
+    if (!e.target.closest('#custom-large-button')) {
+      showControls();
+    }
+  });
+
+  // প্লেয়ার কন্ট্রোল দেখানো/লুকানো সিঙ্ক করা
+  player.on('controlsshown', showControls);
+  player.on('controlshidden', hideControls);
+
+  // ফুলস্ক্রিন ইভেন্ট লিসেনার
+  function handleFullscreenChange() {
+    isFullscreen = document.fullscreenElement || 
+                   document.webkitFullscreenElement || 
+                   document.mozFullScreenElement || 
+                   document.msFullscreenElement;
+    
+    // ফুলস্ক্রিন চেক করে প্রগ্রেস বার পজিশন আপডেট
+    if (isFullscreen) {
+      // ফুলস্ক্রিনে প্রগ্রেস বার পজিশন
+      customProgressBar.style.position = 'fixed';
+      customProgressBar.style.bottom = '60px';
+      customProgressBar.style.left = '0';
+      customProgressBar.style.right = '0';
+      customProgressBar.style.zIndex = '99999';
+      
+      // ফুলস্ক্রিনে কাস্টম বাটন পজিশন
+      customButton.style.position = 'fixed';
+      customButton.style.zIndex = '99998';
+    } else {
+      // নরমাল স্ক্রিনে প্রগ্রেস বার পজিশন
+      customProgressBar.style.position = 'absolute';
+      customProgressBar.style.bottom = '40px';
+      customProgressBar.style.left = '0';
+      customProgressBar.style.right = '0';
+      customProgressBar.style.zIndex = '9999';
+      
+      // নরমাল স্ক্রিনে কাস্টম বাটন পজিশন
+      customButton.style.position = 'absolute';
+      customButton.style.zIndex = '999';
+    }
+    
+    // কন্ট্রোল দেখানো
+    showControls();
+  }
+
+  document.addEventListener('fullscreenchange', handleFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+  document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+  document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+  // শুরুতে কন্ট্রোল দেখানো
+  showControls();
+  
+  // প্লেয়ার রেডি হলে ফুলস্ক্রিন চেক করা
+  player.on('ready', () => {
+    setTimeout(handleFullscreenChange, 100);
+    // শুরুতে কাস্টম বাটন দেখানো (যদি ভিডিও পজ থাকে)
+    if (!player.playing) {
+      showCustomButton();
+    }
+  });
+  </script>
