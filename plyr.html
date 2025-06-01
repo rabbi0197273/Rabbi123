@@ -36,6 +36,37 @@ html, body {
   opacity: 1;
 }
 
+/* Force progress bar to show at top */
+.plyr__controls .plyr__progress {
+  position: absolute !important;
+  top: -40px !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  height: 4px !important;
+  background: rgba(255, 255, 255, 0.3) !important;
+  z-index: 20 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: block !important;
+  visibility: visible !important;
+}
+
+.plyr__controls .plyr__progress:hover {
+  height: 6px !important;
+}
+
+/* Progress bar elements */
+.plyr__controls .plyr__progress .plyr__progress__buffer {
+  background: rgba(255, 255, 255, 0.4) !important;
+  height: 100% !important;
+}
+
+.plyr__controls .plyr__progress .plyr__progress__played {
+  background: var(--plyr-color-main) !important;
+  height: 100% !important;
+}
+
 /* Custom large pause button */
 .custom-large-button {
   position: absolute;
@@ -74,7 +105,7 @@ html, body {
   fill: white;
 }
 
-/* Disable double click selection */
+/* Completely disable double click */
 * {
   -webkit-user-select: none;
   -moz-user-select: none;
