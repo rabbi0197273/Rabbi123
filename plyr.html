@@ -65,6 +65,11 @@ html, body {
   height: 100% !important;
 }
 
+/* Hide duplicate progress bar from controls */
+.plyr__controls .plyr__progress {
+  display: none !important;
+}
+
 /* Move controls down to make space for top progress bar */
 .plyr__controls {
   padding-top: 8px !important;
@@ -210,6 +215,19 @@ html, body {
         console.log('Container clicked while playing');
         showCustomButton();
       }
+    });
+
+    // Disable double-click fullscreen
+    video.addEventListener('dblclick', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    });
+    
+    container.addEventListener('dblclick', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
     });
   });
 
