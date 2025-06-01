@@ -1,187 +1,343 @@
 <link rel="icon" href="drive-logo.png" />
 <style>
-  html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background: #000;
-  }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #000;
+}
 
-  .plyr {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: none !important;
-    outline: none !important;
-  }
+.plyr {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none !important;
+  outline: none !important;
+}
 
-  /* ভিডিও বর্ডার রিমুভ */
-  video {
-    border: none !important;
-    outline: none !important;
-    background: #000 !important;
-  }
+/* ভিডিও বর্ডার রিমুভ */
+video {
+  border: none !important;
+  outline: none !important;
+  background: #000 !important;
+}
 
-  /* Container border remove */
-  #container {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    border: none !important;
-    outline: none !important;
-    background: #000;
-    overflow: hidden;
-  }
+/* Container border remove */
+#container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  border: none !important;
+  outline: none !important;
+  background: #000;
+  overflow: hidden;
+}
 
-  /* Skip feedback animation */
-  .skip-feedback {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 25px;
-    font-size: 18px;
-    font-weight: bold;
-    z-index: 1000;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-  }
+/* Skip feedback animation */
+.skip-feedback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 18px;
+  font-weight: bold;
+  z-index: 100000;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
 
-  .skip-feedback.show {
+.skip-feedback.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+/* Hide original progress bar */
+.plyr__controls .plyr__progress {
+  display: none !important;
+}
+
+/* Hide original large play button */
+.plyr__control--overlaid {
+  display: none !important;
+}
+
+/* Enhanced YouTube-style progress bar */
+.custom-progress-bar {
+  position: absolute;
+  bottom: 40px;
+  left: 20px;
+  right: 20px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.3);
+  z-index: 99999;
+  cursor: pointer;
+  border-radius: 3px;
+  opacity: 1;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.custom-progress-bar:hover {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 20px rgba(255, 0, 0, 0.3);
+}
+
+/* Buffer bar */
+.custom-progress-buffer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  width: 0%;
+  transition: width 0.1s ease;
+  border-radius: 3px;
+}
+
+/* Played bar */
+.custom-progress-played {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #FF0000, #FF4444);
+  width: 0%;
+  border-radius: 3px;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+/* Scrubber circle */
+.custom-progress-scrubber {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border: 3px solid #FF0000;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), 0 2px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  z-index: 15;
+  transition: all 0.2s ease;
+}
+
+.custom-progress-bar:hover .custom-progress-scrubber {
+  width: 18px;
+  height: 18px;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 1), 0 4px 12px rgba(0, 0, 0, 0.4);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Tooltip for time on hover */
+.progress-tooltip {
+  position: absolute;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -200%);
+  white-space: nowrap;
+  z-index: 20;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.custom-progress-bar:hover .progress-tooltip {
+  opacity: 1;
+  transform: translate(-50%, -180%);
+}
+
+/* Enhanced large pause/play button */
+.custom-large-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90px;
+  height: 90px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 99998;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+  pointer-events: all;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.custom-large-button:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: translate(-50%, -50%) scale(1.15);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.custom-large-button:active {
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+.custom-large-button svg {
+  width: 36px;
+  height: 36px;
+  fill: white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transition: all 0.2s ease;
+}
+
+.custom-large-button:hover svg {
+  transform: scale(1.1);
+}
+
+/* Enhanced Plyr controls styling */
+.plyr__controls {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.plyr__control {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+}
+
+.plyr__control:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+.plyr__control--pressed {
+  background: rgba(255, 0, 0, 0.3) !important;
+}
+
+.plyr__volume input[type="range"] {
+  accent-color: #FF0000 !important;
+}
+
+.plyr__menu__container {
+  background: rgba(0, 0, 0, 0.9) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+.plyr__menu__container .plyr__control {
+  background: transparent !important;
+  border-radius: 6px !important;
+}
+
+.plyr__menu__container .plyr__control:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Disable text selection */
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Loading animation */
+@keyframes pulse {
+  0%, 100% {
     opacity: 1;
   }
-
-  /* Hide original progress bar */
-  .plyr__controls .plyr__progress {
-    display: none !important;
+  50% {
+    opacity: 0.5;
   }
+}
 
-  /* Hide original large play button */
-  .plyr__control--overlaid {
-    display: none !important;
-  }
+.custom-large-button.loading {
+  animation: pulse 1.5s infinite;
+}
 
-  /* YouTube-style progress bar কন্ট্রোল বাটনের উপরে */
-  .custom-progress-bar {
-    position: absolute;
-    bottom: 40px;
-    left: 0;
-    right: 0;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.3);
-    z-index: 9999;
-    cursor: pointer;
-    border-radius: 3px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  /* Buffer bar */
-  .custom-progress-buffer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.15);
-    width: 0%;
-    transition: width 0.1s ease;
-    border-radius: 3px;
-  }
-
-  /* Played bar */
-  .custom-progress-played {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background: #FF0000;
-    width: 0%;
-    border-radius: 3px;
-  }
-
-  /* Scrubber circle */
-  .custom-progress-scrubber {
-    position: absolute;
-    top: 50%;
-    left: 0%;
-    width: 14px;
-    height: 14px;
-    background: white;
-    border: 2px solid #FF0000;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 0 8px rgba(255, 0, 0, 0.7);
-    cursor: pointer;
-    z-index: 15;
-  }
-
-  .custom-progress-bar:hover .custom-progress-scrubber {
-    box-shadow: 0 0 12px rgba(255, 0, 0, 1);
-  }
-
-  /* Tooltip for time on hover */
-  .progress-tooltip {
-    position: absolute;
-    padding: 3px 6px;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    font-size: 12px;
-    border-radius: 3px;
-    pointer-events: none;
-    opacity: 0;
-    transform: translate(-50%, -150%);
-    white-space: nowrap;
-    z-index: 20;
-  }
-
-  .custom-progress-bar:hover .progress-tooltip {
-    opacity: 1;
-  }
-
-  /* Custom large pause/play button */
+/* Mobile optimizations */
+@media screen and (max-width: 768px) {
   .custom-large-button {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: 80px;
     height: 80px;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 999;
-    transition: all 0.3s ease;
-    opacity: 0;
-    pointer-events: all;
   }
-
-  .custom-large-button:hover {
-    background: rgba(0, 0, 0, 0.9);
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-
+  
   .custom-large-button svg {
     width: 32px;
     height: 32px;
-    fill: white;
   }
+  
+  .custom-progress-bar {
+    left: 15px;
+    right: 15px;
+    bottom: 35px;
+  }
+  
+  .skip-feedback {
+    font-size: 16px;
+    padding: 10px 20px;
+  }
+}
 
-  /* Disable text selection */
-  * {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+@media screen and (max-width: 480px) {
+  .custom-large-button {
+    width: 70px;
+    height: 70px;
   }
+  
+  .custom-large-button svg {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .custom-progress-bar {
+    left: 10px;
+    right: 10px;
+    bottom: 30px;
+    height: 5px;
+  }
+  
+  .custom-progress-scrubber {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .skip-feedback {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+}
 </style>
 
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
@@ -211,98 +367,289 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/CDNSFree2/Plyr/plyr.css" />
 
 <div id="container">
-  <video controls poster="https://bit.ly/bbsampleposter" id="vid1">
-    <source src="https://rebrand.ly/sample-video" type="video/mp4" size="576" />
-  </video>
+<video controls poster="https://bit.ly/bbsampleposter" id="vid1">
+  <source src="https://rebrand.ly/sample-video" type="video/mp4" size="576" />
+</video>
 
-  <div id="custom-large-button" class="custom-large-button" title="Play/Pause">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="large-btn-icon">
-      <path d="M8 5v14l11-7z" />
-    </svg>
-  </div>
+<div id="custom-large-button" class="custom-large-button" title="Play/Pause">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="large-btn-icon">
+    <path d="M8 5v14l11-7z" />
+  </svg>
+</div>
 
-  <div id="skip-feedback" class="skip-feedback"></div>
+<div id="skip-feedback" class="skip-feedback"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.6.7/plyr.min.js"></script>
 
 <script>
-  var controls = [
-    'rewind',
-    'play',
-    'fast-forward',
-    'progress',
-    'current-time',
-    'duration',
-    'mute',
-    'volume',
-    'captions',
-    'settings',
-    'pip',
-    'airplay',
-    'fullscreen'
-  ];
+var controls = [
+  'rewind',
+  'play',
+  'fast-forward',
+  'progress',
+  'current-time',
+  'duration',
+  'mute',
+  'volume',
+  'captions',
+  'settings',
+  'pip',
+  'airplay',
+  'fullscreen'
+];
 
-  const player = new Plyr('#vid1', {
-    controls,
-    seekTime: 10,
-    hideControls: true,
-    autoHide: true,
-    clickToPlay: false // ডাবল ক্লিক বন্ধ করার জন্য
-  });
+const player = new Plyr('#vid1', {
+  controls,
+  seekTime: 10,
+  hideControls: true,
+  autoHide: true,
+  clickToPlay: false
+});
 
-  const customButton = document.getElementById('custom-large-button');
-  const largeBtnIcon = document.getElementById('large-btn-icon');
-  let hideTimeout;
-  let customProgressBar, customProgressPlayed, customProgressBuffer, customProgressScrubber, progressTooltip;
-  let isDragging = false;
-  let isFullscreen = false;
+const customButton = document.getElementById('custom-large-button');
+const largeBtnIcon = document.getElementById('large-btn-icon');
+let hideTimeout;
+let customProgressBar, customProgressPlayed, customProgressBuffer, customProgressScrubber, progressTooltip;
+let isDragging = false;
+let isFullscreen = false;
 
-  // Auto rotate on fullscreen
-  function autoRotate() {
-    if (!document.fullscreenElement) {
-      if (screen.orientation && screen.orientation.unlock) {
-        screen.orientation.unlock();
-      }
-      return;
+// ফুলস্ক্রিন এলিমেন্ট
+let fullscreenProgressBar = null;
+let fullscreenButton = null;
+let fullscreenSkipFeedback = null;
+
+// Auto rotate on fullscreen
+function autoRotate() {
+  if (!document.fullscreenElement) {
+    if (screen.orientation && screen.orientation.unlock) {
+      screen.orientation.unlock();
     }
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('landscape').catch(() => {});
-    }
+    return;
   }
-  document.addEventListener('fullscreenchange', autoRotate);
-  document.addEventListener('webkitfullscreenchange', autoRotate);
-  document.addEventListener('mozfullscreenchange', autoRotate);
-  document.addEventListener('MSFullscreenChange', autoRotate);
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('landscape').catch(() => {});
+  }
+}
+document.addEventListener('fullscreenchange', autoRotate);
+document.addEventListener('webkitfullscreenchange', autoRotate);
+document.addEventListener('mozfullscreenchange', autoRotate);
+document.addEventListener('MSFullscreenChange', autoRotate);
 
-  // সব ধরনের ডাবল ক্লিক সম্পূর্ণ বন্ধ করা
-  document.addEventListener('dblclick', function(e) {
+// সব ধরনের ডাবল ক্লিক সম্পূর্ণ বন্ধ করা
+document.addEventListener('dblclick', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  return false;
+}, true);
+
+const videoElement = document.getElementById('vid1');
+videoElement.addEventListener('dblclick', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  return false;
+}, true);
+
+const container = document.getElementById('container');
+container.addEventListener('dblclick', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  return false;
+}, true);
+
+// Toggle play/pause by custom big button
+customButton.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  if (player.playing) {
+    player.pause();
+  } else {
+    player.play();
+  }
+});
+
+// Update big button icon based on play/pause
+player.on('play', () => {
+  largeBtnIcon.innerHTML = '<path d="M6 19h4.5V5H6v14zm7.5-14v14H18V5h-4.5z"/>'; // pause icon
+  hideCustomButton();
+});
+
+player.on('pause', () => {
+  largeBtnIcon.innerHTML = '<path d="M8 5v14l11-7z"/>'; // play icon
+  showCustomButton();
+});
+
+// কাস্টম বাটন দেখানো/লুকানো
+function showCustomButton() {
+  customButton.style.opacity = '1';
+  customButton.style.pointerEvents = 'all';
+  
+  if (fullscreenButton && isFullscreen) {
+    fullscreenButton.style.opacity = '1';
+    fullscreenButton.style.pointerEvents = 'all';
+  }
+}
+
+function hideCustomButton() {
+  customButton.style.opacity = '0';
+  customButton.style.pointerEvents = 'none';
+  
+  if (fullscreenButton && isFullscreen) {
+    fullscreenButton.style.opacity = '0';
+    fullscreenButton.style.pointerEvents = 'none';
+  }
+}
+
+// ফুলস্ক্রিন কন্ট্রোল তৈরি
+function createFullscreenControls() {
+  // ফুলস্ক্রিন প্রগ্রেস বার
+  fullscreenProgressBar = document.createElement('div');
+  fullscreenProgressBar.style.cssText = `
+    position: fixed !important;
+    bottom: 30px !important;
+    left: 30px !important;
+    right: 30px !important;
+    height: 8px !important;
+    background: rgba(255, 255, 255, 0.3) !important;
+    z-index: 999999999 !important;
+    cursor: pointer !important;
+    border-radius: 3px !important;
+    opacity: 1 !important;
+    transition: opacity 0.3s ease !important;
+    display: none !important;
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
+  `;
+
+  const fullscreenBuffer = document.createElement('div');
+  fullscreenBuffer.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    width: 0%;
+    transition: width 0.1s ease;
+    border-radius: 3px;
+  `;
+
+  const fullscreenPlayed = document.createElement('div');
+  fullscreenPlayed.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #FF0000, #FF4444);
+    width: 0%;
+    border-radius: 3px;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+  `;
+
+  const fullscreenScrubber = document.createElement('div');
+  fullscreenScrubber.style.cssText = `
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border: 3px solid #FF0000;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), 0 2px 8px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 15;
+    transition: all 0.2s ease;
+  `;
+
+  const fullscreenTooltip = document.createElement('div');
+  fullscreenTooltip.style.cssText = `
+    position: absolute;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 6px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -200%);
+    white-space: nowrap;
+    z-index: 20;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+  `;
+
+  fullscreenProgressBar.appendChild(fullscreenBuffer);
+  fullscreenProgressBar.appendChild(fullscreenPlayed);
+  fullscreenProgressBar.appendChild(fullscreenScrubber);
+  fullscreenProgressBar.appendChild(fullscreenTooltip);
+
+  // ফুলস্ক্রিন বাটন
+  fullscreenButton = document.createElement('div');
+  fullscreenButton.style.cssText = `
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90px !important;
+    height: 90px !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    border-radius: 50% !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    z-index: 999999998 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    opacity: 1 !important;
+    pointer-events: all !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
+  `;
+
+  fullscreenButton.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 36px; height: 36px; fill: white; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)); transition: all 0.2s ease;">
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  `;
+
+  // ফুলস্ক্রিন স্কিপ ফিডব্যাক
+  fullscreenSkipFeedback = document.createElement('div');
+  fullscreenSkipFeedback.style.cssText = `
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    color: white !important;
+    padding: 12px 24px !important;
+    border-radius: 30px !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    z-index: 999999997 !important;
+    opacity: 0 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    pointer-events: none !important;
+    display: none !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+  `;
+
+  // ইভেন্ট লিসেনার
+  fullscreenButton.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    e.stopImmediatePropagation();
-    return false;
-  }, true);
-
-  // ভিডিও এলিমেন্টে ডাবল ক্লিক বন্ধ
-  const videoElement = document.getElementById('vid1');
-  videoElement.addEventListener('dblclick', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    return false;
-  }, true);
-
-  // কন্টেইনারে ডাবল ক্লিক বন্ধ
-  const container = document.getElementById('container');
-  container.addEventListener('dblclick', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    return false;
-  }, true);
-
-  // Toggle play/pause by custom big button
-  customButton.addEventListener('click', () => {
     if (player.playing) {
       player.pause();
     } else {
@@ -310,168 +657,246 @@
     }
   });
 
-  // Update big button icon based on play/pause
-  player.on('play', () => {
-    largeBtnIcon.innerHTML = '<path d="M6 19h4.5V5H6v14zm7.5-14v14H18V5h-4.5z"/>'; // pause icon
-    hideCustomButton();
+  // প্রগ্রেস বার ইভেন্ট
+  setupFullscreenProgressEvents(fullscreenProgressBar, fullscreenPlayed, fullscreenScrubber, fullscreenTooltip, fullscreenBuffer);
+
+  // body তে যোগ করা
+  document.body.appendChild(fullscreenProgressBar);
+  document.body.appendChild(fullscreenButton);
+  document.body.appendChild(fullscreenSkipFeedback);
+}
+
+// ফুলস্ক্রিন প্রগ্রেস ইভেন্ট
+function setupFullscreenProgressEvents(progressBar, progressPlayed, progressScrubber, tooltip, progressBuffer) {
+  let wasPlayingBeforeDrag = false;
+
+  function updateProgressByX(clientX) {
+    const rect = progressBar.getBoundingClientRect();
+    let percent = (clientX - rect.left) / rect.width;
+    percent = Math.min(Math.max(percent, 0), 1);
+    player.currentTime = percent * player.duration;
+    
+    updateAllProgressBars();
+  }
+
+  function onPointerDown(e) {
+    isDragging = true;
+    wasPlayingBeforeDrag = player.playing;
+    player.pause();
+    updateProgressByX(e.clientX);
+    e.preventDefault();
+    showControls();
+  }
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    updateProgressByX(e.clientX);
+    e.preventDefault();
+    showControls();
+  }
+
+  function onPointerUp(e) {
+    if (!isDragging) return;
+    isDragging = false;
+    updateProgressByX(e.clientX);
+    if (wasPlayingBeforeDrag) player.play();
+    e.preventDefault();
+    startHideTimeout();
+  }
+
+  progressBar.addEventListener('mousedown', onPointerDown);
+  
+  progressBar.addEventListener('touchstart', (e) => {
+    onPointerDown(e.touches[0]);
+  }, { passive: false });
+
+  progressBar.addEventListener('mousemove', (e) => {
+    if (isDragging) return;
+    const rect = progressBar.getBoundingClientRect();
+    let percent = (e.clientX - rect.left) / rect.width;
+    percent = Math.min(Math.max(percent, 0), 1);
+    let time = percent * player.duration;
+    tooltip.textContent = formatTime(time);
+    tooltip.style.left = e.clientX - rect.left + 'px';
+    tooltip.style.opacity = '1';
+    tooltip.style.transform = 'translate(-50%, -180%)';
   });
 
-  player.on('pause', () => {
-    largeBtnIcon.innerHTML = '<path d="M8 5v14l11-7z"/>'; // play icon
-    showCustomButton();
+  progressBar.addEventListener('mouseleave', () => {
+    if (!isDragging) {
+      tooltip.style.opacity = '0';
+      tooltip.style.transform = 'translate(-50%, -200%)';
+    }
   });
+}
 
-  // কাস্টম বাটন দেখানো/লুকানো
-  function showCustomButton() {
-    customButton.style.opacity = '1';
-  }
+// সব প্রগ্রেস বার আপডেট
+function updateAllProgressBars() {
+  if (isDragging) return;
+  
+  const buffered = player.buffered;
+  const duration = player.duration;
+  const currentTime = player.currentTime;
 
-  function hideCustomButton() {
-    customButton.style.opacity = '0';
-  }
-
-  // Create custom progress bar under controls
-  function createCustomProgressBar() {
-    customProgressBar = document.createElement('div');
-    customProgressBar.className = 'custom-progress-bar';
-    customProgressBar.id = 'custom-progress-bar';
-
-    customProgressBuffer = document.createElement('div');
-    customProgressBuffer.className = 'custom-progress-buffer';
-    customProgressBar.appendChild(customProgressBuffer);
-
-    customProgressPlayed = document.createElement('div');
-    customProgressPlayed.className = 'custom-progress-played';
-    customProgressBar.appendChild(customProgressPlayed);
-
-    customProgressScrubber = document.createElement('div');
-    customProgressScrubber.className = 'custom-progress-scrubber';
-    customProgressBar.appendChild(customProgressScrubber);
-
-    progressTooltip = document.createElement('div');
-    progressTooltip.className = 'progress-tooltip';
-    customProgressBar.appendChild(progressTooltip);
-
-    document.getElementById('container').appendChild(customProgressBar);
-
-    // Scrubber drag support
-    let wasPlayingBeforeDrag = false;
-
-    function updateProgressByX(clientX) {
-      const rect = customProgressBar.getBoundingClientRect();
-      let percent = (clientX - rect.left) / rect.width;
-      percent = Math.min(Math.max(percent, 0), 1);
-      player.currentTime = percent * player.duration;
-      
-      // তাৎক্ষণিক আপডেট
-      const playedPercent = (player.currentTime / player.duration) * 100;
-      customProgressPlayed.style.width = playedPercent + '%';
-      customProgressScrubber.style.left = playedPercent + '%';
-    }
-
-    function onPointerDown(e) {
-      isDragging = true;
-      wasPlayingBeforeDrag = player.playing;
-      player.pause();
-      updateProgressByX(e.clientX);
-      e.preventDefault();
-      showControls();
-    }
-
-    function onPointerMove(e) {
-      if (!isDragging) return;
-      updateProgressByX(e.clientX);
-      e.preventDefault();
-      showControls();
-    }
-
-    function onPointerUp(e) {
-      if (!isDragging) return;
-      isDragging = false;
-      updateProgressByX(e.clientX);
-      if (wasPlayingBeforeDrag) player.play();
-      e.preventDefault();
-      startHideTimeout();
-    }
-
-    // Mouse events
-    customProgressBar.addEventListener('mousedown', onPointerDown);
-    document.addEventListener('mousemove', onPointerMove);
-    document.addEventListener('mouseup', onPointerUp);
-
-    // Touch events
-    customProgressBar.addEventListener('touchstart', (e) => {
-      onPointerDown(e.touches[0]);
-    }, { passive: false });
+  if (buffered.length) {
+    const bufferedEnd = buffered.end(buffered.length - 1);
+    const bufferPercent = (bufferedEnd / duration) * 100;
     
-    document.addEventListener('touchmove', (e) => {
-      if (isDragging) {
-        onPointerMove(e.touches[0]);
-      }
-    }, { passive: false });
-    
-    document.addEventListener('touchend', (e) => {
-      if (isDragging) {
-        onPointerUp(e.changedTouches[0]);
-      }
-    }, { passive: false });
-
-    // Tooltip update on hover
-    customProgressBar.addEventListener('mousemove', (e) => {
-      if (isDragging) return;
-      const rect = customProgressBar.getBoundingClientRect();
-      let percent = (e.clientX - rect.left) / rect.width;
-      percent = Math.min(Math.max(percent, 0), 1);
-      let time = percent * player.duration;
-      progressTooltip.textContent = formatTime(time);
-      progressTooltip.style.left = e.clientX - rect.left + 'px';
-    });
-
-    customProgressBar.addEventListener('mouseleave', () => {
-      if (!isDragging) {
-        progressTooltip.textContent = '';
-      }
-    });
-  }
-
-  // Format time (seconds) to mm:ss or hh:mm:ss
-  function formatTime(seconds) {
-    if (isNaN(seconds)) return '00:00';
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = Math.floor(seconds % 60);
-    if (h > 0) {
-      return `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-    } else {
-      return `${m}:${s.toString().padStart(2,'0')}`;
-    }
-  }
-
-  createCustomProgressBar();
-
-  // Update custom progress continuously
-  player.on('timeupdate', () => {
-    if (isDragging) return; // ড্র্যাগিং এর সময় আপডেট বন্ধ
-    
-    const buffered = player.buffered;
-    const duration = player.duration;
-
-    if (buffered.length) {
-      const bufferedEnd = buffered.end(buffered.length - 1);
-      const bufferPercent = (bufferedEnd / duration) * 100;
+    // নরমাল প্রগ্রেস বার
+    if (customProgressBuffer) {
       customProgressBuffer.style.width = bufferPercent + '%';
     }
+    
+    // ফুলস্ক্রিন প্রগ্রেস বার
+    if (fullscreenProgressBar && isFullscreen) {
+      const fullscreenBuffer = fullscreenProgressBar.children[0];
+      fullscreenBuffer.style.width = bufferPercent + '%';
+    }
+  }
 
-    const playedPercent = (player.currentTime / duration) * 100;
+  const playedPercent = (currentTime / duration) * 100;
+  
+  // নরমাল প্রগ্রেস বার
+  if (customProgressPlayed && customProgressScrubber) {
     customProgressPlayed.style.width = playedPercent + '%';
     customProgressScrubber.style.left = playedPercent + '%';
+  }
+  
+  // ফুলস্ক্রিন প্রগ্রেস বার
+  if (fullscreenProgressBar && isFullscreen) {
+    const fullscreenPlayed = fullscreenProgressBar.children[1];
+    const fullscreenScrubber = fullscreenProgressBar.children[2];
+    fullscreenPlayed.style.width = playedPercent + '%';
+    fullscreenScrubber.style.left = playedPercent + '%';
+  }
+}
+
+// Create custom progress bar
+function createCustomProgressBar() {
+  customProgressBar = document.createElement('div');
+  customProgressBar.className = 'custom-progress-bar';
+  customProgressBar.id = 'custom-progress-bar';
+
+  customProgressBuffer = document.createElement('div');
+  customProgressBuffer.className = 'custom-progress-buffer';
+  customProgressBar.appendChild(customProgressBuffer);
+
+  customProgressPlayed = document.createElement('div');
+  customProgressPlayed.className = 'custom-progress-played';
+  customProgressBar.appendChild(customProgressPlayed);
+
+  customProgressScrubber = document.createElement('div');
+  customProgressScrubber.className = 'custom-progress-scrubber';
+  customProgressBar.appendChild(customProgressScrubber);
+
+  progressTooltip = document.createElement('div');
+  progressTooltip.className = 'progress-tooltip';
+  customProgressBar.appendChild(progressTooltip);
+
+  document.getElementById('container').appendChild(customProgressBar);
+
+  // Scrubber drag support
+  let wasPlayingBeforeDrag = false;
+
+  function updateProgressByX(clientX) {
+    const rect = customProgressBar.getBoundingClientRect();
+    let percent = (clientX - rect.left) / rect.width;
+    percent = Math.min(Math.max(percent, 0), 1);
+    player.currentTime = percent * player.duration;
+    
+    updateAllProgressBars();
+  }
+
+  function onPointerDown(e) {
+    isDragging = true;
+    wasPlayingBeforeDrag = player.playing;
+    player.pause();
+    updateProgressByX(e.clientX);
+    e.preventDefault();
+    showControls();
+  }
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    updateProgressByX(e.clientX);
+    e.preventDefault();
+    showControls();
+  }
+
+  function onPointerUp(e) {
+    if (!isDragging) return;
+    isDragging = false;
+    updateProgressByX(e.clientX);
+    if (wasPlayingBeforeDrag) player.play();
+    e.preventDefault();
+    startHideTimeout();
+  }
+
+  customProgressBar.addEventListener('mousedown', onPointerDown);
+  document.addEventListener('mousemove', onPointerMove);
+  document.addEventListener('mouseup', onPointerUp);
+
+  customProgressBar.addEventListener('touchstart', (e) => {
+    onPointerDown(e.touches[0]);
+  }, { passive: false });
+  
+  document.addEventListener('touchmove', (e) => {
+    if (isDragging) {
+      onPointerMove(e.touches[0]);
+    }
+  }, { passive: false });
+  
+  document.addEventListener('touchend', (e) => {
+    if (isDragging) {
+      onPointerUp(e.changedTouches[0]);
+    }
+  }, { passive: false });
+
+  customProgressBar.addEventListener('mousemove', (e) => {
+    if (isDragging) return;
+    const rect = customProgressBar.getBoundingClientRect();
+    let percent = (e.clientX - rect.left) / rect.width;
+    percent = Math.min(Math.max(percent, 0), 1);
+    let time = percent * player.duration;
+    progressTooltip.textContent = formatTime(time);
+    progressTooltip.style.left = e.clientX - rect.left + 'px';
   });
 
-  // Skip feedback
-  const skipFeedback = document.getElementById('skip-feedback');
+  customProgressBar.addEventListener('mouseleave', () => {
+    if (!isDragging) {
+      progressTooltip.textContent = '';
+    }
+  });
+}
 
-  let skipTimeout;
-  function showSkipFeedback(text) {
+// Format time
+function formatTime(seconds) {
+  if (isNaN(seconds)) return '00:00';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) {
+    return `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  } else {
+    return `${m}:${s.toString().padStart(2,'0')}`;
+  }
+}
+
+// Skip feedback
+const skipFeedback = document.getElementById('skip-feedback');
+
+let skipTimeout;
+function showSkipFeedback(text) {
+  if (isFullscreen && fullscreenSkipFeedback) {
+    fullscreenSkipFeedback.textContent = text;
+    fullscreenSkipFeedback.style.opacity = '1';
+    fullscreenSkipFeedback.style.transform = 'translate(-50%, -50%) scale(1.05)';
+    clearTimeout(skipTimeout);
+    skipTimeout = setTimeout(() => {
+      fullscreenSkipFeedback.style.opacity = '0';
+      fullscreenSkipFeedback.style.transform = 'translate(-50%, -50%) scale(1)';
+    }, 1000);
+  } else {
     skipFeedback.textContent = text;
     skipFeedback.classList.add('show');
     clearTimeout(skipTimeout);
@@ -479,125 +904,134 @@
       skipFeedback.classList.remove('show');
     }, 1000);
   }
+}
 
-  // Custom rewind/forward with skip feedback
-  const rewindSeconds = 10;
-  const fastForwardSeconds = 10;
+const rewindSeconds = 10;
+const fastForwardSeconds = 10;
 
-  // Plyr already has rewind/fast-forward buttons, so you can listen to them:
-  player.on('rewind', () => {
-    player.currentTime = Math.max(player.currentTime - rewindSeconds, 0);
-    showSkipFeedback(`<< ${rewindSeconds}s`);
-  });
+player.on('rewind', () => {
+  player.currentTime = Math.max(player.currentTime - rewindSeconds, 0);
+  showSkipFeedback(`<< ${rewindSeconds}s`);
+});
 
-  player.on('fastForward', () => {
-    player.currentTime = Math.min(player.currentTime + fastForwardSeconds, player.duration);
-    showSkipFeedback(`${fastForwardSeconds}s >>`);
-  });
+player.on('fastForward', () => {
+  player.currentTime = Math.min(player.currentTime + fastForwardSeconds, player.duration);
+  showSkipFeedback(`${fastForwardSeconds}s >>`);
+});
 
-  // কন্ট্রোল দেখানো/লুকানো ফাংশন
-  function showControls() {
-    // প্রগ্রেস বার দেখানো
-    customProgressBar.style.opacity = '1';
-    
-    // যদি ভিডিও পজ হয় তাহলে কাস্টম বাটন দেখানো
-    if (!player.playing) {
-      showCustomButton();
+// কন্ট্রোল দেখানো/লুকানো
+function showControls() {
+  if (isFullscreen) {
+    if (fullscreenProgressBar) {
+      fullscreenProgressBar.style.opacity = '1';
     }
-    
-    // অটো হাইড টাইমআউট রিসেট
-    clearTimeout(hideTimeout);
-    startHideTimeout();
+  } else {
+    if (customProgressBar) {
+      customProgressBar.style.opacity = '1';
+    }
   }
+  
+  if (!player.playing) {
+    showCustomButton();
+  }
+  
+  clearTimeout(hideTimeout);
+  startHideTimeout();
+}
 
-  function hideControls() {
-    if (!isDragging) {
-      // প্রগ্রেস বার লুকানো
-      customProgressBar.style.opacity = '0';
-      
-      // যদি ভিডিও চলছে তাহলে কাস্টম বাটন লুকানো
-      if (player.playing) {
-        hideCustomButton();
+function hideControls() {
+  if (!isDragging) {
+    if (isFullscreen) {
+      if (fullscreenProgressBar) {
+        fullscreenProgressBar.style.opacity = '0';
+      }
+    } else {
+      if (customProgressBar) {
+        customProgressBar.style.opacity = '0';
       }
     }
-  }
-
-  function startHideTimeout() {
-    hideTimeout = setTimeout(hideControls, 3000);
-  }
-
-  // মাউস মুভ করলে কন্ট্রোল দেখানো
-  container.addEventListener('mousemove', () => {
-    showControls();
-  });
-
-  // টাচ করলে কন্ট্রোল দেখানো
-  container.addEventListener('touchstart', () => {
-    showControls();
-  });
-
-  // ক্লিক করলে কন্ট্রোল দেখানো
-  container.addEventListener('click', (e) => {
-    // যদি কাস্টম বাটনে ক্লিক না হয় তাহলে কন্ট্রোল দেখানো
-    if (!e.target.closest('#custom-large-button')) {
-      showControls();
-    }
-  });
-
-  // প্লেয়ার কন্ট্রোল দেখানো/লুকানো সিঙ্ক করা
-  player.on('controlsshown', showControls);
-  player.on('controlshidden', hideControls);
-
-  // ফুলস্ক্রিন ইভেন্ট লিসেনার
-  function handleFullscreenChange() {
-    isFullscreen = document.fullscreenElement || 
-                   document.webkitFullscreenElement || 
-                   document.mozFullScreenElement || 
-                   document.msFullscreenElement;
     
-    // ফুলস্ক্রিন চেক করে প্রগ্রেস বার পজিশন আপডেট
-    if (isFullscreen) {
-      // ফুলস্ক্রিনে প্রগ্রেস বার পজিশন
-      customProgressBar.style.position = 'fixed';
-      customProgressBar.style.bottom = '60px';
-      customProgressBar.style.left = '0';
-      customProgressBar.style.right = '0';
-      customProgressBar.style.zIndex = '99999';
-      
-      // ফুলস্ক্রিনে কাস্টম বাটন পজিশন
-      customButton.style.position = 'fixed';
-      customButton.style.zIndex = '99998';
-    } else {
-      // নরমাল স্ক্রিনে প্রগ্রেস বার পজিশন
-      customProgressBar.style.position = 'absolute';
-      customProgressBar.style.bottom = '40px';
-      customProgressBar.style.left = '0';
-      customProgressBar.style.right = '0';
-      customProgressBar.style.zIndex = '9999';
-      
-      // নরমাল স্ক্রিনে কাস্টম বাটন পজিশন
-      customButton.style.position = 'absolute';
-      customButton.style.zIndex = '999';
+    if (player.playing) {
+      hideCustomButton();
     }
-    
-    // কন্ট্রোল দেখানো
+  }
+}
+
+function startHideTimeout() {
+  hideTimeout = setTimeout(hideControls, 3000);
+}
+
+// ইভেন্ট লিসেনার
+container.addEventListener('mousemove', showControls);
+container.addEventListener('touchstart', showControls);
+container.addEventListener('click', (e) => {
+  if (!e.target.closest('#custom-large-button')) {
     showControls();
   }
+});
 
-  document.addEventListener('fullscreenchange', handleFullscreenChange);
-  document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-  document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-  document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+document.addEventListener('mousemove', showControls);
+document.addEventListener('touchstart', showControls);
 
-  // শুরুতে কন্ট্রোল দেখানো
-  showControls();
+player.on('controlsshown', showControls);
+player.on('controlshidden', hideControls);
+
+// ফুলস্ক্রিন হ্যান্ডলার
+function handleFullscreenChange() {
+  isFullscreen = document.fullscreenElement || 
+                 document.webkitFullscreenElement || 
+                 document.mozFullScreenElement || 
+                 document.msFullscreenElement;
   
-  // প্লেয়ার রেডি হলে ফুলস্ক্রিন চেক করা
-  player.on('ready', () => {
-    setTimeout(handleFullscreenChange, 100);
-    // শুরুতে কাস্টম বাটন দেখানো (যদি ভিডিও পজ থাকে)
+  if (isFullscreen) {
+    // ফুলস্ক্রিনে
+    console.log('Entering fullscreen');
+    
+    if (fullscreenProgressBar && fullscreenButton && fullscreenSkipFeedback) {
+      fullscreenProgressBar.style.display = 'block';
+      fullscreenButton.style.display = 'flex';
+      fullscreenSkipFeedback.style.display = 'block';
+      
+      // আইকন আপডেট
+      if (player.playing) {
+        fullscreenButton.querySelector('svg path').setAttribute('d', 'M6 19h4.5V5H6v14zm7.5-14v14H18V5h-4.5z');
+      } else {
+        fullscreenButton.querySelector('svg path').setAttribute('d', 'M8 5v14l11-7z');
+      }
+    }
+  } else {
+    // নরমাল স্ক্রিনে
+    console.log('Exiting fullscreen');
+    
+    if (fullscreenProgressBar && fullscreenButton && fullscreenSkipFeedback) {
+      fullscreenProgressBar.style.display = 'none';
+      fullscreenButton.style.display = 'none';
+      fullscreenSkipFeedback.style.display = 'none';
+    }
+  }
+  
+  showControls();
+}
+
+document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+// Update progress continuously
+player.on('timeupdate', updateAllProgressBars);
+
+// শুরুতে সেটআপ
+createCustomProgressBar();
+createFullscreenControls();
+
+player.on('ready', () => {
+  setTimeout(() => {
+    handleFullscreenChange();
     if (!player.playing) {
       showCustomButton();
     }
-  });
-  </script>
+    showControls();
+  }, 100);
+});
+</script>
