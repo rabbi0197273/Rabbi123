@@ -60,7 +60,7 @@
 
 <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
 
-<video poster="https://bit.ly/bbsampleposter" id="video-id" playsinline controls>
+<video poster="https://bit.ly/bbsampleposter" id="video-id" playsinline controls crossorigin="anonymous">
   <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
 </video>
 
@@ -85,8 +85,7 @@
       "allowDownload": false,
       "playButtonShowing": true,
       "fillToContainer": true,
-      "posterImage": "",
-      "pictureInPictureEnabled": true,
+      "posterImage": ""
     },
     "vastOptions": {
       "adList": [],
@@ -95,19 +94,118 @@
     }
   });
 
-  // PIP functionality manually added for better browser support
-  const video = document.getElementById('video-id');
-  
-  // Add PIP support check and manual implementation
-  if ('pictureInPictureEnabled' in document) {
-    // Add custom PIP button if needed
-    video.addEventListener('loadedmetadata', () => {
-      if (document.pictureInPictureEnabled && !video.disablePictureInPicture) {
-        // PIP is supported
-        console.log('PIP is supported');
+  // Google Drive PIP fix - video load হওয়ার পর PIP enable করা
+  function enablePIPForGoogleDrive() {
+    const video = document.getElementById('video-id');
+    
+    // Video metadata load হওয়ার জন্য অপেক্ষা
+    video.addEventListener('loadedmetadata', function() {
+      // Google Drive video এর জন্য PIP manually enable করা
+      if (video.src.includes('googleapis.com') || video.src.includes('googleusercontent.com')) {
+        // Force enable PIP for Google Drive videos
+        video.disablePictureInPicture = false;
+        
+        // Video element এ PIP attributes যোগ করা
+        video.setAttribute('disablePictureInPicture', 'false');
+        video.setAttribute('controlsList', 'nodownload');
       }
     });
+
+    // Video ready হওয়ার পর PIP button functionality যোগ করা
+    video.addEventListener('canplay', function() {
+      setTimeout(function() {
+        // FluidPlayer এর সব button খুঁজে PIP functionality যোগ করা
+        const allButtons = document.querySelectorAll('button, .fluid_button, [class*="button"], [class*="control"]');
+        
+        allButtons.forEach(function(btn) {
+          // PIP button identify করা (icon বা class দিয়ে)
+          const btnHTML = btn.innerHTML.toLowerCase();
+          const btnClass = btn.className.toLowerCase();
+          const btnTitle = (btn.title || '').toLowerCase();
+          
+          if (btnHTML.includes('picture') || btnHTML.includes('pip') || 
+              btnClass.includes('pip') || btnClass.includes('picture') ||
+              btnTitle.includes('picture') || btnTitle.includes('pip') ||
+              btn.getAttribute('aria-label')?.toLowerCase().includes('picture')) {
+            
+            // পুরানো event listeners সরানো
+            btn.onclick = null;
+            btn.removeAttribute('onclick');
+            
+            // নতুন PIP functionality যোগ করা
+            btn.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              
+              // PIP support check করা
+              if ('pictureInPictureEnabled' in document && document.pictureInPictureEnabled && !video.disablePictureInPicture) {
+                if (document.pictureInPictureElement) {
+                  document.exitPictureInPicture()
+                    .then(() => console.log('PIP exited'))
+                    .catch(err => console.log('PIP exit error:', err));
+                } else {
+                  video.requestPictureInPicture()
+                    .then(() => console.log('PIP activated'))
+                    .catch(err => {
+                      console.log('PIP error:', err);
+                      // Fallback: video clone করে PIP চালানো
+                      tryPIPFallback();
+                    });
+                }
+              } else {
+                console.log('PIP not supported or disabled');
+                tryPIPFallback();
+              }
+            });
+          }
+        });
+      }, 3000); // FluidPlayer fully load হওয়ার জন্য অপেক্ষা
+    });
   }
+
+  // PIP Fallback method - যদি normal PIP কাজ না করে
+  function tryPIPFallback() {
+    const video = document.getElementById('video-id');
+    
+    // Video এর current time এবং play state save করা
+    const currentTime = video.currentTime;
+    const isPaused = video.paused;
+    
+    // নতুন video element create করা PIP এর জন্য
+    const pipVideo = document.createElement('video');
+    pipVideo.src = video.src;
+    pipVideo.currentTime = currentTime;
+    pipVideo.controls = true;
+    pipVideo.style.position = 'fixed';
+    pipVideo.style.top = '20px';
+    pipVideo.style.right = '20px';
+    pipVideo.style.width = '300px';
+    pipVideo.style.height = '200px';
+    pipVideo.style.zIndex = '9999';
+    pipVideo.style.border = '2px solid #fff';
+    pipVideo.style.borderRadius = '8px';
+    
+    if (!isPaused) {
+      pipVideo.play();
+    }
+    
+    document.body.appendChild(pipVideo);
+    
+    // Original video pause করা
+    video.pause();
+    
+    // PIP video close করার জন্য double click
+    pipVideo.addEventListener('dblclick', function() {
+      video.currentTime = pipVideo.currentTime;
+      if (!pipVideo.paused) {
+        video.play();
+      }
+      document.body.removeChild(pipVideo);
+    });
+  }
+
+  // PIP functionality initialize করা
+  enablePIPForGoogleDrive();
 </script>
 
 <script>
@@ -129,6 +227,11 @@
     let driveid = json.id;
     video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
     video.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
+    
+    // Google Drive video load হওয়ার পর PIP enable করা
+    video.addEventListener('loadeddata', function() {
+      video.disablePictureInPicture = false;
+    });
   }
 
   function forceRotation() {
