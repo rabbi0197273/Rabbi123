@@ -35,6 +35,15 @@ html, body {
 .skip-feedback.show {
   opacity: 1;
 }
+
+/* Enhanced large play button styling */
+.plyr__control--overlaid {
+  transition: all 0.3s ease;
+}
+
+.plyr__control--overlaid:hover {
+  transform: scale(1.1);
+}
 </style>
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
     
@@ -81,7 +90,7 @@ html, body {
   var controls =
 [
     'play-large', // The large play button in the center
-    'restart', // Restart playback
+    // 'restart', // Removed restart button as requested
     'rewind', // Rewind by the seek time (default 10 seconds) - বাম সাইডে পিছনে
     'play', // Play/pause playback
     'fast-forward', // Fast forward by the seek time (default 10 seconds) - ডান সাইডে সামনে
@@ -101,6 +110,21 @@ html, body {
   const player = new Plyr('#vid1',{
     controls,
     seekTime: 10 // Set seek time to 10 seconds
+  });
+
+  // Enhanced large play button functionality (YouTube-like behavior)
+  player.on('ready', function() {
+    const largePlayButton = document.querySelector('.plyr__control--overlaid');
+    if (largePlayButton) {
+      largePlayButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (player.playing) {
+          player.pause();
+        } else {
+          player.play();
+        }
+      });
+    }
   });
 
   // Skip feedback function
@@ -130,6 +154,14 @@ html, body {
         event.preventDefault();
         player.forward(10);
         showSkipFeedback(10);
+        break;
+      case ' ': // Spacebar for play/pause
+        event.preventDefault();
+        if (player.playing) {
+          player.pause();
+        } else {
+          player.play();
+        }
         break;
     }
   });
