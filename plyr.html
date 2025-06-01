@@ -36,13 +36,45 @@ html, body {
   opacity: 1;
 }
 
-/* Enhanced large play button styling */
-.plyr__control--overlaid {
+/* Custom large play/pause button - YouTube style */
+.custom-large-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 999;
   transition: all 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.plyr__control--overlaid:hover {
-  transform: scale(1.1);
+.custom-large-button.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.custom-large-button:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.custom-large-button svg {
+  width: 32px;
+  height: 32px;
+  fill: white;
+}
+
+/* Hide default large play button when playing */
+.plyr--playing .plyr__control--overlaid {
+  display: none !important;
 }
 </style>
 <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
@@ -80,6 +112,12 @@ html, body {
     <!-- Video files -->
     <source src="https://rebrand.ly/sample-video" type="video/mp4" size="576" />
   </video>
+  <!-- Custom large play/pause button -->
+  <div id="custom-large-button" class="custom-large-button">
+    <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+    </svg>
+  </div>
   <!-- Skip feedback overlay -->
   <div id="skip-feedback" class="skip-feedback"></div>
 </div>
@@ -91,9 +129,9 @@ html, body {
 [
     'play-large', // The large play button in the center
     // 'restart', // Removed restart button as requested
-    'rewind', // Rewind by the seek time (default 10 seconds) - বাম সাইডে পিছনে
+    'rewind', // Rewind by the seek time (default 10 seconds)
     'play', // Play/pause playback
-    'fast-forward', // Fast forward by the seek time (default 10 seconds) - ডান সাইডে সামনে
+    'fast-forward', // Fast forward by the seek time (default 10 seconds)
     'progress', // The progress bar and scrubber for playback and buffering
     'current-time', // The current time of playback
     'duration', // The full duration of the media
@@ -103,28 +141,69 @@ html, body {
     'settings', // Settings menu
     'pip', // Picture-in-picture (currently Safari only)
     'airplay', // Airplay (currently Safari only)
-    //'download', // Show a download button with a link to either the current source or a custom URL you specify in your options
     'fullscreen' // Toggle fullscreen
 ];
 
   const player = new Plyr('#vid1',{
     controls,
-    seekTime: 10 // Set seek time to 10 seconds
+    seekTime: 10
   });
 
-  // Enhanced large play button functionality (YouTube-like behavior)
+  // Get custom button element
+  const customButton = document.getElementById('custom-large-button');
+  let buttonTimeout;
+
+  // Show custom pause button when video is playing and clicked
   player.on('ready', function() {
-    const largePlayButton = document.querySelector('.plyr__control--overlaid');
-    if (largePlayButton) {
-      largePlayButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (player.playing) {
-          player.pause();
-        } else {
-          player.play();
-        }
-      });
+    const videoElement = document.querySelector('#vid1');
+    
+    // Show pause button on video click when playing
+    videoElement.addEventListener('click', function(e) {
+      if (player.playing) {
+        showCustomButton();
+      }
+    });
+  });
+
+  // Custom button click handler
+  customButton.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (player.playing) {
+      player.pause();
+    } else {
+      player.play();
     }
+    hideCustomButton();
+  });
+
+  // Show custom button function
+  function showCustomButton() {
+    if (player.playing) {
+      customButton.classList.add('show');
+      
+      // Clear existing timeout
+      if (buttonTimeout) {
+        clearTimeout(buttonTimeout);
+      }
+      
+      // Hide after 2 seconds
+      buttonTimeout = setTimeout(() => {
+        hideCustomButton();
+      }, 2000);
+    }
+  }
+
+  // Hide custom button function
+  function hideCustomButton() {
+    customButton.classList.remove('show');
+    if (buttonTimeout) {
+      clearTimeout(buttonTimeout);
+    }
+  }
+
+  // Hide button when video is paused
+  player.on('pause', function() {
+    hideCustomButton();
   });
 
   // Skip feedback function
@@ -139,7 +218,6 @@ html, body {
 
   // Keyboard shortcuts for skip functionality
   document.addEventListener('keydown', function(event) {
-    // Only work when video is focused or no input is focused
     if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
       return;
     }
@@ -155,7 +233,7 @@ html, body {
         player.forward(10);
         showSkipFeedback(10);
         break;
-      case ' ': // Spacebar for play/pause
+      case ' ':
         event.preventDefault();
         if (player.playing) {
           player.pause();
@@ -175,7 +253,7 @@ html, body {
     showSkipFeedback(10);
   });
 
-  // ✅ Auto-Rotate on Fullscreen
+  // Auto-Rotate on Fullscreen
   player.on('enterfullscreen', function () {
     if (screen.orientation && screen.orientation.lock) {
       screen.orientation.lock('landscape').catch(function (error) {
@@ -201,7 +279,6 @@ html, body {
 <script>
   var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
  console.log(apikey);
-   //apikey = 'AIzaSyD739-eb6NzS_KbVJq1K8ZAxnrMfkIqPyw';
   function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
 
   let video = document.getElementById('vid1');
