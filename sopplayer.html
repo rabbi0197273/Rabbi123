@@ -1,79 +1,256 @@
-
-<link href="https://cdn.jsdelivr.net/gh/SH20RAJ/Sopplayer/sopplayer.min.css" rel="stylesheet" />
-  <!--Here is the Css Library-->
-<link rel="icon" href="drive-logo.png">
-<title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
     
-<!-- Meta Tags for SEO -->
-<meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
-<meta name="author" content="Rabbi">
+    <!-- Meta Tags for SEO -->
+    <meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+    <meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
+    <meta name="author" content="Rabbi">
 
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://rabbi0197273.github.io/Rabbi123/">
-<meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://rabbi0197273.github.io/Rabbi123/">
+    <meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
+    <meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+    <meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
 
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://rabbi0197273.github.io/Rabbi123/">
-<meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://rabbi0197273.github.io/Rabbi123/">
+    <meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
+    <meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+    <meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
 
-<!-- Other Meta Tags -->
-<link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
-<meta name="theme-color" content="#ffffff">
-<meta name="robots" content="index, follow">
+    <!-- Other Meta Tags -->
+    <link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="robots" content="index, follow">
 
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #000;
+        }
 
+        #artplayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="artplayer"></div>
 
-<style>
-  html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
+    <!-- ArtPlayer CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/artplayer@5/dist/artplayer.js"></script>
+    
+    <script>
+        var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
+        console.log(apikey);
 
-#my-video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
+        function getparam(a, e) {
+            return e || (e = window.location.href), new URL(e).searchParams.get(a);
+        }
 
-</style>
+        // Default video configuration
+        let videoSrc = 'https://bit.ly/bbsamplevideo';
+        let posterSrc = 'https://bit.ly/bbsampleposter';
 
-    <video id="my-video" class="sopplayer" controls preload="auto" data-setup="{}" width= "100%" poster="https://bit.ly/bbsampleposter">
-      <!--Use class="sopplayer" and data-setup="{}" -->
-      <source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
-    </video>
+        // Check if Google Drive ID is provided
+        if (getparam('id')) {
+            let json = JSON.parse(atob(getparam('id')));
+            let driveid = json.id;
+            videoSrc = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
+            posterSrc = 'https://lh3.googleusercontent.com/d/' + driveid;
+        }
 
-   <script src="https://rebrand.ly/SopPlayerJS"></script>
-    <!--Here is the JavaScript Library-->
+        // Initialize ArtPlayer
+        const art = new Artplayer({
+            container: '#artplayer',
+            url: videoSrc,
+            poster: posterSrc,
+            volume: 0.7,
+            isLive: false,
+            muted: false,
+            autoplay: false,
+            pip: true,
+            autoSize: false,
+            autoMini: true,
+            screenshot: true,
+            setting: true,
+            loop: false,
+            flip: true,
+            playbackRate: true,
+            aspectRatio: true,
+            fullscreen: true,
+            fullscreenWeb: true,
+            subtitleOffset: false,
+            miniProgressBar: true,
+            mutex: true,
+            backdrop: true,
+            playsInline: true,
+            autoPlayback: true,
+            airplay: true,
+            theme: '#23ade5',
+            lang: navigator.language.toLowerCase(),
+            whitelist: ['*'],
+            moreVideoAttr: {
+                crossOrigin: 'anonymous',
+            },
+            // Custom settings
+            settings: [
+                {
+                    width: 200,
+                    html: 'Subtitle',
+                    tooltip: 'Bilingual',
+                    icon: '<img width="22" heigth="22" src="https://artplayer.org/assets/img/subtitle.svg">',
+                    selector: [
+                        {
+                            html: 'Display',
+                            tooltip: 'Show',
+                            switch: true,
+                            onSwitch: function (item) {
+                                item.tooltip = item.switch ? 'Hide' : 'Show';
+                                art.subtitle.show = !item.switch;
+                                return !item.switch;
+                            },
+                        },
+                    ],
+                },
+                {
+                    html: 'PIP Mode',
+                    icon: '<img width="22" heigth="22" src="https://artplayer.org/assets/img/pip.svg">',
+                    tooltip: 'OFF',
+                    switch: false,
+                    onSwitch: function (item) {
+                        item.tooltip = item.switch ? 'ON' : 'OFF';
+                        art.pip = item.switch;
+                        return item.switch;
+                    },
+                },
+            ],
+            // Quality selector (if multiple qualities available)
+            quality: [
+                {
+                    default: true,
+                    html: 'SD 480P',
+                    url: videoSrc,
+                },
+            ],
+            // Custom controls
+            controls: [
+                {
+                    position: 'right',
+                    html: 'Download',
+                    tooltip: 'Download Video',
+                    style: {
+                        color: 'white',
+                    },
+                    click: function () {
+                        const a = document.createElement('a');
+                        a.href = videoSrc;
+                        a.download = 'video.mp4';
+                        a.click();
+                    },
+                },
+            ],
+            // Layers for custom overlay
+            layers: [
+                {
+                    html: `<div style="position: absolute; top: 20px; right: 20px; color: white; font-size: 14px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 3px;">DrivePlyr</div>`,
+                    tooltip: 'Powered by DrivePlyr',
+                },
+            ],
+        });
 
-<script>
- // let apikey = 'AIzaSyD739-eb6NzS_KbVJq1K8ZAxnrMfkIqPyw';
-    var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
- console.log(apikey);
-  
-  let videolink, video, json ;
-  function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
+        // Auto-rotate screen functionality for fullscreen
+        function rotateToLandscape() {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape-primary').catch(err => {
+                    console.log('Screen orientation lock failed:', err);
+                });
+            } else if (screen.lockOrientation) {
+                screen.lockOrientation('landscape-primary');
+            } else if (screen.webkitLockOrientation) {
+                screen.webkitLockOrientation('landscape-primary');
+            } else if (screen.mozLockOrientation) {
+                screen.mozLockOrientation('landscape-primary');
+            }
+        }
 
-   video = videojs('my-video');
-  if(getparam('id')){
-     json = JSON.parse(atob(getparam('id'))) ;
-    console.log(json)
-    let driveid = json.id;
-    videolink = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
-    //video.src(videolink);
-    video.src([
-			{type: "video/mp4", src: videolink},
-			{type: "rtmp/mp4", src: videolink}
-		]);
-    video.poster_ = 'https://lh3.googleusercontent.com/d/'+driveid;
-  }
-</script>
+        function unlockOrientation() {
+            if (screen.orientation && screen.orientation.unlock) {
+                screen.orientation.unlock();
+            } else if (screen.unlockOrientation) {
+                screen.unlockOrientation();
+            } else if (screen.webkitUnlockOrientation) {
+                screen.webkitUnlockOrientation();
+            } else if (screen.mozUnlockOrientation) {
+                screen.mozUnlockOrientation();
+            }
+        }
+
+        // Handle fullscreen changes
+        art.on('fullscreen', (state) => {
+            if (state) {
+                setTimeout(rotateToLandscape, 100);
+            } else {
+                setTimeout(unlockOrientation, 100);
+            }
+        });
+
+        // Additional event listeners
+        art.on('ready', () => {
+            console.log('ArtPlayer is ready');
+        });
+
+        art.on('error', (error) => {
+            console.error('ArtPlayer error:', error);
+        });
+
+        // Keyboard shortcuts
+        art.on('video:canplay', () => {
+            document.addEventListener('keydown', (event) => {
+                switch (event.code) {
+                    case 'Space':
+                        event.preventDefault();
+                        art.toggle();
+                        break;
+                    case 'ArrowLeft':
+                        event.preventDefault();
+                        art.currentTime -= 10;
+                        break;
+                    case 'ArrowRight':
+                        event.preventDefault();
+                        art.currentTime += 10;
+                        break;
+                    case 'ArrowUp':
+                        event.preventDefault();
+                        art.volume += 0.1;
+                        break;
+                    case 'ArrowDown':
+                        event.preventDefault();
+                        art.volume -= 0.1;
+                        break;
+                    case 'KeyF':
+                        event.preventDefault();
+                        art.fullscreen = !art.fullscreen;
+                        break;
+                    case 'KeyM':
+                        event.preventDefault();
+                        art.muted = !art.muted;
+                        break;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
