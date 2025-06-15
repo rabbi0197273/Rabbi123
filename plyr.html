@@ -49,7 +49,7 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            background: #E3F2FD;
+            background: transparent;
         }
         
         body, .container, .video-controls, .video-timer, .options {
@@ -59,15 +59,14 @@
         }
         
         .container {
-            width: 98%;
+            width: 100%;
+            height: 100vh;
             user-select: none;
             overflow: hidden;
-            max-width: 900px;
-            border-radius: 5px;
+            border-radius: 0;
             background: #000;
-            aspect-ratio: 16 / 9;
             position: relative;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: none;
         }
         
         .container.fullscreen {
@@ -106,7 +105,8 @@
         
         .video-timeline {
             height: 7px;
-            width: 100%;
+            width: calc(100% - 20px);
+            margin: 0 10px;
             cursor: pointer;
         }
         
@@ -143,6 +143,11 @@
             border-radius: 50%;
             background: #2289ff;
             transform: translateY(-50%);
+            cursor: grab;
+        }
+        
+        .progress-bar::before:active {
+            cursor: grabbing;
         }
         
         .progress-bar::before, .progress-area span {
@@ -268,20 +273,8 @@
         
         .container video {
             width: 100%;
-        }
-
-        .error-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #fff;
-            text-align: center;
-            font-size: 16px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 8px;
-            display: none;
+            height: 100%;
+            object-fit: contain;
         }
 
         @media screen and (max-width: 540px) {
@@ -339,7 +332,7 @@
             <ul class="video-controls">
                 <li class="options left">
                     <button class="volume"><i class="fa-solid fa-volume-high"></i></button>
-                    <input type="range" min="0" max="1" step="any" value="0.5">
+                    <input type="range" min="0" max="1" step="any">
                     <div class="video-timer">
                         <p class="current-time">00:00</p>
                         <p class="separator"> / </p>
@@ -367,15 +360,7 @@
                 </li>
             </ul>
         </div>
-        <video id="mainVideo" preload="metadata" crossorigin="anonymous">
-            <!-- Default fallback source -->
-            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
-            <p>Your browser doesn't support HTML5 video.</p>
-        </video>
-        <div class="error-message" id="errorMessage">
-            <h3>Video Loading Error</h3>
-            <p>Please provide a valid Google Drive video ID parameter.</p>
-        </div>
+        <video src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"></video>
     </div>
 
     <script>
@@ -393,60 +378,25 @@
             speedBtn = container.querySelector(".playback-speed span"),
             speedOptions = container.querySelector(".speed-options"),
             pipBtn = container.querySelector(".pic-in-pic span"),
-            fullScreenBtn = container.querySelector(".fullscreen i"),
-            errorMessage = document.getElementById("errorMessage");
+            fullScreenBtn = container.querySelector(".fullscreen i");
         let timer;
+        let isDragging = false;
 
         // Google Drive API functionality
         var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
-        console.log('Using API Key:', apikey);
+        console.log(apikey);
 
         function getparam(a, e) {
             return e || (e = window.location.href), new URL(e).searchParams.get(a);
         }
 
-        // Initialize video volume
-        mainVideo.volume = 0.5;
-        volumeSlider.value = 0.5;
-
         // Load Google Drive video if ID parameter exists
-        try {
-            if (getparam('id')) {
-                let json = JSON.parse(atob(getparam('id')));
-                let driveid = json.id;
-                console.log('Loading Google Drive video with ID:', driveid);
-                
-                // Clear existing sources
-                mainVideo.innerHTML = '';
-                
-                // Add Google Drive source
-                const source = document.createElement('source');
-                source.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
-                source.type = 'video/mp4';
-                mainVideo.appendChild(source);
-                
-                // Set poster
-                mainVideo.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
-                
-                // Load the video
-                mainVideo.load();
-            } else {
-                console.log('No Google Drive ID provided, using default video');
-            }
-        } catch (error) {
-            console.error('Error parsing Google Drive ID:', error);
-            errorMessage.style.display = 'block';
+        if (getparam('id')) {
+            let json = JSON.parse(atob(getparam('id')));
+            let driveid = json.id;
+            mainVideo.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
+            mainVideo.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
         }
-
-        // Error handling for video loading
-        mainVideo.addEventListener('error', (e) => {
-            console.error('Video loading error:', e);
-            errorMessage.style.display = 'block';
-        });
-
-        mainVideo.addEventListener('loadstart', () => {
-            errorMessage.style.display = 'none';
-        });
 
         const hideControls = () => {
             if (mainVideo.paused) return;
@@ -463,8 +413,6 @@
         });
 
         const formatTime = time => {
-            if (isNaN(time) || time === null || time === undefined) return "00:00";
-            
             let seconds = Math.floor(time % 60),
                 minutes = Math.floor(time / 60) % 60,
                 hours = Math.floor(time / 3600);
@@ -480,7 +428,6 @@
         }
 
         videoTimeline.addEventListener("mousemove", e => {
-            if (!mainVideo.duration) return;
             let timelineWidth = videoTimeline.clientWidth;
             let offsetX = e.offsetX;
             let percent = Math.floor((offsetX / timelineWidth) * mainVideo.duration);
@@ -491,51 +438,74 @@
         });
 
         videoTimeline.addEventListener("click", e => {
-            if (!mainVideo.duration) return;
             let timelineWidth = videoTimeline.clientWidth;
             mainVideo.currentTime = (e.offsetX / timelineWidth) * mainVideo.duration;
         });
 
         mainVideo.addEventListener("timeupdate", e => {
-    let { currentTime, duration } = e.target;
-    if (!isNaN(duration) && duration > 0) {
-        let percent = (currentTime / duration) * 100;
-        progressBar.style.width = `${percent}%`;
-        currentVidTime.innerText = formatTime(currentTime);
-    }
-});
+            let { currentTime, duration } = e.target;
+            let percent = (currentTime / duration) * 100;
+            progressBar.style.width = `${percent}%`;
+            currentVidTime.innerText = formatTime(currentTime);
+        });
 
-mainVideo.addEventListener("loadeddata", () => {
-    if (!isNaN(mainVideo.duration) && mainVideo.duration > 0) {
-        videoDuration.innerText = formatTime(mainVideo.duration);
-    }
-});
-
-mainVideo.addEventListener("loadedmetadata", () => {
-    if (!isNaN(mainVideo.duration) && mainVideo.duration > 0) {
-        videoDuration.innerText = formatTime(mainVideo.duration);
-    }
-});
+        mainVideo.addEventListener("loadeddata", () => {
+            videoDuration.innerText = formatTime(mainVideo.duration);
+        });
 
         const draggableProgressBar = e => {
-    if (!mainVideo.duration) return;
-    let timelineWidth = videoTimeline.clientWidth;
-    let percent = (e.offsetX / timelineWidth) * 100;
-    progressBar.style.width = `${percent}%`;
-    mainVideo.currentTime = (e.offsetX / timelineWidth) * mainVideo.duration;
-    currentVidTime.innerText = formatTime(mainVideo.currentTime);
-}
+            let timelineWidth = videoTimeline.clientWidth;
+            progressBar.style.width = `${e.offsetX}px`;
+            mainVideo.currentTime = (e.offsetX / timelineWidth) * mainVideo.duration;
+            currentVidTime.innerText = formatTime(mainVideo.currentTime);
+        }
+
+        // Enhanced dragging functionality
+        videoTimeline.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            draggableProgressBar(e);
+            videoTimeline.addEventListener("mousemove", draggableProgressBar);
+        });
+
+        document.addEventListener("mouseup", () => {
+            if (isDragging) {
+                isDragging = false;
+                videoTimeline.removeEventListener("mousemove", draggableProgressBar);
+            }
+        });
+
+        // Touch events for mobile
+        videoTimeline.addEventListener("touchstart", (e) => {
+            isDragging = true;
+            const touch = e.touches[0];
+            const rect = videoTimeline.getBoundingClientRect();
+            const offsetX = touch.clientX - rect.left;
+            draggableProgressBar({ offsetX });
+        });
+
+        videoTimeline.addEventListener("touchmove", (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = videoTimeline.getBoundingClientRect();
+                const offsetX = touch.clientX - rect.left;
+                draggableProgressBar({ offsetX });
+            }
+        });
+
+        videoTimeline.addEventListener("touchend", () => {
+            isDragging = false;
+        });
 
         volumeBtn.addEventListener("click", () => {
             if (!volumeBtn.classList.contains("fa-volume-high")) {
                 mainVideo.volume = 0.5;
                 volumeBtn.classList.replace("fa-volume-xmark", "fa-volume-high");
-                volumeSlider.value = 0.5;
             } else {
                 mainVideo.volume = 0.0;
                 volumeBtn.classList.replace("fa-volume-high", "fa-volume-xmark");
-                volumeSlider.value = 0;
             }
+            volumeSlider.value = mainVideo.volume;
         });
 
         volumeSlider.addEventListener("input", e => {
@@ -571,46 +541,12 @@ mainVideo.addEventListener("loadedmetadata", () => {
         });
 
         speedBtn.addEventListener("click", () => speedOptions.classList.toggle("show"));
-        
-        pipBtn.addEventListener("click", () => {
-            if (mainVideo.requestPictureInPicture) {
-                mainVideo.requestPictureInPicture().catch(err => {
-                    console.log('Picture-in-picture failed:', err);
-                });
-            }
-        });
-        
-        skipBackward.addEventListener("click", () => {
-            if (mainVideo.currentTime >= 5) {
-                mainVideo.currentTime -= 5;
-            } else {
-                mainVideo.currentTime = 0;
-            }
-        });
-        
-        skipForward.addEventListener("click", () => {
-            if (mainVideo.duration && mainVideo.currentTime + 5 <= mainVideo.duration) {
-                mainVideo.currentTime += 5;
-            } else if (mainVideo.duration) {
-                mainVideo.currentTime = mainVideo.duration;
-            }
-        });
-        
+        pipBtn.addEventListener("click", () => mainVideo.requestPictureInPicture());
+        skipBackward.addEventListener("click", () => mainVideo.currentTime -= 5);
+        skipForward.addEventListener("click", () => mainVideo.currentTime += 5);
         mainVideo.addEventListener("play", () => playPauseBtn.classList.replace("fa-play", "fa-pause"));
         mainVideo.addEventListener("pause", () => playPauseBtn.classList.replace("fa-pause", "fa-play"));
-        
-        playPauseBtn.addEventListener("click", () => {
-            if (mainVideo.paused) {
-                mainVideo.play().catch(err => {
-                    console.log('Play failed:', err);
-                });
-            } else {
-                mainVideo.pause();
-            }
-        });
-        
-        videoTimeline.addEventListener("mousedown", () => videoTimeline.addEventListener("mousemove", draggableProgressBar));
-        document.addEventListener("mouseup", () => videoTimeline.removeEventListener("mousemove", draggableProgressBar));
+        playPauseBtn.addEventListener("click", () => mainVideo.paused ? mainVideo.play() : mainVideo.pause());
     </script>
 </body>
 </html>
