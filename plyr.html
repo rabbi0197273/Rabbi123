@@ -127,6 +127,7 @@
             height: 100%;
             position: relative;
             background: #2289ff;
+            transition: width 0.1s ease;
         }
         
         .progress-bar::before {
@@ -140,7 +141,7 @@
             background: #2289ff;
             transform: translateY(-50%);
             cursor: grab;
-            display: block; /* Always visible now */
+            display: block;
         }
         
         .progress-bar::before:active {
@@ -155,7 +156,6 @@
             display: block;
         }
         
-        /* Show time span when dragging */
         .video-timeline.dragging .progress-area span {
             display: block;
         }
@@ -243,6 +243,8 @@
             background: rgba(255, 255, 255, 0.9);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             transition: opacity 0.13s ease;
+            z-index: 9999;
+            backdrop-filter: blur(10px);
         }
         
         .playback-content .speed-options.show {
@@ -278,7 +280,6 @@
             object-fit: contain;
         }
 
-        /* Simple Double Click Areas */
         .skip-area {
             position: absolute;
             top: 0;
@@ -299,7 +300,11 @@
             right: 0;
         }
 
-        /* Center Play/Pause Button - Always Visible */
+        .container.speed-options-open .skip-area {
+            pointer-events: none;
+        }
+
+        /* Ultra Smooth Center Play/Pause Button */
         .center-play-button {
             position: absolute;
             top: 50%;
@@ -320,6 +325,7 @@
             -webkit-tap-highlight-color: transparent !important;
             opacity: 1;
             pointer-events: auto;
+            backdrop-filter: blur(5px);
         }
 
         .center-play-button:hover {
@@ -331,22 +337,30 @@
             transform: translate(-50%, -50%) scale(0.95);
         }
 
-        /* Play Icon */
+        /* Ultra Smooth Play Icon */
         .center-play-button .play-icon {
+            position: absolute;
             width: 0;
             height: 0;
             border-left: 15px solid rgba(255, 255, 255, 0.9);
             border-top: 9px solid transparent;
             border-bottom: 9px solid transparent;
             margin-left: 3px;
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+            transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
-        /* Pause Icon */
+        /* Ultra Smooth Pause Icon */
         .center-play-button .pause-icon {
+            position: absolute;
             display: flex;
             gap: 5px;
             align-items: center;
             justify-content: center;
+            opacity: 0;
+            transform: scale(0.5) rotate(90deg);
+            transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
         .center-play-button .pause-icon::before,
@@ -358,22 +372,42 @@
             border-radius: 1px;
         }
 
-        /* Hide center button when video is playing and controls are hidden */
-        .container:not(.show-controls).playing .center-play-button {
+        /* Playing State - Show Pause Icon */
+        .center-play-button.playing .play-icon {
+            opacity: 0;
+            transform: scale(0.5) rotate(-90deg);
+        }
+
+        .center-play-button.playing .pause-icon {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+
+        /* Paused State - Show Play Icon */
+        .center-play-button.paused .play-icon {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+
+        .center-play-button.paused .pause-icon {
+            opacity: 0;
+            transform: scale(0.5) rotate(90deg);
+        }
+
+        /* Hide center button when controls are hidden - regardless of play/pause state */
+        .container:not(.show-controls) .center-play-button {
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.5s ease;
         }
 
-        /* Show center button when video is paused OR controls are visible */
-        .container.show-controls .center-play-button,
-        .container:not(.playing) .center-play-button {
+        /* Show center button when controls are visible */
+        .container.show-controls .center-play-button {
             opacity: 1;
             pointer-events: auto;
             transition: opacity 0.3s ease;
         }
 
-        /* Loading Animation - Only Spinner */
         .loading-spinner {
             position: absolute;
             top: 50%;
@@ -401,7 +435,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Hide center play button when loading */
         .container.loading .center-play-button {
             opacity: 0;
             pointer-events: none;
@@ -477,19 +510,16 @@
 </head>
 <body>
     <div class="container show-controls">
-        <!-- Simple Double Click Areas -->
         <div class="skip-area left"></div>
         <div class="skip-area right"></div>
 
-        <!-- Loading Animation - Only Spinner -->
         <div class="loading-spinner" id="loadingSpinner">
             <div class="spinner"></div>
         </div>
 
-        <!-- Center Play/Pause Button - Now Always Visible -->
-        <button class="center-play-button" id="centerPlayBtn">
+        <button class="center-play-button paused" id="centerPlayBtn">
             <div class="play-icon" id="playIcon"></div>
-            <div class="pause-icon" id="pauseIcon" style="display: none;"></div>
+            <div class="pause-icon" id="pauseIcon"></div>
         </button>
 
         <div class="wrapper">
@@ -551,7 +581,6 @@
             fullScreenBtn = container.querySelector(".fullscreen i"),
             loadingSpinner = document.getElementById("loadingSpinner");
 
-        // Center play button elements
         const centerPlayBtn = document.getElementById("centerPlayBtn"),
             playIcon = document.getElementById("playIcon"),
             pauseIcon = document.getElementById("pauseIcon");
@@ -559,14 +588,12 @@
         let timer;
         let isDragging = false;
 
-        // Google Drive API functionality
         var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
 
         function getparam(a, e) {
             return e || (e = window.location.href), new URL(e).searchParams.get(a);
         }
 
-        // Show/Hide loading spinner
         function showLoading() {
             loadingSpinner.classList.add('show');
             container.classList.add('loading');
@@ -577,29 +604,27 @@
             container.classList.remove('loading');
         }
 
-        // Load Google Drive video if ID parameter exists
         if (getparam('id')) {
             let json = JSON.parse(atob(getparam('id')));
             let driveid = json.id;
-            showLoading(); // Show loading when starting to load
+            showLoading();
             mainVideo.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
             mainVideo.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
         }
 
-        // Update center button icon based on video state
+        // Ultra Smooth Center Button Update - Pure CSS Based
         function updateCenterButton() {
             if (mainVideo.paused) {
-                playIcon.style.display = 'block';
-                pauseIcon.style.display = 'none';
+                centerPlayBtn.classList.remove('playing');
+                centerPlayBtn.classList.add('paused');
                 container.classList.remove('playing');
             } else {
-                playIcon.style.display = 'none';
-                pauseIcon.style.display = 'flex';
+                centerPlayBtn.classList.remove('paused');
+                centerPlayBtn.classList.add('playing');
                 container.classList.add('playing');
             }
         }
 
-        // Center play button click
         centerPlayBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (mainVideo.paused) {
@@ -609,7 +634,6 @@
             }
         });
 
-        // Simple Double Click Skip - Updated Logic
         const skipAreas = document.querySelectorAll('.skip-area');
 
         skipAreas.forEach((area, index) => {
@@ -625,7 +649,6 @@
                 if (clickCount === 1) {
                     clickTimer = setTimeout(() => {
                         clickCount = 0;
-                        // Single click - toggle controls visibility
                         if (container.classList.contains('show-controls')) {
                             container.classList.remove('show-controls');
                             clearTimeout(timer);
@@ -634,32 +657,25 @@
                         }
                     }, 300);
                 } else if (clickCount === 2) {
-                    // Double click - skip
                     clearTimeout(clickTimer);
                     clickCount = 0;
                     
                     if (index === 0) {
-                        // Left area - skip backward 10 seconds
                         mainVideo.currentTime = Math.max(0, mainVideo.currentTime - 10);
                     } else {
-                        // Right area - skip forward 10 seconds
                         mainVideo.currentTime = Math.min(mainVideo.duration, mainVideo.currentTime + 10);
                     }
                     
-                    // Show controls after skip
                     container.classList.add('show-controls');
                 }
             });
         });
 
-        // Video area click for controls toggle
         mainVideo.addEventListener('click', (e) => {
-            // Check if click is not on center button
-            if (!centerPlayBtn.contains(e.target)) {
+            if (!centerPlayBtn.contains(e.target) && !speedOptions.contains(e.target) && !document.querySelector('.playback-content').contains(e.target)) {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Toggle controls visibility
                 if (container.classList.contains('show-controls')) {
                     container.classList.remove('show-controls');
                     clearTimeout(timer);
@@ -684,7 +700,6 @@
             return `${hours}:${minutes}:${seconds}`;
         }
 
-        // Update time display during drag
         const updateTimeDisplay = (offsetX) => {
             let timelineWidth = videoTimeline.clientWidth;
             let percent = Math.floor((offsetX / timelineWidth) * mainVideo.duration);
@@ -700,16 +715,13 @@
             }
         });
 
-        // Improved timeline click and drag functionality
         const updateProgress = (e) => {
             let timelineWidth = videoTimeline.clientWidth;
             let offsetX = e.offsetX;
             let percent = (offsetX / timelineWidth) * mainVideo.duration;
             
-            // Update video time
             mainVideo.currentTime = percent;
             
-            // Update progress bar
             let progressPercent = (percent / mainVideo.duration) * 100;
             progressBar.style.width = `${progressPercent}%`;
             currentVidTime.innerText = formatTime(percent);
@@ -726,7 +738,6 @@
             }
         });
 
-        // Video loading events
         mainVideo.addEventListener("loadstart", () => {
             showLoading();
         });
@@ -748,33 +759,27 @@
             hideLoading();
         });
 
-        // Enhanced dragging functionality with time display
         const handleDrag = (e) => {
             let timelineWidth = videoTimeline.clientWidth;
             let rect = videoTimeline.getBoundingClientRect();
             let offsetX = e.clientX - rect.left;
             
-            // Constrain within timeline bounds
             offsetX = Math.max(0, Math.min(offsetX, timelineWidth));
             
             let percent = (offsetX / timelineWidth) * mainVideo.duration;
             
-            // Update video time smoothly
             mainVideo.currentTime = percent;
             
-            // Update progress bar
             let progressPercent = (percent / mainVideo.duration) * 100;
             progressBar.style.width = `${progressPercent}%`;
             currentVidTime.innerText = formatTime(percent);
             
-            // Update time display during drag
             updateTimeDisplay(offsetX);
         };
 
-        // Mouse events for dragging
         videoTimeline.addEventListener("mousedown", (e) => {
             isDragging = true;
-            videoTimeline.classList.add('dragging'); // Add dragging class to show time
+            videoTimeline.classList.add('dragging');
             handleDrag(e);
             
             const handleMouseMove = (e) => {
@@ -785,7 +790,7 @@
             
             const handleMouseUp = () => {
                 isDragging = false;
-                videoTimeline.classList.remove('dragging'); // Remove dragging class
+                videoTimeline.classList.remove('dragging');
                 document.removeEventListener("mousemove", handleMouseMove);
                 document.removeEventListener("mouseup", handleMouseUp);
             };
@@ -794,10 +799,9 @@
             document.addEventListener("mouseup", handleMouseUp);
         });
 
-        // Touch events for mobile dragging
         videoTimeline.addEventListener("touchstart", (e) => {
             isDragging = true;
-            videoTimeline.classList.add('dragging'); // Add dragging class to show time
+            videoTimeline.classList.add('dragging');
             let touch = e.touches[0];
             let rect = videoTimeline.getBoundingClientRect();
             let offsetX = touch.clientX - rect.left;
@@ -811,7 +815,6 @@
             progressBar.style.width = `${progressPercent}%`;
             currentVidTime.innerText = formatTime(percent);
             
-            // Update time display during touch drag
             updateTimeDisplay(offsetX);
         });
 
@@ -831,14 +834,13 @@
                 progressBar.style.width = `${progressPercent}%`;
                 currentVidTime.innerText = formatTime(percent);
                 
-                // Update time display during touch drag
                 updateTimeDisplay(offsetX);
             }
         });
 
         videoTimeline.addEventListener("touchend", () => {
             isDragging = false;
-            videoTimeline.classList.remove('dragging'); // Remove dragging class
+            videoTimeline.classList.remove('dragging');
         });
 
         volumeBtn.addEventListener("click", () => {
@@ -861,17 +863,36 @@
         });
 
         speedOptions.querySelectorAll("li").forEach(option => {
-            option.addEventListener("click", () => {
+            option.addEventListener("click", (e) => {
+                e.stopPropagation();
+                e.preventDefault();
                 mainVideo.playbackRate = option.dataset.speed;
                 speedOptions.querySelector(".active").classList.remove("active");
                 option.classList.add("active");
             });
         });
 
-        document.addEventListener("click", e => {
-            if (e.target.tagName !== "SPAN" || e.target.className !== "material-symbols-rounded") {
-                speedOptions.classList.remove("show");
+        speedBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            speedOptions.classList.toggle("show");
+            
+            if (speedOptions.classList.contains("show")) {
+                container.classList.add("speed-options-open");
+            } else {
+                container.classList.remove("speed-options-open");
             }
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!document.querySelector('.playback-content').contains(e.target)) {
+                speedOptions.classList.remove("show");
+                container.classList.remove("speed-options-open");
+            }
+        });
+
+        document.querySelector(".wrapper").addEventListener("click", (e) => {
+            e.stopPropagation();
         });
 
         fullScreenBtn.addEventListener("click", () => {
@@ -893,14 +914,11 @@
             }
         });
 
-        speedBtn.addEventListener("click", () => speedOptions.classList.toggle("show"));
         pipBtn.addEventListener("click", () => mainVideo.requestPictureInPicture());
         
-        // Normal skip functions
         skipBackward.addEventListener("click", () => mainVideo.currentTime -= 10);
         skipForward.addEventListener("click", () => mainVideo.currentTime += 10);
         
-        // Video event listeners
         mainVideo.addEventListener("play", () => {
             playPauseBtn.classList.replace("fa-play", "fa-pause");
             updateCenterButton();
@@ -919,10 +937,16 @@
             }
         });
 
-        // Initialize center button
         updateCenterButton();
+        showLoading();
+    </script>
+</body>
+</html>
+</merged
+            }
+        });
 
-        // Show initial loading for default video
+        updateCenterButton();
         showLoading();
     </script>
 </body>
