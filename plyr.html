@@ -349,6 +349,13 @@
             transform: translate(-50%, -50%) scale(0.95);
         }
 
+        /* Disable center button during loading */
+        .center-play-button.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         /* Ultra Smooth Play Icon */
         .center-play-button .play-icon {
             position: absolute;
@@ -428,6 +435,7 @@
             transform: translate(-50%, -50%);
             z-index: 20;
             display: none;
+            cursor: pointer;
         }
 
         .loading-spinner.show {
@@ -601,6 +609,7 @@
         let timer;
         let isDragging = false;
         let isInitialState = true; // Track if this is the first interaction
+        let hasStartedLoading = false; // Track if loading has been initiated
 
         var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
 
@@ -618,10 +627,10 @@
             container.classList.remove('loading');
         }
 
+        // Setup video source if ID parameter exists
         if (getparam('id')) {
             let json = JSON.parse(atob(getparam('id')));
             let driveid = json.id;
-            showLoading();
             mainVideo.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
             mainVideo.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
         }
@@ -649,11 +658,30 @@
                 container.classList.add('show-controls');
             }
             
+            // If currently loading, stop loading and show play button
+            if (container.classList.contains('loading')) {
+                hideLoading();
+                mainVideo.pause();
+                return;
+            }
+            
             if (mainVideo.paused) {
+                // Check if video needs to load
+                if (mainVideo.readyState < 3) {
+                    showLoading();
+                }
                 mainVideo.play();
             } else {
                 mainVideo.pause();
             }
+        });
+
+        // Add click event to loading spinner
+        loadingSpinner.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hideLoading();
+            mainVideo.pause();
+            updateCenterButton();
         });
 
         const skipAreas = document.querySelectorAll('.skip-area');
@@ -867,7 +895,7 @@
 
         volumeBtn.addEventListener("click", () => {
             if (!volumeBtn.classList.contains("fa-volume-high")) {
-                mainVideo.volume = 0.5;
+                mainVideo.volume = 1.0; // Changed from 0.5 to 1.0
                 volumeBtn.classList.replace("fa-volume-xmark", "fa-volume-high");
             } else {
                 mainVideo.volume = 0.0;
@@ -960,7 +988,11 @@
         });
 
         updateCenterButton();
-        showLoading();
+        // Removed the initial showLoading() call
+
+        // Set initial volume to 100%
+        mainVideo.volume = 1.0;
+        volumeSlider.value = 1.0;
     </script>
 </body>
 </html>
