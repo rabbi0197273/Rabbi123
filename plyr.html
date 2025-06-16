@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="utf-8">
-    <title>DrivePlyr - Google Drive Proxy Video Player with Autoplay</title>
+    <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- Font Awesome and Material Icons -->
@@ -86,6 +86,13 @@
             opacity: 1;
             bottom: 0;
             transition: all 0.13s ease;
+        }
+
+        /* Initial state - hide controls completely */
+        .container.initial-state .wrapper {
+            opacity: 0 !important;
+            bottom: -15px !important;
+            pointer-events: none !important;
         }
         
         .wrapper::before {
@@ -304,6 +311,11 @@
             pointer-events: none;
         }
 
+        /* Hide skip areas in initial state */
+        .container.initial-state .skip-area {
+            pointer-events: none !important;
+        }
+
         /* Ultra Smooth Center Play/Pause Button */
         .center-play-button {
             position: absolute;
@@ -394,18 +406,19 @@
             transform: scale(0.5) rotate(90deg);
         }
 
-        /* Hide center button when controls are hidden - regardless of play/pause state */
-        .container:not(.show-controls) .center-play-button {
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease;
-        }
-
-        /* Show center button when controls are visible */
+        /* Show center button in initial state and when controls are visible */
+        .container.initial-state .center-play-button,
         .container.show-controls .center-play-button {
             opacity: 1;
             pointer-events: auto;
             transition: opacity 0.3s ease;
+        }
+
+        /* Hide center button when controls are hidden - but not in initial state */
+        .container:not(.show-controls):not(.initial-state) .center-play-button {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
         }
 
         .loading-spinner {
@@ -509,7 +522,7 @@
     </style>
 </head>
 <body>
-    <div class="container show-controls">
+    <div class="container initial-state">
         <div class="skip-area left"></div>
         <div class="skip-area right"></div>
 
@@ -560,8 +573,7 @@
                 </li>
             </ul>
         </div>
-        <!-- Added autoplay and muted attributes for automatic video playback -->
-        <video src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" autoplay muted></video>
+        <video src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"></video>
     </div>
 
     <script>
@@ -588,6 +600,7 @@
 
         let timer;
         let isDragging = false;
+        let isInitialState = true; // Track if this is the first interaction
 
         var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
 
@@ -596,11 +609,8 @@
         }
 
         function showLoading() {
-            //  শুধুমাত্র ভিডিও চালু থাকলেই লোডিং দেখান
-            if (!mainVideo.paused) {
-                loadingSpinner.classList.add('show');
-                container.classList.add('loading');
-            }
+            loadingSpinner.classList.add('show');
+            container.classList.add('loading');
         }
 
         function hideLoading() {
@@ -615,23 +625,6 @@
             mainVideo.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
             mainVideo.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
         }
-
-        // Auto-unmute on first user interaction
-        let hasInteracted = false;
-        const handleFirstInteraction = () => {
-            if (!hasInteracted && mainVideo.muted) {
-                mainVideo.muted = false;
-                mainVideo.volume = 0.5;
-                volumeSlider.value = 0.5;
-                volumeBtn.classList.replace("fa-volume-xmark", "fa-volume-high");
-                hasInteracted = true;
-            }
-        };
-
-        // Listen for any user interaction to unmute
-        document.addEventListener('click', handleFirstInteraction);
-        document.addEventListener('keydown', handleFirstInteraction);
-        document.addEventListener('touchstart', handleFirstInteraction);
 
         // Ultra Smooth Center Button Update - Pure CSS Based
         function updateCenterButton() {
@@ -648,12 +641,19 @@
 
         centerPlayBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            
+            // If this is the initial state, exit it first
+            if (isInitialState) {
+                isInitialState = false;
+                container.classList.remove('initial-state');
+                container.classList.add('show-controls');
+            }
+            
             if (mainVideo.paused) {
                 mainVideo.play();
             } else {
                 mainVideo.pause();
             }
-            handleFirstInteraction(); // Unmute on interaction
         });
 
         const skipAreas = document.querySelectorAll('.skip-area');
@@ -690,7 +690,6 @@
                     
                     container.classList.add('show-controls');
                 }
-                handleFirstInteraction(); // Unmute on interaction
             });
         });
 
@@ -705,7 +704,6 @@
                 } else {
                     container.classList.add('show-controls');
                 }
-                handleFirstInteraction(); // Unmute on interaction
             }
         });
 
@@ -776,10 +774,7 @@
         });
 
         mainVideo.addEventListener("waiting", () => {
-            // শুধুমাত্র ভিডিও চালু থাকলেই লোডিং দেখান
-            if (!mainVideo.paused) {
-                showLoading();
-            }
+            showLoading();
         });
 
         mainVideo.addEventListener("canplaythrough", () => {
@@ -873,11 +868,9 @@
         volumeBtn.addEventListener("click", () => {
             if (!volumeBtn.classList.contains("fa-volume-high")) {
                 mainVideo.volume = 0.5;
-                mainVideo.muted = false;
                 volumeBtn.classList.replace("fa-volume-xmark", "fa-volume-high");
             } else {
                 mainVideo.volume = 0.0;
-                mainVideo.muted = true;
                 volumeBtn.classList.replace("fa-volume-high", "fa-volume-xmark");
             }
             volumeSlider.value = mainVideo.volume;
@@ -885,7 +878,6 @@
 
         volumeSlider.addEventListener("input", e => {
             mainVideo.volume = e.target.value;
-            mainVideo.muted = e.target.value == 0;
             if (e.target.value == 0) {
                 return volumeBtn.classList.replace("fa-volume-high", "fa-volume-xmark");
             }
@@ -926,83 +918,28 @@
         });
 
         fullScreenBtn.addEventListener("click", () => {
-            const wasPlaying = !mainVideo.paused; // ভিডিও চালু ছিল কিনা মনে রাখুন
-            
             container.classList.toggle("fullscreen");
             if (document.fullscreenElement) {
                 fullScreenBtn.classList.replace("fa-compress", "fa-expand");
                 if (screen.orientation && screen.orientation.unlock) {
                     screen.orientation.unlock();
                 }
-                document.exitFullscreen().then(() => {
-                    // ফুলস্ক্রিন থেকে বের হওয়ার পর যদি আগে চালু ছিল তাহলে আবার চালু করুন
-                    if (wasPlaying && mainVideo.paused) {
-                        setTimeout(() => {
-                            mainVideo.play().catch(e => console.log('Play failed:', e));
-                        }, 100);
-                    }
-                });
-            } else {
-                fullScreenBtn.classList.replace("fa-expand", "fa-compress");
-                container.requestFullscreen().then(() => {
-                    // ফুলস্ক্রিনে যাওয়ার পর যদি আগে চালু ছিল তাহলে আবার চালু করুন
-                    if (wasPlaying && mainVideo.paused) {
-                        setTimeout(() => {
-                            mainVideo.play().catch(e => console.log('Play failed:', e));
-                        }, 100);
-                    }
-                }).catch(err => {
-                    console.log('Fullscreen failed:', err);
-                    // ফুলস্ক্রিন ব্যর্থ হলেও ভিডিও চালু রাখুন
-                    if (wasPlaying && mainVideo.paused) {
-                        setTimeout(() => {
-                            mainVideo.play().catch(e => console.log('Play failed:', e));
-                        }, 100);
-                    }
-                });
-                
-                if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock('landscape').catch(err => {
-                        console.log('Screen orientation lock failed:', err);
-                    });
-                }
+                return document.exitFullscreen();
             }
+            fullScreenBtn.classList.replace("fa-expand", "fa-compress");
+            container.requestFullscreen();
             
-            // অতিরিক্ত সুরক্ষা - ফুলস্ক্রিন চেঞ্জের পর ভিডিও স্ট্যাটাস চেক করুন
-            setTimeout(() => {
-                if (wasPlaying && mainVideo.paused) {
-                    mainVideo.play().catch(e => console.log('Delayed play failed:', e));
-                }
-            }, 300);
-        });
-
-        // ফুলস্ক্রিন চেঞ্জ ইভেন্ট লিসেনার যোগ করুন
-        document.addEventListener('fullscreenchange', () => {
-            // ফুলস্ক্রিন চেঞ্জের সময় ভিডিও পজ হয়ে গেলে আবার চালু করুন
-            setTimeout(() => {
-                if (mainVideo.paused && !mainVideo.ended) {
-                    // শুধুমাত্র তখনই চালু করুন যখন ইউজার ইচ্ছাকৃতভাবে পজ করেনি
-                    const playPromise = mainVideo.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(e => {
-                            console.log('Auto-resume failed:', e);
-                        });
-                    }
-                }
-            }, 200);
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(err => {
+                    console.log('Screen orientation lock failed:', err);
+                });
+            }
         });
 
         pipBtn.addEventListener("click", () => mainVideo.requestPictureInPicture());
         
-        skipBackward.addEventListener("click", () => {
-            mainVideo.currentTime -= 10;
-            handleFirstInteraction();
-        });
-        
-        skipForward.addEventListener("click", () => {
-            mainVideo.currentTime += 10;
-            handleFirstInteraction();
-        });
+        skipBackward.addEventListener("click", () => mainVideo.currentTime -= 10);
+        skipForward.addEventListener("click", () => mainVideo.currentTime += 10);
         
         mainVideo.addEventListener("play", () => {
             playPauseBtn.classList.replace("fa-play", "fa-pause");
@@ -1012,8 +949,6 @@
         mainVideo.addEventListener("pause", () => {
             playPauseBtn.classList.replace("fa-pause", "fa-play");
             updateCenterButton();
-            // ভিডিও পজ হলে লোডিং লুকান
-            hideLoading();
         });
         
         playPauseBtn.addEventListener("click", () => {
@@ -1022,20 +957,6 @@
             } else {
                 mainVideo.pause();
             }
-            handleFirstInteraction();
-        });
-
-        // নতুন ইভেন্ট লিসেনার যোগ করুন:
-        mainVideo.addEventListener("seeking", () => {
-            // সিকিং এর সময় লোডিং দেখান (যদি ভিডিও চালু থাকে)
-            if (!mainVideo.paused) {
-                showLoading();
-            }
-        });
-
-        mainVideo.addEventListener("seeked", () => {
-            // সিকিং শেষ হলে লোডিং লুকান
-            hideLoading();
         });
 
         updateCenterButton();
