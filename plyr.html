@@ -5,30 +5,6 @@
     <title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Meta Tags for SEO -->
-    <meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-    <meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
-    <meta name="author" content="Rabbi123">
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://rabbi0197273.github.io/Rabbi123/">
-    <meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-    <meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-    <meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://rabbi0197273.github.io/Rabbi123/">
-    <meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-    <meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-    <meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
-
-    <!-- Other Meta Tags -->
-    <link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
-    <meta name="theme-color" content="#ffffff">
-    <meta name="robots" content="index, follow">
-    
     <!-- Font Awesome and Material Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
@@ -43,6 +19,26 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-touch-callout: none !important;
+            -webkit-user-select: none !important;
+            -khtml-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+        }
+        
+        *:focus, *:active, *:hover {
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+
+        ::selection {
+            background: transparent !important;
+        }
+        ::-moz-selection {
+            background: transparent !important;
         }
         
         html, body {
@@ -144,18 +140,23 @@
             background: #2289ff;
             transform: translateY(-50%);
             cursor: grab;
+            display: block; /* Always visible now */
         }
         
         .progress-bar::before:active {
             cursor: grabbing;
         }
         
-        .progress-bar::before, .progress-area span {
+        .progress-area span {
             display: none;
         }
         
-        .video-timeline:hover .progress-bar::before,
         .video-timeline:hover .progress-area span {
+            display: block;
+        }
+        
+        /* Show time span when dragging */
+        .video-timeline.dragging .progress-area span {
             display: block;
         }
         
@@ -277,6 +278,136 @@
             object-fit: contain;
         }
 
+        /* Simple Double Click Areas */
+        .skip-area {
+            position: absolute;
+            top: 0;
+            width: 45%;
+            height: calc(100% - 100px);
+            z-index: 5;
+            cursor: pointer;
+            background: transparent;
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+
+        .skip-area.left {
+            left: 0;
+        }
+
+        .skip-area.right {
+            right: 0;
+        }
+
+        /* Center Play/Pause Button - Always Visible */
+        .center-play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .center-play-button:hover {
+            background: rgba(0, 0, 0, 0.7);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .center-play-button:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        /* Play Icon */
+        .center-play-button .play-icon {
+            width: 0;
+            height: 0;
+            border-left: 15px solid rgba(255, 255, 255, 0.9);
+            border-top: 9px solid transparent;
+            border-bottom: 9px solid transparent;
+            margin-left: 3px;
+        }
+
+        /* Pause Icon */
+        .center-play-button .pause-icon {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .center-play-button .pause-icon::before,
+        .center-play-button .pause-icon::after {
+            content: '';
+            width: 4px;
+            height: 18px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 1px;
+        }
+
+        /* Hide center button when video is playing and controls are hidden */
+        .container:not(.show-controls).playing .center-play-button {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Show center button when video is paused OR controls are visible */
+        .container.show-controls .center-play-button,
+        .container:not(.playing) .center-play-button {
+            opacity: 1;
+            pointer-events: auto;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Loading Animation - Only Spinner */
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            display: none;
+        }
+
+        .loading-spinner.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #2289ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hide center play button when loading */
+        .container.loading .center-play-button {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Mobile responsive */
         @media screen and (max-width: 540px) {
             .wrapper .video-controls {
                 padding: 3px 10px 7px;
@@ -317,11 +448,50 @@
             .right .pic-in-pic {
                 display: none;
             }
+
+            .center-play-button {
+                width: 50px;
+                height: 50px;
+            }
+
+            .center-play-button .play-icon {
+                border-left: 15px solid #fff;
+                border-top: 9px solid transparent;
+                border-bottom: 9px solid transparent;
+                margin-left: 3px;
+            }
+
+            .center-play-button .pause-icon::before,
+            .center-play-button .pause-icon::after {
+                width: 3px;  
+                height: 16px; 
+            }
+
+            .spinner {
+                width: 40px;
+                height: 40px;
+                border-width: 3px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container show-controls">
+        <!-- Simple Double Click Areas -->
+        <div class="skip-area left"></div>
+        <div class="skip-area right"></div>
+
+        <!-- Loading Animation - Only Spinner -->
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Center Play/Pause Button - Now Always Visible -->
+        <button class="center-play-button" id="centerPlayBtn">
+            <div class="play-icon" id="playIcon"></div>
+            <div class="pause-icon" id="pauseIcon" style="display: none;"></div>
+        </button>
+
         <div class="wrapper">
             <div class="video-timeline">
                 <div class="progress-area">
@@ -377,39 +547,126 @@
             playPauseBtn = container.querySelector(".play-pause i"),
             speedBtn = container.querySelector(".playback-speed span"),
             speedOptions = container.querySelector(".speed-options"),
-            pipBtn = container.querySelector(".pic-in-pic span"),
-            fullScreenBtn = container.querySelector(".fullscreen i");
+            pipBtn = document.querySelector(".pic-in-pic span"),
+            fullScreenBtn = container.querySelector(".fullscreen i"),
+            loadingSpinner = document.getElementById("loadingSpinner");
+
+        // Center play button elements
+        const centerPlayBtn = document.getElementById("centerPlayBtn"),
+            playIcon = document.getElementById("playIcon"),
+            pauseIcon = document.getElementById("pauseIcon");
+
         let timer;
         let isDragging = false;
 
         // Google Drive API functionality
         var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
-        console.log(apikey);
 
         function getparam(a, e) {
             return e || (e = window.location.href), new URL(e).searchParams.get(a);
+        }
+
+        // Show/Hide loading spinner
+        function showLoading() {
+            loadingSpinner.classList.add('show');
+            container.classList.add('loading');
+        }
+
+        function hideLoading() {
+            loadingSpinner.classList.remove('show');
+            container.classList.remove('loading');
         }
 
         // Load Google Drive video if ID parameter exists
         if (getparam('id')) {
             let json = JSON.parse(atob(getparam('id')));
             let driveid = json.id;
+            showLoading(); // Show loading when starting to load
             mainVideo.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
             mainVideo.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
         }
 
-        const hideControls = () => {
-            if (mainVideo.paused) return;
-            timer = setTimeout(() => {
-                container.classList.remove("show-controls");
-            }, 3000);
+        // Update center button icon based on video state
+        function updateCenterButton() {
+            if (mainVideo.paused) {
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+                container.classList.remove('playing');
+            } else {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'flex';
+                container.classList.add('playing');
+            }
         }
-        hideControls();
 
-        container.addEventListener("mousemove", () => {
-            container.classList.add("show-controls");
-            clearTimeout(timer);
-            hideControls();
+        // Center play button click
+        centerPlayBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (mainVideo.paused) {
+                mainVideo.play();
+            } else {
+                mainVideo.pause();
+            }
+        });
+
+        // Simple Double Click Skip - Updated Logic
+        const skipAreas = document.querySelectorAll('.skip-area');
+
+        skipAreas.forEach((area, index) => {
+            let clickCount = 0;
+            let clickTimer = null;
+
+            area.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                clickCount++;
+                
+                if (clickCount === 1) {
+                    clickTimer = setTimeout(() => {
+                        clickCount = 0;
+                        // Single click - toggle controls visibility
+                        if (container.classList.contains('show-controls')) {
+                            container.classList.remove('show-controls');
+                            clearTimeout(timer);
+                        } else {
+                            container.classList.add('show-controls');
+                        }
+                    }, 300);
+                } else if (clickCount === 2) {
+                    // Double click - skip
+                    clearTimeout(clickTimer);
+                    clickCount = 0;
+                    
+                    if (index === 0) {
+                        // Left area - skip backward 10 seconds
+                        mainVideo.currentTime = Math.max(0, mainVideo.currentTime - 10);
+                    } else {
+                        // Right area - skip forward 10 seconds
+                        mainVideo.currentTime = Math.min(mainVideo.duration, mainVideo.currentTime + 10);
+                    }
+                    
+                    // Show controls after skip
+                    container.classList.add('show-controls');
+                }
+            });
+        });
+
+        // Video area click for controls toggle
+        mainVideo.addEventListener('click', (e) => {
+            // Check if click is not on center button
+            if (!centerPlayBtn.contains(e.target)) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Toggle controls visibility
+                if (container.classList.contains('show-controls')) {
+                    container.classList.remove('show-controls');
+                    clearTimeout(timer);
+                } else {
+                    container.classList.add('show-controls');
+                }
+            }
         });
 
         const formatTime = time => {
@@ -427,74 +684,161 @@
             return `${hours}:${minutes}:${seconds}`;
         }
 
-        videoTimeline.addEventListener("mousemove", e => {
+        // Update time display during drag
+        const updateTimeDisplay = (offsetX) => {
             let timelineWidth = videoTimeline.clientWidth;
-            let offsetX = e.offsetX;
             let percent = Math.floor((offsetX / timelineWidth) * mainVideo.duration);
             const progressTime = videoTimeline.querySelector("span");
-            offsetX = offsetX < 20 ? 20 : (offsetX > timelineWidth - 20) ? timelineWidth - 20 : offsetX;
-            progressTime.style.left = `${offsetX}px`;
+            let adjustedOffsetX = offsetX < 20 ? 20 : (offsetX > timelineWidth - 20) ? timelineWidth - 20 : offsetX;
+            progressTime.style.left = `${adjustedOffsetX}px`;
             progressTime.innerText = formatTime(percent);
-        });
+        };
 
-        videoTimeline.addEventListener("click", e => {
-            let timelineWidth = videoTimeline.clientWidth;
-            mainVideo.currentTime = (e.offsetX / timelineWidth) * mainVideo.duration;
-        });
-
-        mainVideo.addEventListener("timeupdate", e => {
-            let { currentTime, duration } = e.target;
-            let percent = (currentTime / duration) * 100;
-            progressBar.style.width = `${percent}%`;
-            currentVidTime.innerText = formatTime(currentTime);
-        });
-
-        mainVideo.addEventListener("loadeddata", () => {
-            videoDuration.innerText = formatTime(mainVideo.duration);
-        });
-
-        const draggableProgressBar = e => {
-            let timelineWidth = videoTimeline.clientWidth;
-            progressBar.style.width = `${e.offsetX}px`;
-            mainVideo.currentTime = (e.offsetX / timelineWidth) * mainVideo.duration;
-            currentVidTime.innerText = formatTime(mainVideo.currentTime);
-        }
-
-        // Enhanced dragging functionality
-        videoTimeline.addEventListener("mousedown", (e) => {
-            isDragging = true;
-            draggableProgressBar(e);
-            videoTimeline.addEventListener("mousemove", draggableProgressBar);
-        });
-
-        document.addEventListener("mouseup", () => {
-            if (isDragging) {
-                isDragging = false;
-                videoTimeline.removeEventListener("mousemove", draggableProgressBar);
+        videoTimeline.addEventListener("mousemove", e => {
+            if (!isDragging) {
+                updateTimeDisplay(e.offsetX);
             }
         });
 
-        // Touch events for mobile
+        // Improved timeline click and drag functionality
+        const updateProgress = (e) => {
+            let timelineWidth = videoTimeline.clientWidth;
+            let offsetX = e.offsetX;
+            let percent = (offsetX / timelineWidth) * mainVideo.duration;
+            
+            // Update video time
+            mainVideo.currentTime = percent;
+            
+            // Update progress bar
+            let progressPercent = (percent / mainVideo.duration) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+            currentVidTime.innerText = formatTime(percent);
+        };
+
+        videoTimeline.addEventListener("click", updateProgress);
+
+        mainVideo.addEventListener("timeupdate", e => {
+            if (!isDragging) {
+                let { currentTime, duration } = e.target;
+                let percent = (currentTime / duration) * 100;
+                progressBar.style.width = `${percent}%`;
+                currentVidTime.innerText = formatTime(currentTime);
+            }
+        });
+
+        // Video loading events
+        mainVideo.addEventListener("loadstart", () => {
+            showLoading();
+        });
+
+        mainVideo.addEventListener("loadeddata", () => {
+            hideLoading();
+            videoDuration.innerText = formatTime(mainVideo.duration);
+        });
+
+        mainVideo.addEventListener("canplay", () => {
+            hideLoading();
+        });
+
+        mainVideo.addEventListener("waiting", () => {
+            showLoading();
+        });
+
+        mainVideo.addEventListener("canplaythrough", () => {
+            hideLoading();
+        });
+
+        // Enhanced dragging functionality with time display
+        const handleDrag = (e) => {
+            let timelineWidth = videoTimeline.clientWidth;
+            let rect = videoTimeline.getBoundingClientRect();
+            let offsetX = e.clientX - rect.left;
+            
+            // Constrain within timeline bounds
+            offsetX = Math.max(0, Math.min(offsetX, timelineWidth));
+            
+            let percent = (offsetX / timelineWidth) * mainVideo.duration;
+            
+            // Update video time smoothly
+            mainVideo.currentTime = percent;
+            
+            // Update progress bar
+            let progressPercent = (percent / mainVideo.duration) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+            currentVidTime.innerText = formatTime(percent);
+            
+            // Update time display during drag
+            updateTimeDisplay(offsetX);
+        };
+
+        // Mouse events for dragging
+        videoTimeline.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            videoTimeline.classList.add('dragging'); // Add dragging class to show time
+            handleDrag(e);
+            
+            const handleMouseMove = (e) => {
+                if (isDragging) {
+                    handleDrag(e);
+                }
+            };
+            
+            const handleMouseUp = () => {
+                isDragging = false;
+                videoTimeline.classList.remove('dragging'); // Remove dragging class
+                document.removeEventListener("mousemove", handleMouseMove);
+                document.removeEventListener("mouseup", handleMouseUp);
+            };
+            
+            document.addEventListener("mousemove", handleMouseMove);
+            document.addEventListener("mouseup", handleMouseUp);
+        });
+
+        // Touch events for mobile dragging
         videoTimeline.addEventListener("touchstart", (e) => {
             isDragging = true;
-            const touch = e.touches[0];
-            const rect = videoTimeline.getBoundingClientRect();
-            const offsetX = touch.clientX - rect.left;
-            draggableProgressBar({ offsetX });
+            videoTimeline.classList.add('dragging'); // Add dragging class to show time
+            let touch = e.touches[0];
+            let rect = videoTimeline.getBoundingClientRect();
+            let offsetX = touch.clientX - rect.left;
+            let timelineWidth = videoTimeline.clientWidth;
+            
+            offsetX = Math.max(0, Math.min(offsetX, timelineWidth));
+            let percent = (offsetX / timelineWidth) * mainVideo.duration;
+            mainVideo.currentTime = percent;
+            
+            let progressPercent = (percent / mainVideo.duration) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+            currentVidTime.innerText = formatTime(percent);
+            
+            // Update time display during touch drag
+            updateTimeDisplay(offsetX);
         });
 
         videoTimeline.addEventListener("touchmove", (e) => {
             if (isDragging) {
                 e.preventDefault();
-                const touch = e.touches[0];
-                const rect = videoTimeline.getBoundingClientRect();
-                const offsetX = touch.clientX - rect.left;
-                draggableProgressBar({ offsetX });
+                let touch = e.touches[0];
+                let rect = videoTimeline.getBoundingClientRect();
+                let offsetX = touch.clientX - rect.left;
+                let timelineWidth = videoTimeline.clientWidth;
+                
+                offsetX = Math.max(0, Math.min(offsetX, timelineWidth));
+                let percent = (offsetX / timelineWidth) * mainVideo.duration;
+                mainVideo.currentTime = percent;
+                
+                let progressPercent = (percent / mainVideo.duration) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                currentVidTime.innerText = formatTime(percent);
+                
+                // Update time display during touch drag
+                updateTimeDisplay(offsetX);
             }
         });
 
         videoTimeline.addEventListener("touchend", () => {
             isDragging = false;
+            videoTimeline.classList.remove('dragging'); // Remove dragging class
         });
 
         volumeBtn.addEventListener("click", () => {
@@ -534,19 +878,52 @@
             container.classList.toggle("fullscreen");
             if (document.fullscreenElement) {
                 fullScreenBtn.classList.replace("fa-compress", "fa-expand");
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
                 return document.exitFullscreen();
             }
             fullScreenBtn.classList.replace("fa-expand", "fa-compress");
             container.requestFullscreen();
+            
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(err => {
+                    console.log('Screen orientation lock failed:', err);
+                });
+            }
         });
 
         speedBtn.addEventListener("click", () => speedOptions.classList.toggle("show"));
         pipBtn.addEventListener("click", () => mainVideo.requestPictureInPicture());
-        skipBackward.addEventListener("click", () => mainVideo.currentTime -= 5);
-        skipForward.addEventListener("click", () => mainVideo.currentTime += 5);
-        mainVideo.addEventListener("play", () => playPauseBtn.classList.replace("fa-play", "fa-pause"));
-        mainVideo.addEventListener("pause", () => playPauseBtn.classList.replace("fa-pause", "fa-play"));
-        playPauseBtn.addEventListener("click", () => mainVideo.paused ? mainVideo.play() : mainVideo.pause());
+        
+        // Normal skip functions
+        skipBackward.addEventListener("click", () => mainVideo.currentTime -= 10);
+        skipForward.addEventListener("click", () => mainVideo.currentTime += 10);
+        
+        // Video event listeners
+        mainVideo.addEventListener("play", () => {
+            playPauseBtn.classList.replace("fa-play", "fa-pause");
+            updateCenterButton();
+        });
+        
+        mainVideo.addEventListener("pause", () => {
+            playPauseBtn.classList.replace("fa-pause", "fa-play");
+            updateCenterButton();
+        });
+        
+        playPauseBtn.addEventListener("click", () => {
+            if (mainVideo.paused) {
+                mainVideo.play();
+            } else {
+                mainVideo.pause();
+            }
+        });
+
+        // Initialize center button
+        updateCenterButton();
+
+        // Show initial loading for default video
+        showLoading();
     </script>
 </body>
 </html>
