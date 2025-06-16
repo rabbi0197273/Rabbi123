@@ -581,7 +581,7 @@
                 </li>
             </ul>
         </div>
-        <video src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"></video>
+        <video preload="none" src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"></video>
     </div>
 
     <script>
@@ -610,6 +610,7 @@
         let isDragging = false;
         let isInitialState = true; // Track if this is the first interaction
         let hasStartedLoading = false; // Track if loading has been initiated
+        let videoSourceSet = false; // Track if video source has been set
 
         var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
 
@@ -618,8 +619,11 @@
         }
 
         function showLoading() {
-            loadingSpinner.classList.add('show');
-            container.classList.add('loading');
+            // Only show loading if we're not in initial state
+            if (!isInitialState) {
+                loadingSpinner.classList.add('show');
+                container.classList.add('loading');
+            }
         }
 
         function hideLoading() {
@@ -631,8 +635,11 @@
         if (getparam('id')) {
             let json = JSON.parse(atob(getparam('id')));
             let driveid = json.id;
+            // Set preload to none to prevent automatic loading
+            mainVideo.preload = "none";
             mainVideo.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
             mainVideo.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
+            videoSourceSet = true;
         }
 
         // Ultra Smooth Center Button Update - Pure CSS Based
@@ -656,6 +663,7 @@
                 isInitialState = false;
                 container.classList.remove('initial-state');
                 container.classList.add('show-controls');
+                hasStartedLoading = true;
             }
             
             // If currently loading, stop loading and show play button
@@ -666,9 +674,14 @@
             }
             
             if (mainVideo.paused) {
-                // Check if video needs to load
-                if (mainVideo.readyState < 3) {
+                // For first time play or when video needs to load
+                if (mainVideo.readyState < 3 || hasStartedLoading) {
                     showLoading();
+                    // If video source is set but not loaded, load it now
+                    if (videoSourceSet && mainVideo.preload === "none") {
+                        mainVideo.preload = "metadata";
+                        mainVideo.load();
+                    }
                 }
                 mainVideo.play();
             } else {
@@ -988,7 +1001,6 @@
         });
 
         updateCenterButton();
-        // Removed the initial showLoading() call
 
         // Set initial volume to 100%
         mainVideo.volume = 1.0;
