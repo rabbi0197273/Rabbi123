@@ -1023,6 +1023,13 @@
         });
         
         playPauseBtn.addEventListener("click", () => {
+            // Add loading state check like center button
+            if (container.classList.contains('loading')) {
+                hideLoading();
+                mainVideo.pause();
+                return;
+            }
+            
             if (mainVideo.paused) {
                 // Only show loading if video needs to buffer
                 if (!isVideoLoaded || mainVideo.readyState < 3) {
