@@ -12,7 +12,7 @@
 
     <style>
         /* Import Google font - Poppins */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
         
         * {
             margin: 0;
@@ -285,6 +285,12 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            perspective: 1000;
+            -webkit-perspective: 1000;
         }
 
         .skip-area {
@@ -314,6 +320,70 @@
         /* Hide skip areas in initial state */
         .container.initial-state .skip-area {
             pointer-events: none !important;
+        }
+
+        /* Enhanced Skip feedback animation - like YouTube */
+        .skip-feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: white;
+            font-size: 18px;
+            font-weight: 400;
+            z-index: 25;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .skip-feedback.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* Skip feedback icons */
+        .skip-feedback .skip-icon {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 26;
+        }
+
+        .skip-feedback .skip-text {
+            font-size: 20px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            z-index: 27;
+        }
+
+        /* Forward skip feedback (right side) */
+        .skip-feedback.forward {
+            left: 75%;
+        }
+
+        /* Backward skip feedback (left side) */
+        .skip-feedback.backward {
+            left: 25%;
+        }
+
+        /* Hide controls during skip */
+        .container.skipping .wrapper {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transition: opacity 0.2s ease;
+        }
+
+        .container.skipping .center-play-button {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transition: opacity 0.2s ease;
         }
 
         /* Ultra Smooth Center Play/Pause Button */
@@ -526,6 +596,18 @@
                 height: 40px;
                 border-width: 3px;
             }
+
+            .skip-feedback {
+                font-size: 16px;
+            }
+
+            .skip-feedback .skip-text {
+                font-size: 18px;
+            }
+
+            .skip-feedback .skip-icon {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
@@ -533,6 +615,21 @@
     <div class="container initial-state">
         <div class="skip-area left"></div>
         <div class="skip-area right"></div>
+
+        <!-- Enhanced Skip Feedback -->
+        <div class="skip-feedback backward" id="skipFeedbackLeft">
+            <div class="skip-text" id="skipTextLeft">10</div>
+            <div class="skip-icon">
+                <i class="fas fa-backward"></i>
+            </div>
+        </div>
+
+        <div class="skip-feedback forward" id="skipFeedbackRight">
+            <div class="skip-icon">
+                <i class="fas fa-forward"></i>
+            </div>
+            <div class="skip-text" id="skipTextRight">10</div>
+        </div>
 
         <div class="loading-spinner" id="loadingSpinner">
             <div class="spinner"></div>
@@ -604,13 +701,24 @@
 
         const centerPlayBtn = document.getElementById("centerPlayBtn"),
             playIcon = document.getElementById("playIcon"),
-            pauseIcon = document.getElementById("pauseIcon");
+            pauseIcon = document.getElementById("pauseIcon"),
+            skipFeedbackLeft = document.getElementById("skipFeedbackLeft"),
+            skipFeedbackRight = document.getElementById("skipFeedbackRight"),
+            skipTextLeft = document.getElementById("skipTextLeft"),
+            skipTextRight = document.getElementById("skipTextRight");
 
         let timer;
         let isDragging = false;
         let isInitialState = true;
         let videoSourceSet = false;
-        let isVideoLoaded = false; // Track if video has been loaded at least once
+        let isVideoLoaded = false;
+        let skipTimeout = null;
+        let isSkipping = false;
+        
+        // Progressive skip counters
+        let leftSkipCount = 0;
+        let rightSkipCount = 0;
+        let skipResetTimeout = null;
 
         var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
 
@@ -626,6 +734,111 @@
         function hideLoading() {
             loadingSpinner.classList.remove('show');
             container.classList.remove('loading');
+        }
+
+        // Enhanced progressive skip function
+        function skipVideo(direction) {
+            if (isSkipping) {
+                // If already skipping, just update the count and continue
+                if (direction === 'forward') {
+                    rightSkipCount++;
+                    leftSkipCount = 0;
+                } else {
+                    leftSkipCount++;
+                    rightSkipCount = 0;
+                }
+        
+                const skipAmount = (direction === 'forward' ? rightSkipCount : leftSkipCount) * 10;
+                const textElement = direction === 'forward' ? skipTextRight : skipTextLeft;
+                textElement.textContent = skipAmount;
+        
+                // Calculate and apply new time
+                const currentTime = mainVideo.currentTime;
+                const newTime = direction === 'forward'
+                    ? Math.min(mainVideo.duration, currentTime + 10)
+                    : Math.max(0, currentTime - 10);
+        
+                requestAnimationFrame(() => {
+                    mainVideo.currentTime = newTime;
+                });
+        
+                // Reset timers
+                if (skipTimeout) clearTimeout(skipTimeout);
+                if (skipResetTimeout) clearTimeout(skipResetTimeout);
+        
+                skipTimeout = setTimeout(() => {
+                    isSkipping = false;
+                    container.classList.remove('skipping');
+        
+                    // Hide both feedbacks properly
+                    skipFeedbackLeft.classList.remove('show');
+                    skipFeedbackRight.classList.remove('show');
+                }, 1500);
+        
+                skipResetTimeout = setTimeout(() => {
+                    leftSkipCount = 0;
+                    rightSkipCount = 0;
+                }, 3000);
+        
+                return;
+            }
+        
+            isSkipping = true;
+            container.classList.add('skipping');
+        
+            // Clear any existing timeouts
+            if (skipTimeout) clearTimeout(skipTimeout);
+            if (skipResetTimeout) clearTimeout(skipResetTimeout);
+        
+            // Hide both feedbacks first
+            skipFeedbackLeft.classList.remove('show');
+            skipFeedbackRight.classList.remove('show');
+        
+            // Increment skip count based on direction
+            if (direction === 'forward') {
+                rightSkipCount++;
+                leftSkipCount = 0;
+            } else {
+                leftSkipCount++;
+                rightSkipCount = 0;
+            }
+        
+            // Calculate skip amount
+            const skipAmount = (direction === 'forward' ? rightSkipCount : leftSkipCount) * 10;
+        
+            // Calculate new time
+            const currentTime = mainVideo.currentTime;
+            const newTime = direction === 'forward'
+                ? Math.min(mainVideo.duration, currentTime + skipAmount)
+                : Math.max(0, currentTime - skipAmount);
+        
+            // Show appropriate feedback
+            const feedbackElement = direction === 'forward' ? skipFeedbackRight : skipFeedbackLeft;
+            const textElement = direction === 'forward' ? skipTextRight : skipTextLeft;
+        
+            textElement.textContent = skipAmount;
+            feedbackElement.classList.add('show');
+        
+            // Apply new time
+            requestAnimationFrame(() => {
+                mainVideo.currentTime = newTime;
+            });
+        
+            // Set timeout to end skipping mode
+            skipTimeout = setTimeout(() => {
+                isSkipping = false;
+                container.classList.remove('skipping');
+        
+                // Hide both feedbacks properly
+                skipFeedbackLeft.classList.remove('show');
+                skipFeedbackRight.classList.remove('show');
+            }, 1500);
+        
+            // Reset skip counters after inactivity
+            skipResetTimeout = setTimeout(() => {
+                leftSkipCount = 0;
+                rightSkipCount = 0;
+            }, 3000);
         }
 
         // Setup video source if ID parameter exists
@@ -653,14 +866,12 @@
         centerPlayBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             
-            // If this is the initial state, exit it first
             if (isInitialState) {
                 isInitialState = false;
                 container.classList.remove('initial-state');
                 container.classList.add('show-controls');
             }
             
-            // If currently loading, stop loading and pause video
             if (container.classList.contains('loading')) {
                 hideLoading();
                 mainVideo.pause();
@@ -668,10 +879,8 @@
             }
             
             if (mainVideo.paused) {
-                // Only show loading if video needs to load data
                 if (!isVideoLoaded || mainVideo.readyState < 3) {
                     showLoading();
-                    // If video source is set but not loaded, load it now
                     if (videoSourceSet && mainVideo.preload === "none") {
                         mainVideo.preload = "metadata";
                         mainVideo.load();
@@ -685,7 +894,6 @@
             }
         });
 
-        // Add click event to loading spinner
         loadingSpinner.addEventListener('click', (e) => {
             e.stopPropagation();
             hideLoading();
@@ -693,6 +901,7 @@
             updateCenterButton();
         });
 
+        // Enhanced skip areas with progressive skip functionality
         const skipAreas = document.querySelectorAll('.skip-area');
 
         skipAreas.forEach((area, index) => {
@@ -719,10 +928,11 @@
                     clearTimeout(clickTimer);
                     clickCount = 0;
                     
+                    // Use progressive skip function
                     if (index === 0) {
-                        mainVideo.currentTime = Math.max(0, mainVideo.currentTime - 10);
+                        skipVideo('backward');
                     } else {
-                        mainVideo.currentTime = Math.min(mainVideo.duration, mainVideo.currentTime + 10);
+                        skipVideo('forward');
                     }
                     
                     container.classList.add('show-controls');
@@ -779,7 +989,9 @@
             let offsetX = e.offsetX;
             let percent = (offsetX / timelineWidth) * mainVideo.duration;
             
-            mainVideo.currentTime = percent;
+            requestAnimationFrame(() => {
+                mainVideo.currentTime = percent;
+            });
             
             let progressPercent = (percent / mainVideo.duration) * 100;
             progressBar.style.width = `${progressPercent}%`;
@@ -797,7 +1009,7 @@
             }
         });
 
-        // Improved loading event handlers
+        // Enhanced loading event handlers
         mainVideo.addEventListener("loadstart", () => {
             if (!isInitialState) {
                 showLoading();
@@ -852,6 +1064,16 @@
             hideLoading();
         });
 
+        mainVideo.addEventListener("seeking", () => {
+            if (!isInitialState && !mainVideo.paused) {
+                showLoading();
+            }
+        });
+
+        mainVideo.addEventListener("seeked", () => {
+            hideLoading();
+        });
+
         const handleDrag = (e) => {
             let timelineWidth = videoTimeline.clientWidth;
             let rect = videoTimeline.getBoundingClientRect();
@@ -861,7 +1083,9 @@
             
             let percent = (offsetX / timelineWidth) * mainVideo.duration;
             
-            mainVideo.currentTime = percent;
+            requestAnimationFrame(() => {
+                mainVideo.currentTime = percent;
+            });
             
             let progressPercent = (percent / mainVideo.duration) * 100;
             progressBar.style.width = `${progressPercent}%`;
@@ -902,7 +1126,10 @@
             
             offsetX = Math.max(0, Math.min(offsetX, timelineWidth));
             let percent = (offsetX / timelineWidth) * mainVideo.duration;
-            mainVideo.currentTime = percent;
+            
+            requestAnimationFrame(() => {
+                mainVideo.currentTime = percent;
+            });
             
             let progressPercent = (percent / mainVideo.duration) * 100;
             progressBar.style.width = `${progressPercent}%`;
@@ -921,7 +1148,10 @@
                 
                 offsetX = Math.max(0, Math.min(offsetX, timelineWidth));
                 let percent = (offsetX / timelineWidth) * mainVideo.duration;
-                mainVideo.currentTime = percent;
+                
+                requestAnimationFrame(() => {
+                    mainVideo.currentTime = percent;
+                });
                 
                 let progressPercent = (percent / mainVideo.duration) * 100;
                 progressBar.style.width = `${progressPercent}%`;
@@ -1009,8 +1239,14 @@
 
         pipBtn.addEventListener("click", () => mainVideo.requestPictureInPicture());
         
-        skipBackward.addEventListener("click", () => mainVideo.currentTime -= 10);
-        skipForward.addEventListener("click", () => mainVideo.currentTime += 10);
+        // Enhanced skip buttons with progressive functionality
+        skipBackward.addEventListener("click", () => {
+            skipVideo('backward');
+        });
+        
+        skipForward.addEventListener("click", () => {
+            skipVideo('forward');
+        });
         
         mainVideo.addEventListener("play", () => {
             playPauseBtn.classList.replace("fa-play", "fa-pause");
@@ -1023,7 +1259,6 @@
         });
         
         playPauseBtn.addEventListener("click", () => {
-            // Add loading state check like center button
             if (container.classList.contains('loading')) {
                 hideLoading();
                 mainVideo.pause();
@@ -1031,7 +1266,6 @@
             }
             
             if (mainVideo.paused) {
-                // Only show loading if video needs to buffer
                 if (!isVideoLoaded || mainVideo.readyState < 3) {
                     showLoading();
                 }
