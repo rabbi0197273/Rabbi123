@@ -291,6 +291,10 @@
             -webkit-backface-visibility: hidden;
             perspective: 1000;
             -webkit-perspective: 1000;
+            /* Enhanced video stability during seeking */
+            will-change: auto;
+            image-rendering: optimizeQuality;
+            -webkit-image-rendering: optimizeQuality;
         }
 
         .skip-area {
@@ -371,19 +375,6 @@
         /* Backward skip feedback (left side) */
         .skip-feedback.backward {
             left: 25%;
-        }
-
-        /* Hide controls during skip */
-        .container.skipping .wrapper {
-            opacity: 0 !important;
-            pointer-events: none !important;
-            transition: opacity 0.2s ease;
-        }
-
-        .container.skipping .center-play-button {
-            opacity: 0 !important;
-            pointer-events: none !important;
-            transition: opacity 0.2s ease;
         }
 
         /* Ultra Smooth Center Play/Pause Button */
@@ -720,6 +711,11 @@
         let rightSkipCount = 0;
         let skipResetTimeout = null;
 
+        // Enhanced seeking variables for smoother video playback
+        let seekTimeout = null;
+        let lastSeekTime = 0;
+        let pendingSeekTime = null;
+
         var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
 
         function getparam(a, e) {
@@ -736,8 +732,45 @@
             container.classList.remove('loading');
         }
 
-        // Enhanced progressive skip function
+        // Enhanced smooth seeking function to prevent video glitches
+        function smoothSeek(targetTime) {
+            const now = Date.now();
+            
+            // Throttle seeking to prevent too frequent updates
+            if (now - lastSeekTime < 16) { // ~60fps limit
+                pendingSeekTime = targetTime;
+                
+                if (seekTimeout) clearTimeout(seekTimeout);
+                seekTimeout = setTimeout(() => {
+                    if (pendingSeekTime !== null) {
+                        performSeek(pendingSeekTime);
+                        pendingSeekTime = null;
+                    }
+                }, 16);
+                return;
+            }
+            
+            performSeek(targetTime);
+        }
+
+        function performSeek(targetTime) {
+            lastSeekTime = Date.now();
+            
+            // Ensure target time is within bounds
+            const clampedTime = Math.max(0, Math.min(targetTime, mainVideo.duration || 0));
+            
+            try {
+                mainVideo.currentTime = clampedTime;
+            } catch (error) {
+                console.warn('Seek error:', error);
+            }
+        }
+
+        // Enhanced progressive skip function with proper control state management
         function skipVideo(direction) {
+            // Store current control visibility state before skip
+            const wasControlsVisible = container.classList.contains('show-controls');
+            
             if (isSkipping) {
                 // If already skipping, just update the count and continue
                 if (direction === 'forward') {
@@ -752,15 +785,13 @@
                 const textElement = direction === 'forward' ? skipTextRight : skipTextLeft;
                 textElement.textContent = skipAmount;
         
-                // Calculate and apply new time
+                // Calculate and apply new time using smooth seek
                 const currentTime = mainVideo.currentTime;
                 const newTime = direction === 'forward'
                     ? Math.min(mainVideo.duration, currentTime + 10)
                     : Math.max(0, currentTime - 10);
         
-                requestAnimationFrame(() => {
-                    mainVideo.currentTime = newTime;
-                });
+                smoothSeek(newTime);
         
                 // Reset timers
                 if (skipTimeout) clearTimeout(skipTimeout);
@@ -773,6 +804,13 @@
                     // Hide both feedbacks properly
                     skipFeedbackLeft.classList.remove('show');
                     skipFeedbackRight.classList.remove('show');
+                    
+                    // Restore control visibility state
+                    if (wasControlsVisible) {
+                        container.classList.add('show-controls');
+                    } else {
+                        container.classList.remove('show-controls');
+                    }
                 }, 500);
         
                 skipResetTimeout = setTimeout(() => {
@@ -806,7 +844,7 @@
             // Calculate skip amount
             const skipAmount = (direction === 'forward' ? rightSkipCount : leftSkipCount) * 10;
         
-            // Calculate new time
+            // Calculate new time using smooth seek
             const currentTime = mainVideo.currentTime;
             const newTime = direction === 'forward'
                 ? Math.min(mainVideo.duration, currentTime + skipAmount)
@@ -819,10 +857,8 @@
             textElement.textContent = skipAmount;
             feedbackElement.classList.add('show');
         
-            // Apply new time
-            requestAnimationFrame(() => {
-                mainVideo.currentTime = newTime;
-            });
+            // Apply new time with smooth seeking
+            smoothSeek(newTime);
         
             // Set timeout to end skipping mode
             skipTimeout = setTimeout(() => {
@@ -832,6 +868,13 @@
                 // Hide both feedbacks properly
                 skipFeedbackLeft.classList.remove('show');
                 skipFeedbackRight.classList.remove('show');
+                
+                // Restore control visibility state
+                if (wasControlsVisible) {
+                    container.classList.add('show-controls');
+                } else {
+                    container.classList.remove('show-controls');
+                }
             }, 1500);
         
             // Reset skip counters after inactivity
@@ -875,6 +918,7 @@
             if (container.classList.contains('loading')) {
                 hideLoading();
                 mainVideo.pause();
+                updateCenterButton();
                 return;
             }
             
@@ -888,6 +932,7 @@
                 }
                 mainVideo.play().catch(() => {
                     hideLoading();
+                    updateCenterButton();
                 });
             } else {
                 mainVideo.pause();
@@ -901,7 +946,7 @@
             updateCenterButton();
         });
 
-        // Enhanced skip areas with progressive skip functionality
+        // Enhanced skip areas with progressive skip functionality and modified double-click behavior
         const skipAreas = document.querySelectorAll('.skip-area');
 
         skipAreas.forEach((area, index) => {
@@ -928,6 +973,9 @@
                     clearTimeout(clickTimer);
                     clickCount = 0;
                     
+                    // Modified double-click behavior: maintain current state
+                    const isControlsVisible = container.classList.contains('show-controls');
+                    
                     // Use progressive skip function
                     if (index === 0) {
                         skipVideo('backward');
@@ -935,7 +983,7 @@
                         skipVideo('forward');
                     }
                     
-                    container.classList.add('show-controls');
+                    // The skipVideo function now handles state preservation internally
                 }
             });
         });
@@ -984,14 +1032,14 @@
             }
         });
 
+        // Enhanced progress update with smooth seeking
         const updateProgress = (e) => {
             let timelineWidth = videoTimeline.clientWidth;
             let offsetX = e.offsetX;
             let percent = (offsetX / timelineWidth) * mainVideo.duration;
             
-            requestAnimationFrame(() => {
-                mainVideo.currentTime = percent;
-            });
+            // Use smooth seeking for better video stability
+            smoothSeek(percent);
             
             let progressPercent = (percent / mainVideo.duration) * 100;
             progressBar.style.width = `${progressPercent}%`;
@@ -1074,6 +1122,7 @@
             hideLoading();
         });
 
+        // Enhanced drag handling with smooth seeking
         const handleDrag = (e) => {
             let timelineWidth = videoTimeline.clientWidth;
             let rect = videoTimeline.getBoundingClientRect();
@@ -1083,9 +1132,8 @@
             
             let percent = (offsetX / timelineWidth) * mainVideo.duration;
             
-            requestAnimationFrame(() => {
-                mainVideo.currentTime = percent;
-            });
+            // Use smooth seeking during drag
+            smoothSeek(percent);
             
             let progressPercent = (percent / mainVideo.duration) * 100;
             progressBar.style.width = `${progressPercent}%`;
@@ -1116,10 +1164,8 @@
             document.addEventListener("mouseup", handleMouseUp);
         });
 
-        videoTimeline.addEventListener("touchstart", (e) => {
-            isDragging = true;
-            videoTimeline.classList.add('dragging');
-            let touch = e.touches[0];
+        // Enhanced touch handling with smooth seeking
+        const handleTouchDrag = (touch) => {
             let rect = videoTimeline.getBoundingClientRect();
             let offsetX = touch.clientX - rect.left;
             let timelineWidth = videoTimeline.clientWidth;
@@ -1127,37 +1173,28 @@
             offsetX = Math.max(0, Math.min(offsetX, timelineWidth));
             let percent = (offsetX / timelineWidth) * mainVideo.duration;
             
-            requestAnimationFrame(() => {
-                mainVideo.currentTime = percent;
-            });
+            // Use smooth seeking during touch drag
+            smoothSeek(percent);
             
             let progressPercent = (percent / mainVideo.duration) * 100;
             progressBar.style.width = `${progressPercent}%`;
             currentVidTime.innerText = formatTime(percent);
             
             updateTimeDisplay(offsetX);
+        };
+
+        videoTimeline.addEventListener("touchstart", (e) => {
+            isDragging = true;
+            videoTimeline.classList.add('dragging');
+            let touch = e.touches[0];
+            handleTouchDrag(touch);
         });
 
         videoTimeline.addEventListener("touchmove", (e) => {
             if (isDragging) {
                 e.preventDefault();
                 let touch = e.touches[0];
-                let rect = videoTimeline.getBoundingClientRect();
-                let offsetX = touch.clientX - rect.left;
-                let timelineWidth = videoTimeline.clientWidth;
-                
-                offsetX = Math.max(0, Math.min(offsetX, timelineWidth));
-                let percent = (offsetX / timelineWidth) * mainVideo.duration;
-                
-                requestAnimationFrame(() => {
-                    mainVideo.currentTime = percent;
-                });
-                
-                let progressPercent = (percent / mainVideo.duration) * 100;
-                progressBar.style.width = `${progressPercent}%`;
-                currentVidTime.innerText = formatTime(percent);
-                
-                updateTimeDisplay(offsetX);
+                handleTouchDrag(touch);
             }
         });
 
@@ -1262,6 +1299,7 @@
             if (container.classList.contains('loading')) {
                 hideLoading();
                 mainVideo.pause();
+                updateCenterButton();
                 return;
             }
             
@@ -1271,6 +1309,7 @@
                 }
                 mainVideo.play().catch(() => {
                     hideLoading();
+                    updateCenterButton();
                 });
             } else {
                 mainVideo.pause();
