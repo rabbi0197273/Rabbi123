@@ -608,9 +608,9 @@
 
         let timer;
         let isDragging = false;
-        let isInitialState = true; // Track if this is the first interaction
-        let hasStartedLoading = false; // Track if loading has been initiated
-        let videoSourceSet = false; // Track if video source has been set
+        let isInitialState = true;
+        let videoSourceSet = false;
+        let isVideoLoaded = false; // Track if video has been loaded at least once
 
         var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
 
@@ -619,11 +619,8 @@
         }
 
         function showLoading() {
-            // Only show loading if we're not in initial state
-            if (!isInitialState) {
-                loadingSpinner.classList.add('show');
-                container.classList.add('loading');
-            }
+            loadingSpinner.classList.add('show');
+            container.classList.add('loading');
         }
 
         function hideLoading() {
@@ -635,14 +632,12 @@
         if (getparam('id')) {
             let json = JSON.parse(atob(getparam('id')));
             let driveid = json.id;
-            // Set preload to none to prevent automatic loading
             mainVideo.preload = "none";
             mainVideo.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
             mainVideo.poster = 'https://lh3.googleusercontent.com/d/' + driveid;
             videoSourceSet = true;
         }
 
-        // Ultra Smooth Center Button Update - Pure CSS Based
         function updateCenterButton() {
             if (mainVideo.paused) {
                 centerPlayBtn.classList.remove('playing');
@@ -663,10 +658,9 @@
                 isInitialState = false;
                 container.classList.remove('initial-state');
                 container.classList.add('show-controls');
-                hasStartedLoading = true;
             }
             
-            // If currently loading, stop loading and show play button
+            // If currently loading, stop loading and pause video
             if (container.classList.contains('loading')) {
                 hideLoading();
                 mainVideo.pause();
@@ -674,8 +668,8 @@
             }
             
             if (mainVideo.paused) {
-                // For first time play or when video needs to load
-                if (mainVideo.readyState < 3 || hasStartedLoading) {
+                // Only show loading if video needs to load data
+                if (!isVideoLoaded || mainVideo.readyState < 3) {
                     showLoading();
                     // If video source is set but not loaded, load it now
                     if (videoSourceSet && mainVideo.preload === "none") {
@@ -683,7 +677,9 @@
                         mainVideo.load();
                     }
                 }
-                mainVideo.play();
+                mainVideo.play().catch(() => {
+                    hideLoading();
+                });
             } else {
                 mainVideo.pause();
             }
@@ -801,24 +797,58 @@
             }
         });
 
+        // Improved loading event handlers
         mainVideo.addEventListener("loadstart", () => {
-            showLoading();
+            if (!isInitialState) {
+                showLoading();
+            }
         });
 
         mainVideo.addEventListener("loadeddata", () => {
             hideLoading();
             videoDuration.innerText = formatTime(mainVideo.duration);
+            isVideoLoaded = true;
+        });
+
+        mainVideo.addEventListener("loadedmetadata", () => {
+            videoDuration.innerText = formatTime(mainVideo.duration);
         });
 
         mainVideo.addEventListener("canplay", () => {
             hideLoading();
-        });
-
-        mainVideo.addEventListener("waiting", () => {
-            showLoading();
+            isVideoLoaded = true;
         });
 
         mainVideo.addEventListener("canplaythrough", () => {
+            hideLoading();
+            isVideoLoaded = true;
+        });
+
+        mainVideo.addEventListener("waiting", () => {
+            if (!isInitialState && !mainVideo.paused) {
+                showLoading();
+            }
+        });
+
+        mainVideo.addEventListener("playing", () => {
+            hideLoading();
+        });
+
+        mainVideo.addEventListener("stalled", () => {
+            if (!isInitialState && !mainVideo.paused) {
+                showLoading();
+            }
+        });
+
+        mainVideo.addEventListener("suspend", () => {
+            hideLoading();
+        });
+
+        mainVideo.addEventListener("abort", () => {
+            hideLoading();
+        });
+
+        mainVideo.addEventListener("error", () => {
             hideLoading();
         });
 
@@ -908,7 +938,7 @@
 
         volumeBtn.addEventListener("click", () => {
             if (!volumeBtn.classList.contains("fa-volume-high")) {
-                mainVideo.volume = 1.0; // Changed from 0.5 to 1.0
+                mainVideo.volume = 1.0;
                 volumeBtn.classList.replace("fa-volume-xmark", "fa-volume-high");
             } else {
                 mainVideo.volume = 0.0;
@@ -994,7 +1024,13 @@
         
         playPauseBtn.addEventListener("click", () => {
             if (mainVideo.paused) {
-                mainVideo.play();
+                // Only show loading if video needs to buffer
+                if (!isVideoLoaded || mainVideo.readyState < 3) {
+                    showLoading();
+                }
+                mainVideo.play().catch(() => {
+                    hideLoading();
+                });
             } else {
                 mainVideo.pause();
             }
