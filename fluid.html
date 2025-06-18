@@ -1637,7 +1637,256 @@
         // Set initial volume to 100%
         mainVideo.volume = 1.0;
         volumeSlider.value = 1.0;
+    
+// Keyboard Shortcuts - Computer এর জন্য
+document.addEventListener('keydown', (e) => {
+    // যদি input field এ focus থাকে তাহলে shortcuts disable করি
+    if (document.activeElement.tagName === 'INPUT' || 
+        document.activeElement.tagName === 'TEXTAREA' || 
+        document.activeElement.isContentEditable) {
+        return;
     }
+
+    // Prevent default behavior for our shortcuts
+    const shortcutKeys = [
+        'Space', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+        'KeyK', 'KeyJ', 'KeyL', 'KeyM', 'KeyF', 'KeyI', 'KeyC',
+        'Digit0', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5',
+        'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Home', 'End'
+    ];
+    
+    if (shortcutKeys.includes(e.code)) {
+        e.preventDefault();
+    }
+
+    switch(e.code) {
+        // Play/Pause - Spacebar বা K
+        case 'Space':
+        case 'KeyK':
+            if (isInitialState) {
+                isInitialState = false;
+                container.classList.remove('initial-state');
+                container.classList.add('show-controls');
+                
+                if (!isVideoLoaded || mainVideo.readyState < 3) {
+                    showLoading();
+                }
+            }
+            
+            if (container.classList.contains('loading')) {
+                if (mainVideo.paused) {
+                    mainVideo.play().then(() => {
+                        hideLoading();
+                        updateCenterButton();
+                    }).catch(() => {
+                        hideLoading();
+                        updateCenterButton();
+                    });
+                } else {
+                    mainVideo.pause();
+                    hideLoading();
+                    updateCenterButton();
+                }
+                return;
+            }
+            
+            if (mainVideo.paused) {
+                if (!isVideoLoaded || mainVideo.readyState < 3) {
+                    showLoading();
+                }
+                mainVideo.play().catch(() => {
+                    hideLoading();
+                    updateCenterButton();
+                });
+            } else {
+                mainVideo.pause();
+            }
+            break;
+
+        // Seek backward 10s - Left Arrow বা J
+        case 'ArrowLeft':
+        case 'KeyJ':
+            skipVideo('backward');
+            break;
+
+        // Seek forward 10s - Right Arrow বা L  
+        case 'ArrowRight':
+        case 'KeyL':
+            skipVideo('forward');
+            break;
+
+        // Volume Up - Up Arrow
+        case 'ArrowUp':
+            let newVolumeUp = Math.min(1, mainVideo.volume + 0.1);
+            mainVideo.volume = newVolumeUp;
+            volumeSlider.value = newVolumeUp;
+            if (newVolumeUp > 0) {
+                volumeBtn.classList.remove("fa-volume-xmark");
+                volumeBtn.classList.add("fa-volume-high");
+            }
+            break;
+
+        // Volume Down - Down Arrow
+        case 'ArrowDown':
+            let newVolumeDown = Math.max(0, mainVideo.volume - 0.1);
+            mainVideo.volume = newVolumeDown;
+            volumeSlider.value = newVolumeDown;
+            if (newVolumeDown === 0) {
+                volumeBtn.classList.remove("fa-volume-high");
+                volumeBtn.classList.add("fa-volume-xmark");
+            }
+            break;
+
+        // Mute/Unmute - M
+        case 'KeyM':
+            if (!volumeBtn.classList.contains("fa-volume-high")) {
+                mainVideo.volume = 1.0;
+                volumeBtn.classList.replace("fa-volume-xmark", "fa-volume-high");
+            } else {
+                mainVideo.volume = 0.0;
+                volumeBtn.classList.replace("fa-volume-high", "fa-volume-xmark");
+            }
+            volumeSlider.value = mainVideo.volume;
+            break;
+
+        // Fullscreen - F
+        case 'KeyF':
+            const fluidWrapper = document.querySelector('.fluid_video_wrapper');
+            container.classList.toggle("fullscreen");
+            
+            if (document.fullscreenElement) {
+                fullScreenBtn.classList.replace("fa-compress", "fa-expand");
+                unlockOrientation();
+                return document.exitFullscreen();
+            }
+            
+            fullScreenBtn.classList.replace("fa-expand", "fa-compress");
+            
+            if (fluidWrapper) {
+                if (fluidWrapper.requestFullscreen) {
+                    fluidWrapper.requestFullscreen();
+                } else if (fluidWrapper.webkitRequestFullscreen) {
+                    fluidWrapper.webkitRequestFullscreen();
+                } else if (fluidWrapper.mozRequestFullScreen) {
+                    fluidWrapper.mozRequestFullScreen();
+                } else if (fluidWrapper.msRequestFullscreen) {
+                    fluidWrapper.msRequestFullscreen();
+                }
+            } else {
+                document.body.requestFullscreen();
+            }
+            
+            rotateToLandscape();
+            break;
+
+        // Picture in Picture - I
+        case 'KeyI':
+            if (document.pictureInPictureEnabled && !mainVideo.disablePictureInPicture) {
+                mainVideo.requestPictureInPicture().catch(() => {
+                    console.log('Picture-in-Picture not supported');
+                });
+            }
+            break;
+
+        // Show/Hide Controls - C
+        case 'KeyC':
+            if (container.classList.contains('show-controls')) {
+                container.classList.remove('show-controls');
+                clearTimeout(timer);
+            } else {
+                container.classList.add('show-controls');
+            }
+            break;
+
+        // Seek to specific percentage - 0-9 keys
+        case 'Digit0':
+            smoothSeek(0);
+            break;
+        case 'Digit1':
+            smoothSeek(mainVideo.duration * 0.1);
+            break;
+        case 'Digit2':
+            smoothSeek(mainVideo.duration * 0.2);
+            break;
+        case 'Digit3':
+            smoothSeek(mainVideo.duration * 0.3);
+            break;
+        case 'Digit4':
+            smoothSeek(mainVideo.duration * 0.4);
+            break;
+        case 'Digit5':
+            smoothSeek(mainVideo.duration * 0.5);
+            break;
+        case 'Digit6':
+            smoothSeek(mainVideo.duration * 0.6);
+            break;
+        case 'Digit7':
+            smoothSeek(mainVideo.duration * 0.7);
+            break;
+        case 'Digit8':
+            smoothSeek(mainVideo.duration * 0.8);
+            break;
+        case 'Digit9':
+            smoothSeek(mainVideo.duration * 0.9);
+            break;
+
+        // Go to beginning - Home
+        case 'Home':
+            smoothSeek(0);
+            break;
+
+        // Go to end - End
+        case 'End':
+            smoothSeek(mainVideo.duration);
+            break;
+    }
+});
+
+// Speed shortcuts with Shift key
+document.addEventListener('keydown', (e) => {
+    if (document.activeElement.tagName === 'INPUT' || 
+        document.activeElement.tagName === 'TEXTAREA' || 
+        document.activeElement.isContentEditable) {
+        return;
+    }
+
+    // Speed controls with Shift + Number
+    if (e.shiftKey) {
+        switch(e.code) {
+            case 'Digit1': // Shift + 1 = 0.5x speed
+                e.preventDefault();
+                mainVideo.playbackRate = 0.5;
+                speedOptions.querySelector(".active").classList.remove("active");
+                speedOptions.querySelector('[data-speed="0.5"]').classList.add("active");
+                break;
+            case 'Digit2': // Shift + 2 = 0.75x speed
+                e.preventDefault();
+                mainVideo.playbackRate = 0.75;
+                speedOptions.querySelector(".active").classList.remove("active");
+                speedOptions.querySelector('[data-speed="0.75"]').classList.add("active");
+                break;
+            case 'Digit3': // Shift + 3 = Normal speed
+                e.preventDefault();
+                mainVideo.playbackRate = 1;
+                speedOptions.querySelector(".active").classList.remove("active");
+                speedOptions.querySelector('[data-speed="1"]').classList.add("active");
+                break;
+            case 'Digit4': // Shift + 4 = 1.5x speed
+                e.preventDefault();
+                mainVideo.playbackRate = 1.5;
+                speedOptions.querySelector(".active").classList.remove("active");
+                speedOptions.querySelector('[data-speed="1.5"]').classList.add("active");
+                break;
+            case 'Digit5': // Shift + 5 = 2x speed
+                e.preventDefault();
+                mainVideo.playbackRate = 2;
+                speedOptions.querySelector(".active").classList.remove("active");
+                speedOptions.querySelector('[data-speed="2"]').classList.add("active");
+                break;
+        }
+    }
+});
+}
 </script>
 </body>
 </html>
