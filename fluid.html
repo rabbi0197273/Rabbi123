@@ -1184,10 +1184,9 @@
                 container.classList.add('show-controls');
             }
             
-            // FIXED: Loading state এ pause/play properly handle করা
+            // Loading state এ pause/play properly handle করা
             if (container.classList.contains('loading')) {
                 if (mainVideo.paused) {
-                    // যদি paused থাকে এবং loading চলে, তাহলে play করার চেষ্টা করো
                     mainVideo.play().then(() => {
                         hideLoading();
                         updateCenterButton();
@@ -1196,7 +1195,6 @@
                         updateCenterButton();
                     });
                 } else {
-                    // যদি playing থাকে এবং loading চলে, তাহলে pause করো
                     mainVideo.pause();
                     hideLoading();
                     updateCenterButton();
@@ -1205,6 +1203,7 @@
             }
             
             if (mainVideo.paused) {
+                // Play করার আগে loading দেখাই
                 if (!isVideoLoaded || mainVideo.readyState < 3) {
                     showLoading();
                 }
@@ -1342,7 +1341,10 @@
 
         // FIXED: Enhanced loading event handlers - Video চলার সময়ও loading দেখাবে
         mainVideo.addEventListener("loadstart", () => {
-            showLoading();
+            // Initial state এ loading দেখাবে না
+            if (!isInitialState) {
+                showLoading();
+            }
         });
 
         mainVideo.addEventListener("loadeddata", () => {
@@ -1365,18 +1367,22 @@
             isVideoLoaded = true;
         });
 
-        // FIXED: Video চলার সময়ও loading দেখাবে
+        // FIXED: Initial state এ waiting event ignore করি
         mainVideo.addEventListener("waiting", () => {
-            showLoading();
+            if (!isInitialState) {
+                showLoading();
+            }
         });
 
         mainVideo.addEventListener("playing", () => {
             hideLoading();
         });
 
-        // FIXED: Video চলার সময় stalled হলেও loading দেখাবে
+        // FIXED: Initial state এ stalled event ignore করি  
         mainVideo.addEventListener("stalled", () => {
-            showLoading();
+            if (!isInitialState) {
+                showLoading();
+            }
         });
 
         mainVideo.addEventListener("suspend", () => {
@@ -1391,9 +1397,9 @@
             hideLoading();
         });
 
-        // FIXED: Seeking এর সময়ও loading দেখাবে
+        // FIXED: Initial state এ seeking event ignore করি
         mainVideo.addEventListener("seeking", () => {
-            if (mainVideo.readyState < 3) {
+            if (!isInitialState && mainVideo.readyState < 3) {
                 showLoading();
             }
         });
@@ -1580,10 +1586,9 @@
         
         // FIXED: Play/pause button click handler
         playPauseBtn.addEventListener("click", () => {
-            // FIXED: Loading state এ pause/play properly handle করা
+            // Loading state এ pause/play properly handle করা
             if (container.classList.contains('loading')) {
                 if (mainVideo.paused) {
-                    // যদি paused থাকে এবং loading চলে, তাহলে play করার চেষ্টা করো
                     mainVideo.play().then(() => {
                         hideLoading();
                         updateCenterButton();
@@ -1592,7 +1597,6 @@
                         updateCenterButton();
                     });
                 } else {
-                    // যদি playing থাকে এবং loading চলে, তাহলে pause করো
                     mainVideo.pause();
                     hideLoading();
                     updateCenterButton();
@@ -1631,4 +1635,4 @@
     }
 </script>
 </body>
-</html>
+    </html>
