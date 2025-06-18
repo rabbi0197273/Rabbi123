@@ -281,20 +281,21 @@
             background: #3e97fd;
         }
         
+        /* Fixed video element - removed problematic transform properties */
         .container video {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
+            /* Removed transform properties that cause rendering issues */
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
-            perspective: 1000;
-            -webkit-perspective: 1000;
-            /* Enhanced video stability during seeking */
+            /* Enhanced video stability */
             will-change: auto;
             image-rendering: optimizeQuality;
             -webkit-image-rendering: optimizeQuality;
+            /* Force hardware acceleration in a stable way */
+            transform: translate3d(0, 0, 0);
+            -webkit-transform: translate3d(0, 0, 0);
         }
 
         .skip-area {
@@ -489,6 +490,7 @@
             transition: opacity 0.5s ease;
         }
 
+        /* Fixed loading spinner - ensure animation continues */
         .loading-spinner {
             position: absolute;
             top: 50%;
@@ -497,10 +499,14 @@
             z-index: 20;
             display: none;
             cursor: pointer;
+            /* Ensure spinner stays on top and animates properly */
+            pointer-events: auto;
         }
 
         .loading-spinner.show {
-            display: block;
+            display: block !important;
+            /* Force display and ensure animation runs */
+            animation: none;
         }
 
         .spinner {
@@ -509,17 +515,28 @@
             border: 4px solid rgba(255, 255, 255, 0.3);
             border-top: 4px solid #2289ff;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            /* Ensure animation always runs and is not interrupted */
+            animation: spin 1s linear infinite !important;
+            /* Force animation to continue */
+            animation-play-state: running !important;
         }
 
+        /* Keyframe animation with higher specificity */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
+        /* Ensure loading state doesn't interfere with spinner */
         .container.loading .center-play-button {
             opacity: 0;
             pointer-events: none;
+        }
+
+        /* Force spinner animation to continue in all states */
+        .container.loading .loading-spinner.show .spinner {
+            animation: spin 1s linear infinite !important;
+            animation-play-state: running !important;
         }
 
         /* Mobile responsive */
@@ -716,20 +733,50 @@
         let lastSeekTime = 0;
         let pendingSeekTime = null;
 
+        // Loading state management
+        let isLoadingActive = false;
+        let loadingTimeout = null;
+
         var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY'][Math.floor(Math.random() * 4)];
 
         function getparam(a, e) {
             return e || (e = window.location.href), new URL(e).searchParams.get(a);
         }
 
+        // Enhanced loading functions with better state management
         function showLoading() {
+            if (isLoadingActive) return;
+            
+            isLoadingActive = true;
             loadingSpinner.classList.add('show');
             container.classList.add('loading');
+            
+            // Force spinner animation restart
+            const spinner = loadingSpinner.querySelector('.spinner');
+            if (spinner) {
+                spinner.style.animation = 'none';
+                spinner.offsetHeight; // Trigger reflow
+                spinner.style.animation = 'spin 1s linear infinite';
+            }
+            
+            // Clear any existing timeout
+            if (loadingTimeout) {
+                clearTimeout(loadingTimeout);
+            }
         }
 
         function hideLoading() {
-            loadingSpinner.classList.remove('show');
-            container.classList.remove('loading');
+            if (!isLoadingActive) return;
+            
+            isLoadingActive = false;
+            
+            // Add small delay to prevent flickering
+            loadingTimeout = setTimeout(() => {
+                if (!isLoadingActive) {
+                    loadingSpinner.classList.remove('show');
+                    container.classList.remove('loading');
+                }
+            }, 100);
         }
 
         // Enhanced smooth seeking function to prevent video glitches
@@ -1057,7 +1104,7 @@
             }
         });
 
-        // Enhanced loading event handlers
+        // Enhanced loading event handlers with better state management
         mainVideo.addEventListener("loadstart", () => {
             if (!isInitialState) {
                 showLoading();
@@ -1113,7 +1160,7 @@
         });
 
         mainVideo.addEventListener("seeking", () => {
-            if (!isInitialState && !mainVideo.paused) {
+            if (!isInitialState && !mainVideo.paused && mainVideo.readyState < 3) {
                 showLoading();
             }
         });
@@ -1323,4 +1370,4 @@
         volumeSlider.value = 1.0;
     </script>
 </body>
-</html>
+    </html>
