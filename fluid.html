@@ -15,14 +15,14 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://rabbi0197273.github.io/Rabbi123/">
 <meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+<meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players">
 <meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:url" content="https://rabbi0197273.github.io/Rabbi123/">
 <meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
+<meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players">
 <meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
 
 <!-- Other Meta Tags -->
@@ -971,7 +971,7 @@
         let isLoadingActive = false;
         let loadingTimeout = null;
 
-        // Loading functions
+        // Loading functions - FIXED VERSION
         function showLoading() {
             if (isLoadingActive) return;
             
@@ -1174,6 +1174,7 @@
             }
         }
 
+        // FIXED: Center play button click handler
         centerPlayBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             
@@ -1183,10 +1184,23 @@
                 container.classList.add('show-controls');
             }
             
+            // FIXED: Loading state এ pause/play properly handle করা
             if (container.classList.contains('loading')) {
-                hideLoading();
-                mainVideo.pause();
-                updateCenterButton();
+                if (mainVideo.paused) {
+                    // যদি paused থাকে এবং loading চলে, তাহলে play করার চেষ্টা করো
+                    mainVideo.play().then(() => {
+                        hideLoading();
+                        updateCenterButton();
+                    }).catch(() => {
+                        hideLoading();
+                        updateCenterButton();
+                    });
+                } else {
+                    // যদি playing থাকে এবং loading চলে, তাহলে pause করো
+                    mainVideo.pause();
+                    hideLoading();
+                    updateCenterButton();
+                }
                 return;
             }
             
@@ -1203,10 +1217,15 @@
             }
         });
 
+        // FIXED: Loading spinner click handler
         loadingSpinner.addEventListener('click', (e) => {
             e.stopPropagation();
+            
+            // Loading spinner এ click করলে video pause করো
+            if (!mainVideo.paused) {
+                mainVideo.pause();
+            }
             hideLoading();
-            mainVideo.pause();
             updateCenterButton();
         });
 
@@ -1321,11 +1340,9 @@
             }
         });
 
-        // Enhanced loading event handlers with better state management
+        // FIXED: Enhanced loading event handlers - Video চলার সময়ও loading দেখাবে
         mainVideo.addEventListener("loadstart", () => {
-            if (!isInitialState) {
-                showLoading();
-            }
+            showLoading();
         });
 
         mainVideo.addEventListener("loadeddata", () => {
@@ -1348,20 +1365,18 @@
             isVideoLoaded = true;
         });
 
+        // FIXED: Video চলার সময়ও loading দেখাবে
         mainVideo.addEventListener("waiting", () => {
-            if (!isInitialState && !mainVideo.paused) {
-                showLoading();
-            }
+            showLoading();
         });
 
         mainVideo.addEventListener("playing", () => {
             hideLoading();
         });
 
+        // FIXED: Video চলার সময় stalled হলেও loading দেখাবে
         mainVideo.addEventListener("stalled", () => {
-            if (!isInitialState && !mainVideo.paused) {
-                showLoading();
-            }
+            showLoading();
         });
 
         mainVideo.addEventListener("suspend", () => {
@@ -1376,8 +1391,9 @@
             hideLoading();
         });
 
+        // FIXED: Seeking এর সময়ও loading দেখাবে
         mainVideo.addEventListener("seeking", () => {
-            if (!isInitialState && !mainVideo.paused && mainVideo.readyState < 3) {
+            if (mainVideo.readyState < 3) {
                 showLoading();
             }
         });
@@ -1562,21 +1578,25 @@
             skipVideo('forward');
         });
         
-        mainVideo.addEventListener("play", () => {
-            playPauseBtn.classList.replace("fa-play", "fa-pause");
-            updateCenterButton();
-        });
-        
-        mainVideo.addEventListener("pause", () => {
-            playPauseBtn.classList.replace("fa-pause", "fa-play");
-            updateCenterButton();
-        });
-        
+        // FIXED: Play/pause button click handler
         playPauseBtn.addEventListener("click", () => {
+            // FIXED: Loading state এ pause/play properly handle করা
             if (container.classList.contains('loading')) {
-                hideLoading();
-                mainVideo.pause();
-                updateCenterButton();
+                if (mainVideo.paused) {
+                    // যদি paused থাকে এবং loading চলে, তাহলে play করার চেষ্টা করো
+                    mainVideo.play().then(() => {
+                        hideLoading();
+                        updateCenterButton();
+                    }).catch(() => {
+                        hideLoading();
+                        updateCenterButton();
+                    });
+                } else {
+                    // যদি playing থাকে এবং loading চলে, তাহলে pause করো
+                    mainVideo.pause();
+                    hideLoading();
+                    updateCenterButton();
+                }
                 return;
             }
             
@@ -1592,6 +1612,16 @@
                 mainVideo.pause();
             }
         });
+        
+        mainVideo.addEventListener("play", () => {
+            playPauseBtn.classList.replace("fa-play", "fa-pause");
+            updateCenterButton();
+        });
+        
+        mainVideo.addEventListener("pause", () => {
+            playPauseBtn.classList.replace("fa-pause", "fa-play");
+            updateCenterButton();
+        });
 
         updateCenterButton();
 
@@ -1601,4 +1631,4 @@
     }
 </script>
 </body>
-    </html>
+</html>
