@@ -460,7 +460,7 @@
         transform: translate(-50%, -50%);
         width: 60px;
         height: 60px;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.3);  /* rgba(0, 0, 0, 0.5) থেকে rgba(0, 0, 0, 0.3) এ পরিবর্তন */
         border: none;
         border-radius: 50%;
         cursor: pointer;
@@ -477,7 +477,7 @@
     }
 
     .center-play-button:hover {
-        background: rgba(0, 0, 0, 0.7);
+        background: rgba(0, 0, 0, 0.5);  /* rgba(0, 0, 0, 0.7) থেকে rgba(0, 0, 0, 0.5) এ পরিবর্তন */
         transform: translate(-50%, -50%) scale(1.1);
     }
 
@@ -490,7 +490,7 @@
         position: absolute;
         width: 0;
         height: 0;
-        border-left: 15px solid rgba(255, 255, 255, 0.9);
+        border-left: 15px solid rgba(255, 255, 255, 0.9);  /* #fff থেকে #ffffff এ পরিবর্তন */
         border-top: 9px solid transparent;
         border-bottom: 9px solid transparent;
         margin-left: 3px;
@@ -516,7 +516,7 @@
         content: '';
         width: 4px;
         height: 18px;
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.9);  /* এখানে background color যোগ করুন */
         border-radius: 1px;
     }
 
@@ -642,7 +642,7 @@
         }
 
         .center-play-button .play-icon {
-            border-left: 15px solid #fff;
+            border-left: 15px solid rgba(255, 255, 255, 0.9);  /* #fff থেকে #ffffff এ পরিবর্তন */
             border-top: 9px solid transparent;
             border-bottom: 9px solid transparent;
             margin-left: 3px;
@@ -650,8 +650,7 @@
 
         .center-play-button .pause-icon::before,
         .center-play-button .pause-icon::after {
-            width: 3px;  
-            height: 16px; 
+            background: rgba(255, 255, 255, 0.9);  /* এখানে background color যোগ করুন */
         }
 
         .spinner {
