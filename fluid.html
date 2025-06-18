@@ -1182,6 +1182,11 @@
                 isInitialState = false;
                 container.classList.remove('initial-state');
                 container.classList.add('show-controls');
+                
+                // এখানেই loading শুরু করি - play button click করার পরে
+                if (!isVideoLoaded || mainVideo.readyState < 3) {
+                    showLoading();
+                }
             }
             
             // Loading state এ pause/play properly handle করা
@@ -1203,7 +1208,7 @@
             }
             
             if (mainVideo.paused) {
-                // Play করার আগে loading দেখাই
+                // Play করার আগে loading দেখাই (যদি প্রয়োজন হয়)
                 if (!isVideoLoaded || mainVideo.readyState < 3) {
                     showLoading();
                 }
@@ -1342,7 +1347,7 @@
         // FIXED: Enhanced loading event handlers - Video চলার সময়ও loading দেখাবে
         mainVideo.addEventListener("loadstart", () => {
             // Initial state এ loading দেখাবে না
-            if (!isInitialState) {
+            if (!isInitialState && mainVideo.currentTime > 0) {
                 showLoading();
             }
         });
@@ -1355,6 +1360,7 @@
 
         mainVideo.addEventListener("loadedmetadata", () => {
             videoDuration.innerText = formatTime(mainVideo.duration);
+            // Initial state এ metadata load হলেও loading দেখাবে না
         });
 
         mainVideo.addEventListener("canplay", () => {
@@ -1369,7 +1375,7 @@
 
         // FIXED: Initial state এ waiting event ignore করি
         mainVideo.addEventListener("waiting", () => {
-            if (!isInitialState) {
+            if (!isInitialState && !mainVideo.paused) {
                 showLoading();
             }
         });
@@ -1378,9 +1384,9 @@
             hideLoading();
         });
 
-        // FIXED: Initial state এ stalled event ignore করি  
+        // FIXED: Initial state এ stalled event সম্পূর্ণ ignore করি  
         mainVideo.addEventListener("stalled", () => {
-            if (!isInitialState) {
+            if (!isInitialState && !mainVideo.paused) {
                 showLoading();
             }
         });
@@ -1397,9 +1403,9 @@
             hideLoading();
         });
 
-        // FIXED: Initial state এ seeking event ignore করি
+        // FIXED: Initial state এ seeking event সম্পূর্ণ ignore করি
         mainVideo.addEventListener("seeking", () => {
-            if (!isInitialState && mainVideo.readyState < 3) {
+            if (!isInitialState && mainVideo.readyState < 3 && !mainVideo.paused) {
                 showLoading();
             }
         });
@@ -1635,4 +1641,4 @@
     }
 </script>
 </body>
-    </html>
+</html>
