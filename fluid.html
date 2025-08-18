@@ -1,129 +1,163 @@
-<link rel="icon" href="drive-logo.png">
-<title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
-    
-<!-- Meta Tags for SEO -->
-<meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
-<meta name="author" content="RTube">
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple Video Player</title>
+  <meta name="description" content="A tiny, Google‑style simple HTML5 video player." />
+  <meta name="robots" content="index,follow" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23000'/%3E%3Cpolygon points='40,30 75,50 40,70' fill='%23fff'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #0b0b0c;       /* near-black like Google players */
+      --fg: #e8e8ea;       /* light text */
+      --border: #222326;   /* soft border */
+      --accent: #2d6cdf;   /* subtle blue */
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; background: var(--bg); color: var(--fg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    }
+    .wrap {
+      max-width: 960px; margin: 0 auto; padding: 12px; display: grid; gap: 12px;
+    }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    header h1 { font-size: 16px; font-weight: 600; margin: 0; opacity: .9 }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .controls input[type="text"] { width: min(520px, 100%); }
+    .controls input[type="text"], .controls button, .controls select, .controls label {
+      background: #121316; color: var(--fg); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 10px; font-size: 14px; outline: none;
+    }
+    .controls button:hover { border-color: var(--accent); }
 
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://rabbi0197273.github.io/Rabbi123/">
-<meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+    .player {
+      position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--border);
+      background: #000; aspect-ratio: 16/9; display: grid; place-items: center;
+    }
+    video { width: 100%; height: 100%; display: block; background: #000; }
 
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://rabbi0197273.github.io/Rabbi123/">
-<meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+    .hint { font-size: 12px; opacity: .7; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .spacer { flex: 1 1 auto; }
 
-<!-- Other Meta Tags -->
-<link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
-<meta name="theme-color" content="#ffffff">
-<meta name="robots" content="index, follow">
+    /* minimal look for default controls (when supported) */
+    video::-webkit-media-controls { filter: saturate(0.9) brightness(0.95); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Simple Video Player</h1>
+      <div class="row hint">Use a direct video URL or a Google Drive file ID.</div>
+    </header>
 
+    <div class="controls">
+      <input id="srcInput" type="text" placeholder="Paste video URL…  e.g. https://example.com/video.mp4" />
+      <input id="idInput" type="text" placeholder="Or Google Drive File ID… (e.g. 1AbCDeFG...)" />
+      <button id="loadBtn" title="Load into player">Load</button>
+      <label class="row" for="fileInput" style="cursor:pointer">Open file<input id="fileInput" type="file" accept="video/*" style="display:none"></label>
+      <div class="spacer"></div>
+      <label class="row" title="Playback speed">
+        Speed
+        <select id="rate">
+          <option value="0.5">0.5×</option>
+          <option value="0.75">0.75×</option>
+          <option value="1" selected>1×</option>
+          <option value="1.25">1.25×</option>
+          <option value="1.5">1.5×</option>
+          <option value="1.75">1.75×</option>
+          <option value="2">2×</option>
+        </select>
+      </label>
+    </div>
 
-<style>
-  body {
-    margin : 0;
-    padding: 0;
-  }
-</style>
-<script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
-<video poster="https://bit.ly/bbsampleposter" height="100%" width="100%" id="video-id"><source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
-<script>
-    var myFP = fluidPlayer(
-        'video-id',	{
-	"layoutControls": {
-		"controlBar": {
-			"autoHideTimeout": 3,
-			"animated": true,
-			"autoHide": true
-		},
-		"htmlOnPauseBlock": {
-			"html": null,
-			"height": null,
-			"width": null
-		},
-		"autoPlay": false,
-		"mute": false,
-		"allowTheatre": true,
-		"playPauseAnimation": true,
-		"playbackRateEnabled": true,
-		"allowDownload": true,
-		"playButtonShowing": true,
-		"fillToContainer": false,
-		"posterImage": ""
-	},
-	"vastOptions": {
-		"adList": [],
-		"adCTAText": false,
-		"adCTATextPosition": ""
-	}
-}
-    );
+    <div class="player">
+      <video id="player" controls playsinline preload="metadata" poster="" controlsList="nodownload noplaybackrate">
+        Sorry, your browser doesn’t support the video tag.
+      </video>
+    </div>
 
-    // Auto-rotate screen functionality for fullscreen
-    function rotateToLandscape() {
-        if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape-primary').catch(err => {
-                console.log('Screen orientation lock failed:', err);
-            });
-        } else if (screen.lockOrientation) {
-            screen.lockOrientation('landscape-primary');
-        } else if (screen.webkitLockOrientation) {
-            screen.webkitLockOrientation('landscape-primary');
-        } else if (screen.mozLockOrientation) {
-            screen.mozLockOrientation('landscape-primary');
-        }
+    <div class="hint">
+      URL params supported: <code>?src=&lt;direct video url&gt;</code> or <code>?id=&lt;google drive file id&gt;</code>.
+      For Google Drive, the file must be shared publicly or to "Anyone with the link".
+    </div>
+  </div>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+    const player = $('#player');
+    const srcInput = $('#srcInput');
+    const idInput = $('#idInput');
+    const rate = $('#rate');
+
+    function getParam(key) { return new URL(location.href).searchParams.get(key); }
+
+    function driveUrlFromId(id) {
+      // No API key needed; works for files shared to "Anyone with the link"
+      // Google serves a redirect to the actual file; the video tag will follow it.
+      return `https://drive.google.com/uc?export=download&id=${encodeURIComponent(id)}`;
     }
 
-    function unlockOrientation() {
-        if (screen.orientation && screen.orientation.unlock) {
-            screen.orientation.unlock();
-        } else if (screen.unlockOrientation) {
-            screen.unlockOrientation();
-        } else if (screen.webkitUnlockOrientation) {
-            screen.webkitUnlockOrientation();
-        } else if (screen.mozUnlockOrientation) {
-            screen.mozUnlockOrientation();
-        }
+    function setPosterFromId(id) {
+      // Use Google thumbnail server for a lightweight poster (works for many files)
+      player.poster = `https://lh3.googleusercontent.com/d/${encodeURIComponent(id)}`;
     }
 
-    // Handle fullscreen changes
-    function handleFullscreenChange() {
-        const isFullscreen = document.fullscreenElement || 
-                            document.webkitFullscreenElement || 
-                            document.mozFullScreenElement || 
-                            document.msFullscreenElement;
-        
-        if (isFullscreen) {
-            setTimeout(rotateToLandscape, 100);
-        } else {
-            setTimeout(unlockOrientation, 100);
-        }
+    function loadSource(url, posterId) {
+      player.src = url;
+      if (posterId) setPosterFromId(posterId);
+      player.playbackRate = Number(rate.value) || 1;
+      player.load();
     }
 
-    // Add event listeners
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-</script>
-<script>
-  var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyATjR8DbYGha0Z2U84gPVT0dxROp7UdWy8', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY', 'AIzaSyDCLkAwFkagtt077kgXw1HfmYGx-VLkvt8'][Math.floor(Math.random() * 6)];
-console.log(apikey);
-   //apikey = 'AIzaSyD739-eb6NzS_KbVJq1K8ZAxnrMfkIqPyw';
-  function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
+    // Wire controls
+    $('#loadBtn').addEventListener('click', () => {
+      const src = srcInput.value.trim();
+      const id = idInput.value.trim();
+      if (id) {
+        loadSource(driveUrlFromId(id), id);
+      } else if (src) {
+        loadSource(src);
+      } else {
+        alert('Paste a direct video URL or enter a Google Drive File ID.');
+      }
+    });
 
-  let video = document.getElementById('video-id');
-  if(getparam('id')){
-    let json = JSON.parse(atob(getparam('id'))) ;
-    let driveid = json.id;
-    video.src = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
-    video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
-  }
-</script>
+    $('#fileInput').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      player.poster = '';
+      loadSource(url);
+    });
+
+    rate.addEventListener('change', () => {
+      player.playbackRate = Number(rate.value) || 1;
+    });
+
+    // Auto-load from URL params
+    (function initFromParams(){
+      const src = getParam('src');
+      const id = getParam('id');
+      if (id) {
+        idInput.value = id;
+        loadSource(driveUrlFromId(id), id);
+      } else if (src) {
+        srcInput.value = src;
+        loadSource(src);
+      }
+    })();
+
+    // Quality of life: spacebar toggles play/pause when focused anywhere
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) {
+        e.preventDefault();
+        if (player.paused) player.play(); else player.pause();
+      }
+    });
+  </script>
+</body>
+</html>
