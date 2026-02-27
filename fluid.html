@@ -1,129 +1,202 @@
-<link rel="icon" href="drive-logo.png">
-<title>DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
+    <title>DrivePlyr - Simple & Clean</title>
     
-<!-- Meta Tags for SEO -->
-<meta name="description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta name="keywords" content="DrivePlyr, Google Drive, Proxy, Video Player, HTML5 Player, Hidden ID, Features">
-<meta name="author" content="RTube">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://rabbi0197273.github.io/Rabbi123/">
-<meta property="og:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="og:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta property="og:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+        body { background-color: #000; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
 
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://rabbi0197273.github.io/Rabbi123/">
-<meta property="twitter:title" content="DrivePlyr - Google Drive Proxy Video Player with Many Powerful HTML5 Players">
-<meta property="twitter:description" content="DrivePlyr is a Google Drive Proxy Video Player with Many Powerful HTML5 Players, Hidden ID, and Many Features. Play your videos from Google Drive with ease.">
-<meta property="twitter:image" content="https://sh20raj.github.io/DrivePlyr/drive-logo.png">
-
-<!-- Other Meta Tags -->
-<link rel="icon" href="https://raw.githubusercontent.com/SH20RAJ/DrivePlyr/main/drive-logo.png">
-<meta name="theme-color" content="#ffffff">
-<meta name="robots" content="index, follow">
-
-
-<style>
-  body {
-    margin : 0;
-    padding: 0;
-  }
-</style>
-<script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
-<video height="100%" width="100%" id="video-id"><source src="https://bit.ly/bbsamplevideo" type="video/mp4" />
-<script>
-    var myFP = fluidPlayer(
-        'video-id',	{
-	"layoutControls": {
-		"controlBar": {
-			"autoHideTimeout": 3,
-			"animated": true,
-			"autoHide": true
-		},
-		"htmlOnPauseBlock": {
-			"html": null,
-			"height": null,
-			"width": null
-		},
-		"autoPlay": false,
-		"mute": false,
-		"allowTheatre": true,
-		"playPauseAnimation": true,
-		"playbackRateEnabled": true,
-		"allowDownload": false,
-		"playButtonShowing": true,
-		"fillToContainer": false,
-		"posterImage": ""
-	},
-	"vastOptions": {
-		"adList": [],
-		"adCTAText": false,
-		"adCTATextPosition": ""
-	}
-}
-    );
-
-    // Auto-rotate screen functionality for fullscreen
-    function rotateToLandscape() {
-        if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape-primary').catch(err => {
-                console.log('Screen orientation lock failed:', err);
-            });
-        } else if (screen.lockOrientation) {
-            screen.lockOrientation('landscape-primary');
-        } else if (screen.webkitLockOrientation) {
-            screen.webkitLockOrientation('landscape-primary');
-        } else if (screen.mozLockOrientation) {
-            screen.mozLockOrientation('landscape-primary');
+        .video_player {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: #000;
         }
-    }
 
-    function unlockOrientation() {
-        if (screen.orientation && screen.orientation.unlock) {
-            screen.orientation.unlock();
-        } else if (screen.unlockOrientation) {
-            screen.unlockOrientation();
-        } else if (screen.webkitUnlockOrientation) {
-            screen.webkitUnlockOrientation();
-        } else if (screen.mozUnlockOrientation) {
-            screen.mozUnlockOrientation();
+        .main-video { width: 100%; height: 100%; object-fit: contain; outline: none; cursor: pointer; }
+
+        /* Progress Bar (আপনার ছবির মতো নীল রঙের) */
+        .progress-area {
+            position: absolute;
+            bottom: 55px;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            z-index: 10;
         }
-    }
+        .progress-bar { height: 100%; width: 0%; background: #3498db; position: relative; }
 
-    // Handle fullscreen changes
-    function handleFullscreenChange() {
-        const isFullscreen = document.fullscreenElement || 
-                            document.webkitFullscreenElement || 
-                            document.mozFullScreenElement || 
-                            document.msFullscreenElement;
+        /* কন্ট্রোল বার - ব্যাকগ্রাউন্ড স্বচ্ছ এবং আইকনগুলো সাজানো */
+        .controls {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            z-index: 10;
+        }
+
+        .controls-left, .controls-right { display: flex; align-items: center; gap: 10px; }
+
+        /* আপনার দেওয়া SVG বাটন ডিজাইন - কোনো আলাদা ব্যাকগ্রাউন্ড নেই */
+        .skip-btn {
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            background: transparent; /* ব্যাকগ্রাউন্ড একদম স্বচ্ছ */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .arrow-path {
+            fill: none;
+            stroke: #D1D1D1;
+            stroke-width: 10; 
+            stroke-linecap: square; 
+            stroke-linejoin: miter;
+        }
+        .arrow-head { fill: #D1D1D1; }
+        .number-text {
+            fill: #D1D1D1;
+            font-family: "Brush Script MT", sans-serif; 
+            font-size: 65px; 
+            font-weight: 700;
+            letter-spacing: -5px;
+        }
+
+        /* Forward Button Mirror */
+        .forward-btn svg g.arrow-group {
+            transform: scaleX(-1);
+            transform-origin: center;
+        }
+
+        .material-icons { color: #D1D1D1; cursor: pointer; font-size: 28px; }
+        .timer { color: #fff; font-size: 20px; margin-left: 5px; font-weight: 500; }
+
+        /* Central Play Icon */
+        .central-play {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px !important;
+            color: rgba(255,255,255,0.4);
+            pointer-events: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="video_player">
+        <video class="main-video" id="main-video"></video>
         
-        if (isFullscreen) {
-            setTimeout(rotateToLandscape, 100);
-        } else {
-            setTimeout(unlockOrientation, 100);
+        <i class="material-icons central-play" id="center-play">play_arrow</i>
+
+        <!-- Progress Bar -->
+        <div class="progress-area" id="progress-area">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="controls">
+            <!-- বাম দিকে: ভলিউম এবং সময় -->
+            <div class="controls-left">
+                <i class="material-icons">volume_up</i>
+                <div class="timer">
+                    <span id="current">00:00</span> / <span id="total">00:00</span>
+                </div>
+            </div>
+
+            <!-- ডান দিকে: স্কিপ বাটন, সেটিংস এবং ফুলস্ক্রিন -->
+            <div class="controls-right">
+                
+                <!-- রিউইন্ড বাটন -->
+                <div class="skip-btn" id="rewind">
+                    <svg viewBox="0 0 140 140" width="100%" height="100%">
+                        <path class="arrow-path" d="M 85 110 H 115 V 35 H 21" />
+                        <polygon class="arrow-head" points="33,17 33,53 10,35" />
+                        <text class="number-text" x="8" y="101" transform="scale(1, 1.15)">10</text>
+                    </svg>
+                </div>
+
+                <!-- ফরওয়ার্ড বাটন -->
+                <div class="skip-btn forward-btn" id="forward">
+                    <svg viewBox="0 0 140 140" width="100%" height="100%">
+                        <g class="arrow-group">
+                            <path class="arrow-path" d="M 85 110 H 115 V 35 H 21" />
+                            <polygon class="arrow-head" points="33,17 33,53 10,35" />
+                        </g>
+                        <text class="number-text" x="52" y="101" transform="scale(1, 1.15)">10</text>
+                    </svg>
+                </div>
+
+                <i class="material-icons">settings</i>
+                <i class="material-icons">picture_in_picture_alt</i>
+                <i class="material-icons" id="full-btn">fullscreen</i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Google Drive Player Logic (আপনার আগের কোডের মতই)
+        var apikeys = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU'];
+        var apikey = apikeys[0];
+        function getparam(a) { return new URLSearchParams(window.location.search).get(a); }
+
+        const video = document.getElementById('main-video');
+        const playBtn = document.getElementById('center-play');
+        const progressBar = document.getElementById('progress-bar');
+        const progressArea = document.getElementById('progress-area');
+
+        // লোড ভিডিও
+        if (getparam('id')) {
+            try {
+                let driveid = JSON.parse(atob(getparam('id'))).id;
+                video.src = `https://www.googleapis.com/drive/v3/files/${driveid}?alt=media&key=${apikey}`;
+            } catch (e) { video.src = 'https://bit.ly/bbsamplevideo'; }
+        } else { video.src = 'https://bit.ly/bbsamplevideo'; }
+
+        // প্লে/পজ
+        function togglePlay() {
+            if (video.paused) { video.play(); playBtn.style.display = "none"; }
+            else { video.pause(); playBtn.style.display = "block"; }
         }
-    }
+        video.onclick = togglePlay;
 
-    // Add event listeners
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-</script>
-<script>
-  var apikey = ['AIzaSyCt3DULzE2trDJhfFUosWZT-3GEObbMqVU', 'AIzaSyCsbx8BSyLwkw6XX6Lg5OF1U0HNtI9VmCY', 'AIzaSyATjR8DbYGha0Z2U84gPVT0dxROp7UdWy8', 'AIzaSyBLMJAT6oqTZxAMsCsMjXzoo4lkJL4MmfM', 'AIzaSyCIY6fomcJxOt0XQ_naa1rzfd5wlOMGKDY', 'AIzaSyDCLkAwFkagtt077kgXw1HfmYGx-VLkvt8'][Math.floor(Math.random() * 6)];
-console.log(apikey);
-   //apikey = 'AIzaSyD739-eb6NzS_KbVJq1K8ZAxnrMfkIqPyw';
-  function getparam(a,e){return e||(e=window.location.href),new URL(e).searchParams.get(a)}
+        // স্কিপ লজিক
+        document.getElementById('rewind').onclick = (e) => { e.stopPropagation(); video.currentTime -= 10; };
+        document.getElementById('forward').onclick = (e) => { e.stopPropagation(); video.currentTime += 10; };
 
-  let video = document.getElementById('video-id');
-  if(getparam('id')){
-    let json = JSON.parse(atob(getparam('id'))) ;
-    let driveid = json.id;
-    video.src = `https://www.googleapis.com/drive/v3/files/${driveid }?alt=media&key=${apikey}`;
-    video.poster = 'https://lh3.googleusercontent.com/d/'+driveid;
-  }
-</script>
+        // আপডেট প্রগ্রেস এবং টাইম
+        video.ontimeupdate = () => {
+            let pct = (video.currentTime / video.duration) * 100;
+            progressBar.style.width = pct + "%";
+            document.getElementById('current').innerText = formatTime(video.currentTime);
+        };
+        video.onloadeddata = () => { document.getElementById('total').innerText = formatTime(video.duration); };
+
+        function formatTime(t) {
+            let m = Math.floor(t / 60), s = Math.floor(t % 60);
+            return (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+        }
+
+        progressArea.onclick = (e) => { video.currentTime = (e.offsetX / progressArea.clientWidth) * video.duration; };
+        document.getElementById('full-btn').onclick = () => {
+            if (!document.fullscreenElement) document.querySelector('.video_player').requestFullscreen();
+            else document.exitFullscreen();
+        };
+    </script>
+</body>
+</html>
